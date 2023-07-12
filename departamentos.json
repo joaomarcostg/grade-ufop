@@ -1,0 +1,190 @@
+[
+    {
+        "nome": "DEPARTAMENTO DE ANALISES CLINICAS",
+        "sigla": "DEACL"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ALIMENTOS",
+        "sigla": "DEALI"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA AMBIENTAL",
+        "sigla": "DEAMB"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ARQUITETURA E URBANISMO",
+        "sigla": "DEARQ"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ARTES",
+        "sigla": "DEART"
+    },
+    {
+        "nome": "DEPARTAMENTO DE BIODIVERSIDADE, EVOLUCAO E MEIO AMBIENTE",
+        "sigla": "DEBIO"
+    },
+    {
+        "nome": "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
+        "sigla": "DECAD"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA DE CONTROLE E AUTOMACAO E TECNICAS FUNDAMENTAIS",
+        "sigla": "DECAT"
+    },
+    {
+        "nome": "DEPARTAMENTO DE CIENCIAS BIOLOGICAS",
+        "sigla": "DECBI"
+    },
+    {
+        "nome": "DEPARTAMENTO DE CIENCIAS EXATAS E APLICADAS -J.MONLEVADE",
+        "sigla": "DECEA"
+    },
+    {
+        "nome": "DEPARTAMENTO DE CIRURGIA, GINECOLOGIA E OBSTETRICIA",
+        "sigla": "DECGP"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA CIVIL",
+        "sigla": "DECIV"
+    },
+    {
+        "nome": "DEPARTAMENTO DE COMPUTACAO",
+        "sigla": "DECOM"
+    },
+    {
+        "nome": "DEPARTAMENTO DE CLINICAS PEDIATRICAS E DO ADULTO",
+        "sigla": "DECPA"
+    },
+    {
+        "nome": "DEPARTAMENTO DE COMPUTACAO E SISTEMAS",
+        "sigla": "DECSI"
+    },
+    {
+        "nome": "DEPARTAMENTO DE CIENCIAS SOCIAIS",
+        "sigla": "DECSO"
+    },
+    {
+        "nome": "DEPARTAMENTO DE DIREITO",
+        "sigla": "DEDIR"
+    },
+    {
+        "nome": "DEPARTAMENTO DE CIENCIAS ECONOMICAS",
+        "sigla": "DEECO"
+    },
+    {
+        "nome": "DEPARTAMENTO DE EDUCACAO",
+        "sigla": "DEEDU"
+    },
+    {
+        "nome": "DEPARTAMENTO DE EDUCACAO FISICA",
+        "sigla": "DEEFD"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA ELETRICA",
+        "sigla": "DEELT"
+    },
+    {
+        "nome": "DEPARTAMENTO DE EDUCACAO MATEMATICA",
+        "sigla": "DEEMA"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA DE PRODUCAO - ICEA",
+        "sigla": "DEENP"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ESTATISTICA",
+        "sigla": "DEEST"
+    },
+    {
+        "nome": "DEPARTAMENTO DE EDUCACAO E TECNOLOGIAS",
+        "sigla": "DEETE"
+    },
+    {
+        "nome": "DEPARTAMENTO DE FARMACIA",
+        "sigla": "DEFAR"
+    },
+    {
+        "nome": "DEPARTAMENTO DE FILOSOFIA",
+        "sigla": "DEFIL"
+    },
+    {
+        "nome": "DEPARTAMENTO DE FISICA",
+        "sigla": "DEFIS"
+    },
+    {
+        "nome": "DEPARTAMENTO DE GEOLOGIA",
+        "sigla": "DEGEO"
+    },
+    {
+        "nome": "DEPARTAMENTO DE GESTAO PUBLICA",
+        "sigla": "DEGEP"
+    },
+    {
+        "nome": "DEPARTAMENTO DE HISTORIA",
+        "sigla": "DEHIS"
+    },
+    {
+        "nome": "DEPARTAMENTO DE JORNALISMO",
+        "sigla": "DEJOR"
+    },
+    {
+        "nome": "DEPARTAMENTO DE LETRAS",
+        "sigla": "DELET"
+    },
+    {
+        "nome": "DEPARTAMENTO DE MATEMATICA",
+        "sigla": "DEMAT"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA MECANICA",
+        "sigla": "DEMEC"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA METALURGICA E DE MATERIAIS",
+        "sigla": "DEMET"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ALOCACAO DE MIF",
+        "sigla": "DEMIF"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA DE MINAS",
+        "sigla": "DEMIN"
+    },
+    {
+        "nome": "DEPARTAMENTO DE MEDICINA DE FAMILIA, SAUDE MENTAL E COLETIVA",
+        "sigla": "DEMSC"
+    },
+    {
+        "nome": "DEPARTAMENTO DE MUSEOLOGIA",
+        "sigla": "DEMUL"
+    },
+    {
+        "nome": "DEPARTAMENTO DE MUSICA",
+        "sigla": "DEMUS"
+    },
+    {
+        "nome": "DEPARTAMENTO DE NUTRICAO CLINICA E SOCIAL",
+        "sigla": "DENCS"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA DE PRODUCAO",
+        "sigla": "DEPRO"
+    },
+    {
+        "nome": "DEPARTAMENTO DE QUIMICA",
+        "sigla": "DEQUI"
+    },
+    {
+        "nome": "DEPARTAMENTO DE SERVICO SOCIAL",
+        "sigla": "DESSO"
+    },
+    {
+        "nome": "DEPARTAMENTO DE TURISMO",
+        "sigla": "DETUR"
+    },
+    {
+        "nome": "DEPARTAMENTO DE ENGENHARIA URBANA",
+        "sigla": "DEURB"
+    }
+]
