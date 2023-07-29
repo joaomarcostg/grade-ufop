@@ -786,3 +786,268 @@ ed3c9fcd-da6f-4cc5-af66-407bcb8d3249,CEA739,,CEA563,False,engenharia-eletrica
 298ef160-94c1-4445-80ce-b1f39cfff877,CEA717,,CEA555 CEA562,False,engenharia-eletrica
 6c5c1a83-4b3b-41bc-a5df-fc017efff042,CEA728,,CEA555,False,engenharia-eletrica
 8df03211-fe6d-4e78-a206-575b130a6142,CEA735,,CEA555,False,engenharia-eletrica
+70d7e5b8-b19f-44e1-97b7-ffd707729aa3,CEA038,1,,True,engenharia-de-computacao
+ba792204-8c93-4d45-9126-41159696b7d1,CEA039,1,,True,engenharia-de-computacao
+07706bb6-f48e-4ac8-9c6e-08b9f7a0b22c,CEA049,1,,True,engenharia-de-computacao
+7ccd838c-589f-4c17-bc1a-45b251c40a35,CEA050,1,,True,engenharia-de-computacao
+d5c00c43-09c8-4be7-b49d-62206f1cd4e8,CSI030,1,,True,engenharia-de-computacao
+217f8da0-f83a-4f2f-ae6f-0c9e7398b2cd,CSI201,1,,True,engenharia-de-computacao
+4ef4af8a-94c0-493e-9e42-4147fb0d939f,CSI427,1,,True,engenharia-de-computacao
+69af0bd8-b39e-4659-b48b-36706b2ea1e1,EAD707,1,,True,engenharia-de-computacao
+4dc2ca61-7774-4564-aad3-0dbb9c57ab25,CEA051,2,CEA049 CEA050,True,engenharia-de-computacao
+a13e497c-33c5-4758-85ef-7103610730ee,CEA055,2,CEA050,True,engenharia-de-computacao
+db9556c9-1e59-49cd-a5e2-7f45f71e0d31,CEA061,2,CEA049 CEA050,True,engenharia-de-computacao
+668cc640-d3f2-4c4a-baf3-b2e312fd9b67,CSI032,2,CSI030,True,engenharia-de-computacao
+a8d5dba9-bf18-4789-bfee-f5bf6035b8aa,CSI443,2,,True,engenharia-de-computacao
+b9a226c8-2d9f-445f-995b-84c52ba27bf1,CEA052,3,CEA051,True,engenharia-de-computacao
+a72cc56f-7d22-49ef-9188-765c11e78327,CEA056,3,CEA051,True,engenharia-de-computacao
+82bc5df0-bbfa-4e7e-a490-e803bc2cb5c3 bbba11e1-0c14-4e77-a00d-8244a386c2ab,CEA062,3,CEA038 CEA039 CEA051 CEA061,True,engenharia-de-computacao
+62cc3195-1e1a-4246-a0ff-b4f6009d8722,CEA341,3,CSI030,True,engenharia-de-computacao
+1b6a3db0-6164-44d6-9656-7710ab09f54c,CSI488,3,CSI030,True,engenharia-de-computacao
+e0ad6e46-f4b0-4154-9496-0ea34a67162d 7b7cad5e-d36b-42c5-8cae-90eb0a6eabd5,CEA063,4,CEA038 CEA039 CEA051 CEA055 CEA061,True,engenharia-de-computacao
+668bdf13-ffad-447b-b345-089ee2819ee9,CEA552,4,CEA056 CEA062,True,engenharia-de-computacao
+ec8c24a5-137d-4be0-a647-133eb45dd689,CEA562,4,CEA056,True,engenharia-de-computacao
+b691e9c5-7a7b-480d-9ae7-f0869644a906,CSI429,4,CSI032 CSI488,True,engenharia-de-computacao
+48a81ad2-3ec6-43da-b41a-8138dfee57f1,CSI466,4,CSI443 CSI488,True,engenharia-de-computacao
+cd71fb5d-ebcd-4209-b450-f7aa09c17cb8 52c16fc1-a788-4958-98eb-420dd64aba40,CEA064,5,CEA052 CEA056 CEA062 CEA063,True,engenharia-de-computacao
+63866f7f-2599-4446-9962-866c82a2a51a,CEA502,5,CEA052 CEA063 CEA552,True,engenharia-de-computacao
+ad4008c1-cf22-4bbb-9c7e-8aa9fc147ba0,CSI148,5,CEA056 CSI030,True,engenharia-de-computacao
+0b364466-9947-489d-aec6-beaad2a9d735,CSI203,5,CEA341 CSI030,True,engenharia-de-computacao
+b5f8cd10-8d57-46f8-b483-dbb57baafc00,CSI485,5,CSI032 CSI488,True,engenharia-de-computacao
+d0fac02b-06d3-436a-8031-9db503f8ba97,CEA561,6,CEA552,True,engenharia-de-computacao
+e3b3d59e-995e-47fe-8301-1a4fe4e3329f,CEA582,6,CEA562,True,engenharia-de-computacao
+0096c056-b255-4d2c-b53e-559228ebf62e,CSI440,6,CSI488,True,engenharia-de-computacao
+0483dc4f-48a4-4114-b2c3-bda8cbb7b631,CSI509,6,CSI203,True,engenharia-de-computacao
+0417994a-1bf0-4f31-ad82-6d37914cfa2c,CSI546,6,CSI466,True,engenharia-de-computacao
+fb9a531c-0a34-4a57-99f7-842c63c674e2,CEA551,7,CEA064 CEA552 CSI148,True,engenharia-de-computacao
+d06eb124-4c37-48ce-9ecc-22a5b5a4d9ee,CEA580,7,CSI203,True,engenharia-de-computacao
+c5ff07f1-888d-449b-b586-92ca7c78bbf4,CSI437,7,CSI203 CSI488,True,engenharia-de-computacao
+276ab912-eb1c-4f82-90eb-27c393d0b138,CSI476,7,CSI466,True,engenharia-de-computacao
+d4be650a-75bc-4b4b-8a04-1230ba8afe21,CSI508,7,CSI488,True,engenharia-de-computacao
+6b6e1383-0ad7-410d-b189-ef98cab42b59,CSI419,8,CSI476,True,engenharia-de-computacao
+af45b15f-d8ce-4c83-acb9-9d2c461d8276,CSI450,8,CSI485,True,engenharia-de-computacao
+0ea792d4-4ce4-4ce1-82b3-bb99134bf4e2,CSI457,8,CSI466,True,engenharia-de-computacao
+1f04f23c-a21b-49d3-ad23-318bf40cc409,CSI548,8,CSI488,True,engenharia-de-computacao
+e4631526-d7e6-4625-8890-7598cb8da998,CSI433,9,CSI548,True,engenharia-de-computacao
+f70fcc07-e3b4-454c-8a29-ec2729e0322c,CSI495,9,,True,engenharia-de-computacao
+a5fc1aa5-1f5f-46b2-a78b-9b6e5edf9d21,CSI506,9,CSI476,True,engenharia-de-computacao
+d62750d9-ac8c-44e9-9e23-1b4408962822,CSI510,9,CSI548,True,engenharia-de-computacao
+e990fe56-2d75-494d-8f7d-96f874ef62c3 094cd40f-83e2-4d51-a23c-23829664f2ba,CEA066,10,CEA038 CEA039 CEA062 CEA063,True,engenharia-de-computacao
+7adee567-666c-4eec-b438-1f7db735c8dc,CSI491,10,,True,engenharia-de-computacao
+8bc1f35f-dd39-4b07-9530-78f81aaf51b7,CSI496,10,CSI495,True,engenharia-de-computacao
+3842e051-bf96-496b-a7c6-19d7f33ebb70,CSI693,10,CSI433,True,engenharia-de-computacao
+ab45d49e-f8a8-45f9-a138-ba9c3f211aa4,CEA026,,,False,engenharia-de-computacao
+694462a9-3779-4ae6-a353-b5b23c800f76 67519b5e-5ef9-4238-ab1d-a4486f56d257,CEA057,,CEA052 CEA056,False,engenharia-de-computacao
+862cb576-8153-4704-87ab-1ab980a853ac,CEA147,,CEA580,False,engenharia-de-computacao
+3d240e54-6e32-4bec-9365-8450adabc6d7,CEA563,,CEA552,False,engenharia-de-computacao
+b277e0a2-06f5-4219-bf9f-8400299552c3,CEA570,,CEA562,False,engenharia-de-computacao
+0c413f20-fcd0-4b9c-8c52-54857030bcfd,CEA571,,CEA551 CEA561,False,engenharia-de-computacao
+6c9b4985-fea6-4d95-ab2d-2e2658d7ee55,CEA572,,CEA561 CEA570,False,engenharia-de-computacao
+f09d0423-8a4f-4b57-8d3e-3204ad0f296a,CEA671,,CEA562,False,engenharia-de-computacao
+cadc32ab-9437-4160-a9f6-4fdbad7a3033 795cebb2-f786-454d-babf-0779151683c1,CEA710,,,False,engenharia-de-computacao
+7e4d50b2-1eea-4a8f-9135-209d28692cf0,CEA712,,CEA562,False,engenharia-de-computacao
+d70b6089-f738-4f11-a1b7-c638794b88bf,ENP151,,,False,engenharia-de-computacao
+80ed2e06-0f79-4b0f-9ebc-9cce29dd044a,ENP152,,,False,engenharia-de-computacao
+8b9b9e31-47e0-4f47-b993-28c14d817a09,ENP153,,CSI030 CSI488,False,engenharia-de-computacao
+9ba56f0e-2de8-4f02-95e8-0546954219b4,ENP160,,ENP153,False,engenharia-de-computacao
+15e84df1-3074-4698-990b-dce4f4bf870a,ENP493,,,False,engenharia-de-computacao
+8fa780b9-35dc-4e2d-9df4-c9e5f1e4d598 c9fd5d65-5b44-4849-be95-d95970a378ee,CEA710,,,False,engenharia-de-computacao
+c87fc6df-622f-47f1-8d94-b4e7ed7adc13,CEA712,,CEA562,False,engenharia-de-computacao
+e6f5cfdb-be01-48aa-bf1d-18416a17aa12,CEA038,1,,True,engenharia-de-producao-jm
+8f4d5a93-fe85-40a3-b7b9-ed9da37c3a52,CEA039,1,,True,engenharia-de-producao-jm
+dd278a0b-b052-47b4-ad28-c0e55b5f5774,CEA049,1,,True,engenharia-de-producao-jm
+9c435424-853c-4eb9-ad79-fdfb12a4d309,CEA050,1,,True,engenharia-de-producao-jm
+69a0b85c-3749-4d87-bd45-0ec38f9e33bb,CSI002,1,,True,engenharia-de-producao-jm
+83383c0d-87f2-455f-be68-7b6c82a261d2,ENP042,1,,True,engenharia-de-producao-jm
+ec055b85-a066-4986-92c5-d8449e1e34f9,CEA051,2,CEA049 CEA050,True,engenharia-de-producao-jm
+1be14e39-712a-4ab9-8497-fb53aa6ad3e1,CEA061,2,CEA049 CEA050,True,engenharia-de-producao-jm
+7ad30af1-9194-4046-a3a4-70cf74c8d517,CEA052,3,CEA050 CEA051,True,engenharia-de-producao-jm
+e5535168-2946-4989-8a25-f61a2849bee1,CEA053,3,CEA050 CEA051,True,engenharia-de-producao-jm
+d6cdb6c6-6cd5-4e41-a054-7a0d761ed432,CEA056,3,CEA051,True,engenharia-de-producao-jm
+269e1c36-d950-4e2e-ba50-771b3a34236e b1e31813-4770-4cce-9e77-1ad9ff08b5b5,CEA062,3,CEA038 CEA039 CEA051 CEA061,True,engenharia-de-producao-jm
+b895c935-acaa-40f4-96f1-93b7e68775f9,CEA054,4,CEA053,True,engenharia-de-producao-jm
+dc50d6f1-9da8-455b-b77b-b6e60f0f27b9 381c4112-0fdc-473c-980a-283472f6acd0,CEA058,4,CEA051 CEA056 CEA062 CSI002,True,engenharia-de-producao-jm
+791ef844-30f5-4e22-a80e-02b818da9926 99723164-fdc4-4274-8aa6-9f9fdcef7f5d,CEA063,4,CEA038 CEA039 CEA052 CEA053,True,engenharia-de-producao-jm
+539509c6-522e-4848-bddc-570c2dcd95c1,CEA067,4,CEA038 CEA039 CEA062,True,engenharia-de-producao-jm
+b02178d8-cea4-4423-8d22-6fc9aa4a6cbf,ENP012,5,CEA049 CSI002 CSI003,True,engenharia-de-producao-jm
+0c0e945a-669c-479c-baef-2082da614c09,ENP157,5,CEA053 CEA054,True,engenharia-de-producao-jm
+cdd0c277-d11e-4c5c-80d1-dda2e5de374b,ENP015,6,CEA052 CEA054,True,engenharia-de-producao-jm
+7e2a95cd-2a5d-4b59-bc17-a60b0f34f88e,ENP022,6,CEA054,True,engenharia-de-producao-jm
+49ec6cd2-760a-408a-8d09-d2b28c3d95ae cdd646f5-caa8-4156-bd7b-9ffe5e31be05,ENP023,7,CEA053 CEA054 ENP015 ENP048,True,engenharia-de-producao-jm
+24940d38-a7b8-4641-99b7-0afd78b7549e,ENP122,7,,True,engenharia-de-producao-jm
+e129df6d-c3c6-4f1c-a5fa-52331c5e3045,ENP141,7,ENP022,True,engenharia-de-producao-jm
+b151f064-9845-40a6-ab4e-0b32dee2f952 bfa5d124-78b0-4d2b-9c63-92e5a7785ed1,ENP154,7,ENP015,True,engenharia-de-producao-jm
+04d6a22d-03e8-41be-a0b1-6eb504808d26,ENP123,8,ENP122,True,engenharia-de-producao-jm
+1850a704-6e3d-42c1-9be5-b2b08463af41,CEA064,,CEA063,False,engenharia-de-producao-jm
+5d15bc27-e534-420b-9865-97d4554773ee,CEA502,,CEA052 CEA062,False,engenharia-de-producao-jm
+e7a0090d-c1cd-4c35-85f7-e4a79c569f32,CEA595,,CSI003,False,engenharia-de-producao-jm
+315be4dc-64c7-4d3b-9dcc-88bf00aec9da,CEA597,,CEA063,False,engenharia-de-producao-jm
+6db43f5f-029d-4406-9b93-d778f9926cae bafee653-bf1c-40f5-a063-1b4cfeb1c18e,CEA710,,CEA052 CEA053 CEA054,False,engenharia-de-producao-jm
+6a876418-d9f5-4fba-b949-8b443e4be6b7,CSI011,,,False,engenharia-de-producao-jm
+4106d4ba-7174-4709-8ba8-d8737aa4809c,CSI102,,CSI002,False,engenharia-de-producao-jm
+c0578964-f0b8-44ad-be2a-428b63272a99,CSI104,,CSI003,False,engenharia-de-producao-jm
+db163dc2-8c3c-448e-9444-42c4acb922ef 4e4f42ac-5321-4676-b339-a9b20ecd2cb4,CSI202,,CSI002,False,engenharia-de-producao-jm
+d43aa06d-b8a2-4e87-8379-43a6ff3b4daf,CSI301,,CSI003,False,engenharia-de-producao-jm
+5b5dbb77-2909-45b4-b50c-119a16520cfa 5aff3cea-ccfe-4940-b997-e97260c460fa,CSI403,,CSI003,False,engenharia-de-producao-jm
+39e10ec9-c930-42bf-8bd8-10d2c8b84d05,CSI404,,CSI403,False,engenharia-de-producao-jm
+7605940e-e9de-4bb1-b845-1769f43874c8,CSI405,,CSI404,False,engenharia-de-producao-jm
+7c6fe747-ebef-4e4b-acac-fd515751ec74,CSI466,,CSI003 CSI011,False,engenharia-de-producao-jm
+8084f6ab-51a3-4696-be10-4ea559e1a038,CSI504,,CSI403,False,engenharia-de-producao-jm
+cafdf885-ffa5-4bed-b096-2dd03b2a0cd3,CSI546,,CSI466,False,engenharia-de-producao-jm
+8423f98f-c899-43f1-8628-16b089e2ac42,CSI601,,,False,engenharia-de-producao-jm
+12ca3b40-0538-45cb-8324-76df759662c9,CSI602,,CSI003,False,engenharia-de-producao-jm
+1ca4824f-a68e-47c4-9bbc-7cea42415c6e,CSI605,,CSI601 CSI602,False,engenharia-de-producao-jm
+e0f84977-0742-4620-9235-eca4fc6e8a7f,CSI609,,CSI466,False,engenharia-de-producao-jm
+fa5196b1-326b-49d2-9b3d-ebcb90c98d03 42b1bb36-b8c4-4b18-83cd-e3c6611baf97,CSI701,,CSI003,False,engenharia-de-producao-jm
+7850df5c-0905-49f3-8880-8f59c414a7b1,CSI703,,CSI701 ENP012,False,engenharia-de-producao-jm
+933af20e-2cbb-49f5-a0a5-706db7b4a105,CSI704,,CSI701,False,engenharia-de-producao-jm
+f7af9ec8-4b6a-41c0-b58a-18acf608a6c7,CSI802,,,False,engenharia-de-producao-jm
+c7cd91e1-0885-40fe-b46d-844759fdc058,CSI901,,,False,engenharia-de-producao-jm
+34c5ecec-eee8-4fbf-8123-dfba8f0b6dd1 6cfbb2b4-ccc7-430e-b0ef-7b2f35a120e9,DTE071,,,False,engenharia-de-producao-jm
+aa11d70d-b6ea-480d-9a9f-65b070865dce,EAD707,,,False,engenharia-de-producao-jm
+92af2682-a58b-4dd5-9ca6-c985dc8b6ead,ENP026,,,False,engenharia-de-producao-jm
+b39e765c-e8a7-43d4-b423-7069650ab849 d3ee086c-dabe-4faf-a3ef-660f68d3d6da,ENP473,,ENP049,False,engenharia-de-producao-jm
+a4e158f9-a3f5-489a-85d3-c1391d1d2b42,ENP493,,ENP046 ENP048 ENP154,False,engenharia-de-producao-jm
+075b0a3b-5258-4743-aadd-545d2475e74f,ENP530,,ENP022 ENP053,False,engenharia-de-producao-jm
+464ade14-7a8f-4f31-a784-63007a17efb3 454a33ff-35b8-446e-ad60-1ea748964ad1,ENP569,,,False,engenharia-de-producao-jm
+31cae0fd-329c-46be-aa34-7f86ce56ca38 c3cda4cb-41be-4615-bcf6-eead71ff48e6,CEA059,1,,True,sistemas-de-informacao
+cb415b21-b7b1-4444-bd4b-23df2fe85f91,CEA060,1,,True,sistemas-de-informacao
+5e2dcff1-6757-479a-9852-d27e120f5b24,CSI101,1,,True,sistemas-de-informacao
+f266c77a-7911-4581-a893-55e926cca3ce,CSI601,1,,True,sistemas-de-informacao
+994ce2f3-c1e5-44b1-81bf-495f3b74ad71,CSI901,1,,True,sistemas-de-informacao
+9e48b980-c420-4e8b-ab87-81d9a18bfaa7,CSI902,1,,True,sistemas-de-informacao
+60c7b5ba-41dd-463b-9ea2-8cf422133d8a,CSI011,2,,True,sistemas-de-informacao
+8698de5a-dccf-4cab-b77f-5923990f9e2f,CSI102,2,CSI101,True,sistemas-de-informacao
+32a6025a-3b21-43f4-8c22-4e3af3c954aa,CSI103,2,CSI101,True,sistemas-de-informacao
+c7090b04-4835-4fce-947a-8c1fb237168a,CSI801,2,,True,sistemas-de-informacao
+562f1c38-ea08-4794-b05e-e1118b533fae,ENP144,2,,True,sistemas-de-informacao
+53f16f76-42e5-48aa-8adc-a60508335d08,CEA055,3,CEA060,True,sistemas-de-informacao
+aaf52181-c20f-4c3e-bbe9-a5c5e2b0d87d,CSI104,3,CSI102 CSI103,True,sistemas-de-informacao
+2bb52636-60fb-471b-acd1-e4a83ea86695,CSI105,3,CSI011 CSI103,True,sistemas-de-informacao
+a47723c6-788b-4e2c-ad60-5e26db53bfca,CSI202,3,,True,sistemas-de-informacao
+cbbd89e5-4226-46e6-a7c5-940b640bdc24,ENP473,3,,True,sistemas-de-informacao
+a6154615-27e9-4ed8-8e57-4d0d296f34eb,CSI204,4,CSI103 CSI202,True,sistemas-de-informacao
+c24fe91a-3890-4fe5-9e97-6dc0529ca9c2,CSI403,4,CSI102 CSI103,True,sistemas-de-informacao
+ca0077eb-e1c3-43b0-8a03-d69bfe3ba45f,CSI602,4,CSI103,True,sistemas-de-informacao
+7de4e4ef-d4a4-4b73-aa55-4381f0175639,ENP012,4,CEA059 CSI103,True,sistemas-de-informacao
+384967a2-cd61-4095-8fa9-363093046db3,ENP150,4,CEA060,True,sistemas-de-informacao
+f6005926-486f-42f8-b188-36f3c13193f7,CSI106,5,CSI105,True,sistemas-de-informacao
+f3d6e40b-b81b-49fb-bb8d-7df4d34f0f05,CSI301,5,CSI101 CSI202,True,sistemas-de-informacao
+aec94fe7-108e-48ec-a0fb-1acdfd072092,CSI404,5,CSI403,True,sistemas-de-informacao
+2bff65ee-6693-4d40-8b2b-0a92e2014e9c,CSI603,5,CSI104 CSI602,True,sistemas-de-informacao
+56d83a51-47be-43c9-8581-e2dc361b83af,CSI701,5,CSI105,True,sistemas-de-informacao
+aaf4ed4f-5b6a-4f71-a628-cad94abbe593,CSI107,6,CSI106,True,sistemas-de-informacao
+cf936daf-1664-4ba9-81f5-ee1e973966ec,CSI302,6,CSI204 CSI301,True,sistemas-de-informacao
+2204cadb-0709-4da4-a48f-eb39e2f507bf,CSI405,6,CSI404,True,sistemas-de-informacao
+6ff89dae-e241-4005-aadb-5d2e269b6889,CSI504,6,CSI403,True,sistemas-de-informacao
+a184a75c-f996-43ea-8db2-0d30475e478c,CSI606,6,CSI403 CSI602,True,sistemas-de-informacao
+16adf451-0641-4002-a7a7-129262ca8f83,CSI802,7,CSI801,True,sistemas-de-informacao
+5fca9239-97a3-4b8c-8ada-46411e712ad8 ee3a42bc-5559-4ab1-a1e6-2e7bf52cd394,CSI998,7,CSI902,True,sistemas-de-informacao
+984af28c-af34-433f-8f54-620b8f9469df,ENP026,7,,True,sistemas-de-informacao
+7ed60139-24b3-49d7-8f63-28fec0681eed,ENP493,7,,True,sistemas-de-informacao
+58fdf88f-7ca8-4dba-81fd-2abef8ce24e6,CSI303,8,CSI301,True,sistemas-de-informacao
+5ca1ce30-742e-4a92-9a2b-8134bbf95c8e,CSI605,8,CSI601 CSI602,True,sistemas-de-informacao
+efd59ce6-9737-47ec-a67c-3ed92fae2268,CSI999,8,CSI998,True,sistemas-de-informacao
+5589f34e-34e0-4068-b470-0aa1e060e74b,CEA580,,CSI202,False,sistemas-de-informacao
+6637653e-c87e-4485-b020-e03d22ade7a0,CSI305,,CSI301,False,sistemas-de-informacao
+0b664206-cf3e-4c5d-8c63-e61be1ac7657,CSI406,,CSI403,False,sistemas-de-informacao
+96615b6c-e09a-488e-b4d5-2bafc7a59674,CSI407,,CSI403,False,sistemas-de-informacao
+1fe774f9-baf0-4e8f-aec8-319385823ffc,CSI408,,CSI403,False,sistemas-de-informacao
+3e5d6607-8794-421a-a245-4ebedffaec1d,CSI507,,CSI403,False,sistemas-de-informacao
+e0f1b013-e0c0-485b-92bf-7726d75de7ee,CSI609,,CSI105,False,sistemas-de-informacao
+be824026-46ca-43b1-9631-360ab99da27f,CSI702,,CSI701 ENP012,False,sistemas-de-informacao
+b0692f4d-f40f-4863-9afa-409ee014cfbc,CSI703,,CSI701 ENP012,False,sistemas-de-informacao
+10be35ef-7bb5-4572-8618-14d54ae9b502,CSI704,,CSI701,False,sistemas-de-informacao
+7250660d-79a0-48e5-8cb6-4617699bc502,CSI705,,CSI701,False,sistemas-de-informacao
+a9e60827-24a0-4705-8ad9-aef096d0a978,ENP005,,ENP473,False,sistemas-de-informacao
+667d5b11-8d58-4efa-8ea4-4d813d969a1c,ENP014,,ENP473,False,sistemas-de-informacao
+f61fcc84-ba63-4529-8646-b2451d8ab285,ENP022,,,False,sistemas-de-informacao
+67b4e214-e9a9-46bb-abde-e34078b0a07a,ENP023,,ENP012 ENP150,False,sistemas-de-informacao
+25dfc811-f69f-43b0-9738-11940ada6998,ENP025,,CSI801,False,sistemas-de-informacao
+7324d83d-0e36-4982-982c-53989c935436,ENP122,,ENP150,False,sistemas-de-informacao
+1e2ad349-b4d9-408a-aacb-79ceaa587cf1,ENP151,,,False,sistemas-de-informacao
+c01e25fe-8e8c-4b9f-997f-c9098513f89a,ENP152,,,False,sistemas-de-informacao
+13fddb30-8eec-45a6-9715-0a5afe9a0da0,ENP154,,ENP150,False,sistemas-de-informacao
+0909291b-061e-424d-b3c3-cba0e502f547,ENP155,,ENP150,False,sistemas-de-informacao
+25534d14-f5cd-4151-9fc6-d348b2aba1cd,ENP157,,,False,sistemas-de-informacao
+fd96725d-8005-49e6-b957-e94f89c79d44,CEA038,1,,True,engenharia-eletrica
+bdb2d3f3-069e-498b-af14-60720330f2b4,CEA039,1,,True,engenharia-eletrica
+ac306560-8a27-4039-8a10-fa6201007e0c,CEA049,1,,True,engenharia-eletrica
+189e1b9a-442b-4890-862b-eae1fd7739b5,CEA050,1,,True,engenharia-eletrica
+e7311fc7-c2c8-437b-9f43-308bfe09110e,CEA204,1,,True,engenharia-eletrica
+2c372abf-61ab-4652-84ee-1d745e7cabb3,CEA458,1,,True,engenharia-eletrica
+2271b5aa-8431-4cd4-9192-138e1bc9a881,CSI030,1,,True,engenharia-eletrica
+54486d7b-539f-4ff7-a4ac-fbe1f47e5136,EAD707,1,,True,engenharia-eletrica
+a4806e65-08ef-4d8d-ac06-b005f21bbfe0,CEA026,2,,True,engenharia-eletrica
+7e40f554-6b47-44ae-a7bf-868df07b394b,CEA051,2,CEA049 CEA050,True,engenharia-eletrica
+777e4271-a683-4ce7-a0bc-e8e5bc96e229,CEA055,2,CEA050,True,engenharia-eletrica
+28b338f1-b906-4fcc-a548-4e2bd6775fc1,CEA061,2,CEA049 CEA050,True,engenharia-eletrica
+ac4185b9-d499-4be7-b016-555b7359111e,CSI488,2,CSI030,True,engenharia-eletrica
+d63da6a0-c381-4c86-bd3b-ba825b48d393,CEA052,3,CEA051,True,engenharia-eletrica
+93a8c3e5-e292-4ddb-a278-e9f79ec01c26,CEA056,3,CEA051,True,engenharia-eletrica
+9cfca0b7-0872-485a-a26f-3f25ca00918c 1d9c0de0-2135-46b2-8fe6-65f4cb44c080,CEA062,3,CEA038 CEA039 CEA051 CEA061,True,engenharia-eletrica
+edc6bdc8-8143-48f9-8f46-528df505dd18 fbb96e44-275b-4ac9-be52-209d0eb29273,CEA063,3,CEA038 CEA039 CEA051 CEA055 CEA061,True,engenharia-eletrica
+e8db1857-2924-4f71-85e0-b10d067e1b9d,CEA341,3,CSI030,True,engenharia-eletrica
+b426eba0-bab6-4d11-9450-8910b2cad813 8f7b3328-ab22-41de-ab97-50bdbdda9ea5,CEA057,4,CEA052 CEA056,True,engenharia-eletrica
+e208079e-3570-4a7a-9bb2-ac56d084b921 0f111c6d-56f8-4c04-8b14-038bcf17bd16,CEA064,4,CEA052 CEA056 CEA062 CEA063,True,engenharia-eletrica
+fb7429d7-d566-494a-b320-2e14634bc96a,CEA552,4,CEA056 CEA062,True,engenharia-eletrica
+519b8c05-fa96-44fd-a26e-79c6cae8cbe9,CSI148,4,CSI030,True,engenharia-eletrica
+9bf10256-6106-4d9b-8f4d-ce35a615de87,CSI203,4,CEA341 CSI030,True,engenharia-eletrica
+71c2502c-1457-4fe7-a538-cc45a5c2a770,CEA065,5,CEA057 CEA064,True,engenharia-eletrica
+1cd66f32-f11c-40af-8fee-95e024c4dce2,CEA502,5,CEA052 CEA063 CEA552,True,engenharia-eletrica
+0ed4db09-a25a-4258-a38d-3059a6d46e7e 87eb22c9-addf-4bea-9755-d6d61620fccd,CEA555,5,CEA057 CEA064 CEA552 CSI148,True,engenharia-eletrica
+0240621c-716a-4849-b9c8-59a21d7f875c,CEA562,5,CEA056,True,engenharia-eletrica
+8d515203-c658-444c-b042-47f9f5ff7662,CEA563,5,CEA064 CEA552,True,engenharia-eletrica
+fac89193-9349-4e1c-92eb-ba1a1de88c82,CEA550,6,CEA502 CEA563,True,engenharia-eletrica
+618138ce-602d-430c-be45-73483bca3083,CEA561,6,CEA552,True,engenharia-eletrica
+f36aa91e-6c4a-4b29-9e38-5461d08a7a6d,CEA570,6,CEA555 CEA562,True,engenharia-eletrica
+7f2835b7-cd9b-4108-bd6b-4d55c2feb1a9,CEA573,6,CEA563,True,engenharia-eletrica
+cc49fad4-226d-4902-b491-38224d483675,CEA582,6,CEA562,True,engenharia-eletrica
+0a1fa9b1-6415-47ba-8a8b-064a4e4b83ac,CEA560,7,CEA550,True,engenharia-eletrica
+033a2824-c234-41b2-b0d7-cf7db6b082bb,CEA571,7,CEA065 CEA555 CEA561,True,engenharia-eletrica
+f9a407d1-780e-4d47-ab4b-dd73d94ec653,CEA580,7,CEA561 CSI203,True,engenharia-eletrica
+f3cd4179-880e-4ca7-87e6-7d68b8c03ebf,CEA583,7,CEA573,True,engenharia-eletrica
+b56bacfd-a93b-4e10-9218-4510fdb78b44,CEA147,8,CEA580,True,engenharia-eletrica
+f9cb4b73-fcb7-4cb4-952a-a2526d4157a4,CEA581,8,CEA571,True,engenharia-eletrica
+06000b45-b4ee-4104-9992-4e299eb1aa72,CEA671,8,CEA562,True,engenharia-eletrica
+2b0ef650-f2ca-4ce0-b193-ff9b77e570d6,CEA572,9,CEA561 CEA570,True,engenharia-eletrica
+7eb20005-aa54-43cb-95da-114eb7064315,CEA590,9,CEA560 CEA581,True,engenharia-eletrica
+bd7c1568-e137-42d4-b1df-94fc8afa9c4a fea52e48-8d9f-47d7-a5b7-a8554ec2e701,CEA598,9,CEA458 EAD707,True,engenharia-eletrica
+1aa79806-9201-4760-83d5-635a4d60cf90,CSI548,9,CSI488,True,engenharia-eletrica
+7e5cb146-ae95-46e8-b51a-abe544114759 12d6a6a8-7e1c-43b8-9150-758ad48fd597,CEA066,10,CEA038 CEA039 CEA062 CEA063,True,engenharia-eletrica
+5d8a6b14-03de-4b14-b24c-69d364e5bfa5 52e0e65d-56ed-4b56-830e-31a4dfb126fe,CEA593,10,CEA038 CEA039 CEA065 CEA502,True,engenharia-eletrica
+b7b66453-5a6c-410a-8f5e-1c645870409f,CEA594,10,,True,engenharia-eletrica
+8d686c36-2d21-4bc1-a908-6df20f9eba5a,CEA595,10,CSI030 CSI548,True,engenharia-eletrica
+c465d3b4-7a49-4d71-8be8-6dcc526a1add,CEA597,10,CEA563,True,engenharia-eletrica
+a5ad7170-b192-48c5-bef3-b5d9087aa6f2 4695339a-45ae-491a-b36b-c4b929460821,CEA710,,,False,engenharia-eletrica
+80be2f9a-332d-4644-8d22-ae241bbe79e4,CEA712,,CEA562,False,engenharia-eletrica
+9b341ffc-4844-4143-9d90-5767360d1f46,CEA716,,CEA555 CEA562,False,engenharia-eletrica
+dddfaa3c-f56e-4d52-aedd-827cb6ab5fd8,CEA717,,CEA555 CEA562,False,engenharia-eletrica
+e6297b02-2034-4b98-a749-069d0829970b,CEA722,,,False,engenharia-eletrica
+d05acf6d-bacd-4fec-9a59-63febf141724,CEA723,,CEA563,False,engenharia-eletrica
+b32d6d85-e5df-4793-8624-47a5ca97715c,CEA725,,CEA563,False,engenharia-eletrica
+a5e7ce4c-a97b-4b95-8f1d-4f5287475d3d,CEA728,,CEA555,False,engenharia-eletrica
+3726feae-c253-43b6-97d1-99a8f3da6ae8,CEA735,,CEA555,False,engenharia-eletrica
+8f71b4ee-7df1-4045-b3ad-3b75ff6bc093,CEA737,,CEA563,False,engenharia-eletrica
+abb5c716-8f47-475b-b096-17401a8311cd,CEA739,,CEA563,False,engenharia-eletrica
+0b032f62-2a16-4fbb-8cef-6d80d9375c11,CEA740,,,False,engenharia-eletrica
+077ce82f-904d-4678-a0e4-8e33b48d9d02,CEA741,,CEA563,False,engenharia-eletrica
+28c1b2c6-19fb-4ff2-9152-598679de312a,CEA742,,CEA562,False,engenharia-eletrica
+195c82fb-a04d-4bc1-b038-60ad9b3815c9,CEA744,,CEA562,False,engenharia-eletrica
+e0647e1f-c08f-4204-b346-a0b1d2ac3e88,CSI510,,CSI548,False,engenharia-eletrica
+eb791c36-de51-459e-a526-48dc49730dbb c4de7ad8-4a15-41e8-b142-22232c25ff06,CEA710,,,False,engenharia-eletrica
+227d2d70-a3be-404a-846e-485002bec3f4,CEA712,,CEA562,False,engenharia-eletrica
+e0ad7bd0-cdbc-4c36-9320-4229c9c427f3,CEA741,,CEA563,False,engenharia-eletrica
+72adeca2-5743-4cf0-a8e5-7817d7a18151,CEA742,,CEA562,False,engenharia-eletrica
+6218d943-14e8-4d48-bdb5-0631046c2ce5,CEA744,,CEA562,False,engenharia-eletrica
+3cc9b833-0bbc-4867-9f70-7cc00e2f2fe7 0ae91575-bd5b-4b39-8282-95f67bfd2953,CSI510,,CSI548,False,engenharia-eletrica
+b9c85273-453c-49d6-a82a-495add284d3a,CEA722,,,False,engenharia-eletrica
+638537aa-399a-45b1-bb09-6e557903c067,CEA723,,CEA563,False,engenharia-eletrica
+00baf858-11e2-4315-8e06-d860800a116e,CEA725,,CEA563,False,engenharia-eletrica
+77bb10d0-ed42-4254-aba3-24a006dba73c,CEA737,,CEA563,False,engenharia-eletrica
+978d2c70-108d-456e-9a5b-068aa157fabc,CEA739,,CEA563,False,engenharia-eletrica
+17c41b77-0709-48a2-8f7c-655497375e1b 48f76e25-e6b9-45a3-a1b3-848e0b4bc4e6,CEA740,,,False,engenharia-eletrica
+83777d9c-913a-4de7-aab8-e421c90ece85,CEA716,,CEA555 CEA562,False,engenharia-eletrica
+bc18ff82-d2a0-48aa-89bb-9eb3c53cd179,CEA717,,CEA555 CEA562,False,engenharia-eletrica
+ea71a047-6eeb-48b4-b0d3-7c0d505c2026,CEA728,,CEA555,False,engenharia-eletrica
+fbe529e9-e9cf-4c84-b27c-ac53231557c7,CEA735,,CEA555,False,engenharia-eletrica
