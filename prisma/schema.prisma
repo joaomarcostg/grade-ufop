@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model course {
+  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  code              String?             @db.VarChar
+  name              String?             @db.VarChar
+  created_at        DateTime?           @db.Timestamp(6)
+  discipline_course discipline_course[]
+}
+
+model department {
+  id         String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  code       String?      @db.VarChar
+  name       String?      @db.VarChar
+  created_at DateTime?    @db.Timestamp(6)
+  discipline discipline[]
+}
+
+model discipline {
+  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  code              String?             @db.VarChar
+  name              String?             @db.VarChar
+  description       String?             @db.VarChar
+  department_id     String?             @db.Uuid
+  created_at        DateTime?           @db.Timestamp(6)
+  department        department?         @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  discipline_class  discipline_class[]
+  discipline_course discipline_course[]
+  prerequisite      prerequisite[]
+}
+
+model discipline_class {
+  id                        String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  class_number              String?                     @db.VarChar
+  discipline_id             String?                     @db.Uuid
+  semester                  String?                     @db.VarChar
+  professor                 String?                     @db.VarChar
+  created_at                DateTime?                   @db.Timestamp(6)
+  discipline                discipline?                 @relation(fields: [discipline_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  discipline_class_schedule discipline_class_schedule[]
+}
+
+model discipline_class_schedule {
+  id                  String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  discipline_class_id String?           @db.Uuid
+  day_of_week         String?           @db.VarChar
+  start_time          DateTime?         @db.Time(6)
+  end_time            DateTime?         @db.Time(6)
+  class_type          String?           @db.VarChar
+  created_at          DateTime?         @db.Timestamp(6)
+  discipline_class    discipline_class? @relation(fields: [discipline_class_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model discipline_course {
+  id            String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  discipline_id String?        @db.Uuid
+  course_id     String?        @db.Uuid
+  mandatory     Boolean?
+  period        Int?
+  created_at    DateTime?      @db.Timestamp(6)
+  course        course?        @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  discipline    discipline?    @relation(fields: [discipline_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prerequisite  prerequisite[]
+}
+
+model prerequisite {
+  id                         String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  discipline_course_id       String?            @db.Uuid
+  prerequisite_discipline_id String?            @db.Uuid
+  created_at                 DateTime?          @db.Timestamp(6)
+  discipline_course          discipline_course? @relation(fields: [discipline_course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  discipline                 discipline?        @relation(fields: [prerequisite_discipline_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
