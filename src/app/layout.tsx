@@ -1,5 +1,6 @@
 import "./globals.css";
 import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
+import { StudentProvider } from "./context/StudentContext";
 
 import { Roboto } from "next/font/google";
 
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={roboto.className} suppressHydrationWarning={true}>
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <ThemeRegistry>
+          <StudentProvider>{children}</StudentProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );
