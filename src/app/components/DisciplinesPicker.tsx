@@ -1,12 +1,15 @@
 "use client";
+import { Button } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { StudentContext } from "@/app/context/StudentContext";
 import { ActionType } from "../context/reducers";
 import { getDisciplinesByCourse } from "@/lib/fetch-api/fetch-disciplines";
 import { type discipline } from "@prisma/client";
+import { useRouter } from 'next/navigation'
 
 export default function DisciplinePicker() {
   const { state, dispatch } = useContext(StudentContext);
+  const router = useRouter()
 
   const [disciplines, setDisciplines] = useState<discipline[]>([]);
 
@@ -20,7 +23,7 @@ export default function DisciplinePicker() {
   useEffect(() => {
     async function fetchData() {
       const disciplinesData = await getDisciplinesByCourse({
-        course: state.course,
+        course: state.course?.value,
         mandatoryOnly: true,
       });
       setDisciplines(disciplinesData);
@@ -45,12 +48,9 @@ export default function DisciplinePicker() {
           </div>
         ))}
       </ul>
-      <ul>
-        Selecionadas:
-        {state.coursedDisciplines.map((disc) => (
-          <li key={disc}>{disc}</li>
-        ))}
-      </ul>
+      <Button onClick={() => router.push('/montar-grade')}>
+        Próximo
+      </Button>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { type discipline } from "@prisma/client";
 import { fetchRequest } from "./utils";
 
 type FetchGetDisciplinesByCourseResponse = {
-  data: discipline[];
+  data: discipline[] ;
 };
 
 export async function getDisciplinesByCourse({
@@ -26,9 +26,63 @@ export async function getDisciplinesByCourse({
 
     const res = await fetchRequest<FetchGetDisciplinesByCourseResponse>(
       apiUrl,
-      { method: "GET", next: {
-        revalidate: 3600
-      } }
+      {
+        method: "GET",
+        next: {
+          revalidate: 3600,
+        },
+      }
+    );
+
+    if (!res.data) {
+      throw new Error("Failed to fetch data");
+    }
+
+    return res.data;
+  } catch (error) {
+    return [];
+  }
+}
+
+
+type FetchGetAvailableDisciplinesResponse = {
+  data: {
+    id: string;
+    code: string | null;
+    name: string | null;
+    isEnabled: boolean;
+    period: number | null;
+    classes: {
+        id: string;
+        class_number: string | null;
+        professor: string | null;
+    }[];
+}[] ;
+};
+
+export async function getAvailableDisciplines({
+  courseId,
+  coursedDisciplines,
+}: {
+  courseId: string;
+  coursedDisciplines: string[];
+}) {
+  try {
+    let apiUrl = `${API_BASE_URL}/availableDisciplines`;
+    const body = JSON.stringify({
+      courseId,
+      coursedDisciplines
+    });
+
+    const res = await fetchRequest<FetchGetAvailableDisciplinesResponse>(
+      apiUrl,
+      {
+        method: "POST",
+        body,
+        next: {
+          revalidate: 3600,
+        },
+      }
     );
 
     if (!res.data) {

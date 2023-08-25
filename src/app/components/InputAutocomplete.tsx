@@ -1,39 +1,57 @@
 "use client";
 
+import type { Theme } from "@emotion/react";
+import type { SxProps } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export type AutocompleteOption = {
+  index?: number;
   label: string | null;
   value: string;
+  disabled?: boolean;
 } | null;
 
 type InputAutocompleteProps = {
+  action?: (value: AutocompleteOption) => void;
   options: Array<any>;
   label: string;
-  action?: (value: AutocompleteOption | null) => void;
+  initialValue?: AutocompleteOption;
+  style?: SxProps<Theme>;
 };
 
-function InputAutocomplete({ options, label, action }: InputAutocompleteProps) {
-  const [value, setValue] = useState<AutocompleteOption>(null);
+function InputAutocomplete({
+  action,
+  options,
+  label,
+  initialValue,
+  style,
+}: InputAutocompleteProps) {
   const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    setInputValue(initialValue?.label ?? "");
+  }, [initialValue]);
 
   return (
     <div className="flex">
       <Autocomplete
         id="combo-box-demo"
-        sx={{ width: 300 }}
+        sx={style}
         options={options}
-        value={value}
-        onChange={(event: any, selected: AutocompleteOption) => {
-          setValue(selected);
+        value={initialValue}
+        onChange={(_, selected: AutocompleteOption) => {
           action && action(selected);
         }}
         inputValue={inputValue}
-        onInputChange={(event, newInputValue) => {
+        onInputChange={(_, newInputValue) => {
           setInputValue(newInputValue);
         }}
+        isOptionEqualToValue={(
+          option: NonNullable<AutocompleteOption>,
+          value: AutocompleteOption
+        ) => option?.value === value?.value}
         filterSelectedOptions
         renderInput={(params) => <TextField {...params} label={label} />}
         renderOption={(props, option) => {

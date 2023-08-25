@@ -4,7 +4,7 @@ import { Button } from "@mui/material";
 import InputAutocomplete, {
   type AutocompleteOption,
 } from "@/components/InputAutocomplete";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { StudentContext } from "@/app/context/StudentContext";
 import { ActionType } from "../context/reducers";
 
@@ -13,7 +13,7 @@ type CoursePickerProps = {
 };
 
 export default function CoursePicker({ courses }: CoursePickerProps) {
-  const { dispatch } = useContext(StudentContext);
+  const { state, dispatch } = useContext(StudentContext);
   const [selectedCourse, setSelectedCourse] =
     useState<AutocompleteOption>(null);
 
@@ -23,18 +23,24 @@ export default function CoursePicker({ courses }: CoursePickerProps) {
 
   const handleCourseSelection = () => {
     dispatch({
-      payload: selectedCourse?.value ?? null,
+      payload: selectedCourse,
       type: ActionType["SELECT_COURSE"],
     });
   };
+
+  useEffect(() => {
+    setSelectedCourse(state.course);
+  }, [state.course]);
 
   return (
     <div className="flex flex-col gap-4">
       <p>Por favor, informe seu curso</p>
       <InputAutocomplete
+        initialValue={state.course}
         options={courses}
         action={handleAutocompleChange}
         label="Curso"
+        style={{ width: 300 }}
       />
       <Button
         variant="outlined"

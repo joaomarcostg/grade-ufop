@@ -1,6 +1,12 @@
+import { type AutocompleteOption } from "../components/InputAutocomplete";
+
 export type InitialStateType = {
-  course: string | null;
+  course: {
+    label: string;
+    value: string;
+  } | null
   coursedDisciplines: string[];
+  availableOptions: AutocompleteOption[]
 };
 
 type ActionMap<M extends { [index: string]: any }> = {
