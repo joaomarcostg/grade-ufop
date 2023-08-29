@@ -1,17 +1,42 @@
+import { Action, ActionType } from "./actions";
 import { InitialStateType } from "./types";
 
-export enum ActionType {
-  INIT_STATE = "INIT_STATE",
-  SELECT_COURSE = "SELECT_COURSE",
-  SELECT_COURSED_DISCIPLINE = "SELECT_COURSED_DISCIPLINE",
-  SET_AVAILABLE_OPTIONS = "SET_AVAILABLE_OPTIONS",
-  REMOVE_FROM_AVAILABLE_OPTIONS = "REMOVE_FROM_AVAILABLE_OPTIONS",
-  ADD_TO_AVAILABLE_OPTIONS = "ADD_TO_AVAILABLE_OPTIONS",
-}
+const updateSelectedDisciplines = (
+  obj: InitialStateType["selectedDisciplines"],
+  payload: {
+    slotId: string;
+    disciplineId: string;
+  }
+) => {
+  const updated = { ...obj };
+  const { slotId, disciplineId } = payload;
 
-export type Action = {
-  type: ActionType;
-  payload: any;
+  if (!updated[slotId]) {
+    updated[slotId] = [];
+  }
+
+  if (!updated[slotId].includes(disciplineId)) {
+    updated[slotId].push(disciplineId);
+  }
+
+  return updated;
+};
+
+const removeFromSelectedDisciplines = (
+  obj: InitialStateType["selectedDisciplines"],
+  payload: {
+    slotId: string;
+    disciplineId: string;
+  }
+) => {
+  const updated = { ...obj };
+  const { slotId, disciplineId } = payload;
+
+  if (updated[slotId]) {
+    updated[slotId] = updated[slotId].filter((id) => id !== disciplineId);
+  }
+
+  return updated;
 };
 
 export const globalReducer = (
@@ -28,28 +53,17 @@ export const globalReducer = (
         availableOptions: payload,
       };
 
-    case ActionType.REMOVE_FROM_AVAILABLE_OPTIONS:
-      return {
-        ...state,
-        availableOptions: state.availableOptions.filter(
-          (item) => item?.value !== payload.value
-        ),
-      };
-
-    case ActionType.ADD_TO_AVAILABLE_OPTIONS:
-      const newArrayWithAdded = [...state.availableOptions, payload];
-      newArrayWithAdded.sort((a, b) => a.index - b.index);
-
-      return {
-        ...state,
-        availableOptions: newArrayWithAdded,
-      };
-
     case ActionType.SELECT_COURSE:
       return {
         ...state,
-        course: payload,
+        course: payload
+          ? {
+              label: payload.label ?? "",
+              value: payload.value,
+            }
+          : null,
       };
+
     case ActionType.SELECT_COURSED_DISCIPLINE:
       if (!payload) {
         return state;
@@ -70,6 +84,78 @@ export const globalReducer = (
         ),
       };
 
+    case ActionType.ADD_TO_SELECTED_DISCIPLINES:
+      return {
+        ...state,
+        selectedDisciplines: updateSelectedDisciplines(
+          state.selectedDisciplines,
+          payload
+        ),
+      };
+
+    case ActionType.REMOVE_FROM_SELECTED_DISCIPLINES:
+      return {
+        ...state,
+        selectedDisciplines: removeFromSelectedDisciplines(
+          state.selectedDisciplines,
+          payload
+        ),
+      };
+
+    case ActionType.CREATE_DISCIPLINES_SLOT:
+      return {
+        ...state,
+        disciplineSlots: {
+          ...state.disciplineSlots,
+          [payload.slotId]: [],
+        },
+      };
+
+    case ActionType.DELETE_DISCIPLINES_SLOT:
+      const updatedDisciplineSlots = { ...state.disciplineSlots };
+      delete updatedDisciplineSlots[payload.slotId];
+      return {
+        ...state,
+        disciplineSlots: updatedDisciplineSlots,
+      };
+
+    case ActionType.ADD_TO_DISCIPLINES_SLOT:
+      return {
+        ...state,
+        disciplineSlots: {
+          ...state.disciplineSlots,
+          [payload.slotId]: [
+            ...(state.disciplineSlots[payload.slotId] || []),
+            payload.value,
+          ],
+        },
+        availableOptions: state.availableOptions.filter(
+          (item) => item?.value !== payload.value?.value
+        ),
+      };
+
+    case ActionType.REMOVE_FROM_DISCIPLINES_SLOT:
+      const newArrayWithAdded = [...state.availableOptions, payload.value];
+      newArrayWithAdded.sort((a, b) => (a?.index || 0) - (b?.index || 0));
+
+      return {
+        ...state,
+        disciplineSlots: {
+          ...state.disciplineSlots,
+          [payload.slotId]: (
+            state.disciplineSlots[payload.slotId] || []
+          ).filter(
+            (disciplineClass) => disciplineClass?.value !== payload.value?.value
+          ),
+        },
+        availableOptions: newArrayWithAdded,
+      };
+
+    case ActionType.SET_DISCIPLINES_SLOT:
+      return {
+        ...state,
+        disciplineSlots: payload,
+      };
     default:
       return state;
   }

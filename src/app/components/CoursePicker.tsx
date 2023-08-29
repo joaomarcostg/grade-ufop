@@ -6,7 +6,7 @@ import InputAutocomplete, {
 } from "@/components/InputAutocomplete";
 import { useContext, useEffect, useState } from "react";
 import { StudentContext } from "@/app/context/StudentContext";
-import { ActionType } from "../context/reducers";
+import { ActionType } from "../context/actions";
 
 type CoursePickerProps = {
   courses: AutocompleteOption[];
@@ -23,8 +23,8 @@ export default function CoursePicker({ courses }: CoursePickerProps) {
 
   const handleCourseSelection = () => {
     dispatch({
-      payload: selectedCourse,
       type: ActionType["SELECT_COURSE"],
+      payload: selectedCourse,
     });
   };
 

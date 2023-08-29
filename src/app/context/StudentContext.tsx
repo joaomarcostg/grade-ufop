@@ -1,12 +1,15 @@
 "use client";
 import React, { createContext, useReducer, useEffect, Dispatch } from "react";
-import { globalReducer, type Action, ActionType } from "./reducers";
-import { InitialStateType } from "./types";
+import { globalReducer } from "./reducers";
+import { type Action, ActionType } from "./actions";
+import { type InitialStateType } from "./types";
 
 const initialState: InitialStateType = {
   course: null,
   coursedDisciplines: [],
   availableOptions: [],
+  disciplineSlots: {},
+  selectedDisciplines: {},
 };
 
 const StudentContext = createContext<{
@@ -56,11 +59,7 @@ function StudentProvider({ children }: React.PropsWithChildren<{}>) {
     }
   }, [state]);
 
-  return (
-    <StudentContext.Provider value={{ state, dispatch }}>
-      {children}
-    </StudentContext.Provider>
-  );
+  return <StudentContext.Provider value={{ state, dispatch }}>{children}</StudentContext.Provider>;
 }
 
 export { StudentProvider, StudentContext };

@@ -21,9 +21,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={roboto.className} suppressHydrationWarning={true}>
+      <body className={`${roboto.className} min-h-screen`} suppressHydrationWarning={true}>
         <ThemeRegistry>
-          <StudentProvider>{children}</StudentProvider>
+          <StudentProvider>
+            <header className="flex w-full h-16 items-center justify-center text-lg fixed top-0 z-10 bg-primary text-white">
+              GradeUFOP
+            </header>
+            <main className="py-16">
+              {children}
+            </main>
+          </StudentProvider>
         </ThemeRegistry>
       </body>
     </html>

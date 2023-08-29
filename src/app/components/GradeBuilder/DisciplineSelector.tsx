@@ -5,23 +5,25 @@ import {
   DragDropContext,
   Droppable,
   Draggable,
-  DraggableProvided,
   DropResult,
 } from "@hello-pangea/dnd";
 import { Button } from "@mui/material";
 import { type AutocompleteOption } from "@/components/InputAutocomplete"; // Import your Autocomplete component
 import { StudentContext } from "@/app/context/StudentContext";
 import { getAvailableDisciplines } from "@/lib/fetch-api/fetch-disciplines";
-import { ActionType } from "@/app/context/reducers";
-import ClassesSelector from "./ClassesSelector";
-
-type ClassSelector = {
-  id: string;
-  selected: AutocompleteOption[];
-};
+import { ActionType } from "@/app/context/actions";
+import DisciplinesSlot from "./DisciplinesSlot";
+import { capitalize } from "@/app/utils/converters";
 
 function DisciplinesSelector() {
   const { state, dispatch } = useContext(StudentContext);
+
+  const [focused, setFocus] = useState<string>("");
+  const [showDnd, setShowDnd] = useState(false);
+
+  useEffect(() => {
+    setShowDnd(true);
+  }, []);
 
   useEffect(() => {
     async function fetchRequest() {
@@ -30,20 +32,23 @@ function DisciplinesSelector() {
         courseId: state.course?.value ?? "",
       });
 
-      const autocompleteOptions = disciplines.reduce<AutocompleteOption[]>(
-        (acc, discipline) => {
-          discipline.classes.forEach((classItem) => {
-            acc.push({
-              index: acc.length,
-              value: classItem.id,
-              label: `${discipline.code} - ${discipline.name} - T${classItem.class_number} ${classItem.professor}`,
-              disabled: !discipline.isEnabled,
-            } as AutocompleteOption);
+      const autocompleteOptions = disciplines.reduce<
+        NonNullable<AutocompleteOption>[]
+      >((acc, discipline) => {
+        discipline.classes.forEach((classItem) => {
+          acc.push({
+            index: acc.length,
+            value: classItem.id,
+            label: `${discipline.code} - ${capitalize(discipline.name)} - T${
+              classItem.class_number
+            } ${capitalize(classItem.professor)}`,
+            professor: capitalize(classItem.professor),
+            disciplineId: discipline.id,
+            disabled: !discipline.isEnabled,
           });
-          return acc;
-        },
-        []
-      );
+        });
+        return acc;
+      }, []);
 
       dispatch({
         type: ActionType["SET_AVAILABLE_OPTIONS"],
@@ -52,61 +57,69 @@ function DisciplinesSelector() {
     }
 
     fetchRequest();
-  }, [
-    dispatch,
-    state.course?.value,
-    state.coursedDisciplines,
-  ]);
+  }, [dispatch, state.course?.value, state.coursedDisciplines]);
 
-  const [classSelectors, setClassSelectors] = useState<ClassSelector[]>([
-    {
-      id: uuid(),
-      selected: [],
-    },
-  ]);
+  const addDisciplinesSlot = () => {
+    const slotId = uuid();
 
-  const addClassSelector = () => {
-    setClassSelectors([
-      ...classSelectors,
-      {
-        id: uuid(),
-        selected: [],
+    dispatch({
+      type: ActionType.CREATE_DISCIPLINES_SLOT,
+      payload: {
+        slotId,
       },
-    ]);
+    });
+
+    setFocus(slotId);
   };
 
-  const removeClassSelector = (id: string) => {
-    if (classSelectors.length <= 1) {
+  const removeDisciplinesSlot = (id: string) => {
+    if (Object.keys(state.disciplineSlots).length <= 1) {
       return;
     }
 
-    const index = classSelectors.findIndex((value) => value.id === id);
-
-    if (index !== -1) {
-      const newClassSelectors = classSelectors.splice(index, 1);
-      setClassSelectors(newClassSelectors);
-    }
+    dispatch({
+      type: ActionType.DELETE_DISCIPLINES_SLOT,
+      payload: {
+        slotId: id,
+      },
+    });
   };
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) {
       return;
     }
-    const items = Array.from(classSelectors);
+
+    // Handling drag and drop while disciplineSlots is an object
+    const items = Object.entries(state.disciplineSlots);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    setClassSelectors(items);
+
+    const reorderedSlots = Object.fromEntries(items);
+
+    dispatch({
+      type: ActionType.SET_DISCIPLINES_SLOT,
+      payload: reorderedSlots,
+    });
   };
 
-  return (
-    <div>
+  return showDnd ? (
+    <div className="flex flex-col">
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="options">
           {(provided) => (
-            <ul {...provided.droppableProps} ref={provided.innerRef}>
-              {classSelectors.map((value, index) => (
-                <Draggable key={value.id} draggableId={value.id} index={index}>
-                  {(provided) => <ClassesSelector provided={provided} />}
+            <ul {...provided.droppableProps} ref={provided.innerRef} className="w-fit">
+              {Object.entries(state.disciplineSlots).map(([key, _], index) => (
+                <Draggable key={key} draggableId={key} index={index}>
+                  {(provided) => (
+                    <DisciplinesSlot
+                      provided={provided}
+                      removeAction={() => removeDisciplinesSlot(key)}
+                      isFocused={focused === key}
+                      changeFocus={() => setFocus(key)}
+                      slotId={key}
+                    />
+                  )}
                 </Draggable>
               ))}
               {provided.placeholder}
@@ -114,8 +127,17 @@ function DisciplinesSelector() {
           )}
         </Droppable>
       </DragDropContext>
-      <Button onClick={addClassSelector}>Adicionar Disciplinas</Button>
+      <div className="flex justify-between items-center">
+        <Button variant="contained" onClick={addDisciplinesSlot}>
+          Adicionar Slot
+        </Button>
+        <Button variant="contained" onClick={() => {}}>
+          Gerar Grade
+        </Button>
+      </div>
     </div>
+  ) : (
+    <></>
   );
 }
 

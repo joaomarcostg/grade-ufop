@@ -2,7 +2,7 @@
 import { Button } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { StudentContext } from "@/app/context/StudentContext";
-import { ActionType } from "../context/reducers";
+import { ActionType } from "../context/actions";
 import { getDisciplinesByCourse } from "@/lib/fetch-api/fetch-disciplines";
 import { type discipline } from "@prisma/client";
 import { useRouter } from 'next/navigation'

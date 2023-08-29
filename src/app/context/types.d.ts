@@ -4,18 +4,13 @@ export type InitialStateType = {
   course: {
     label: string;
     value: string;
-  } | null
+  } | null;
   coursedDisciplines: string[];
-  availableOptions: AutocompleteOption[]
-};
-
-type ActionMap<M extends { [index: string]: any }> = {
-    [Key in keyof M]: M[Key] extends undefined
-      ? {
-          type: Key;
-        }
-      : {
-          type: Key;
-          payload: M[Key];
-        }
+  availableOptions: AutocompleteOption[];
+  selectedDisciplines: {
+    [slotId: string]: string[];
   };
+  disciplineSlots: {
+    [slotId: string]: AutocompleteOption[];
+  };
+};

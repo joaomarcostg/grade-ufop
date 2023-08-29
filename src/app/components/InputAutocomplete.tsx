@@ -2,6 +2,7 @@
 
 import type { Theme } from "@emotion/react";
 import type { SxProps } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
@@ -11,6 +12,7 @@ export type AutocompleteOption = {
   label: string | null;
   value: string;
   disabled?: boolean;
+  [key: string]: any;
 } | null;
 
 type InputAutocompleteProps = {
@@ -35,34 +37,40 @@ function InputAutocomplete({
   }, [initialValue]);
 
   return (
-    <div className="flex">
-      <Autocomplete
-        id="combo-box-demo"
-        sx={style}
-        options={options}
-        value={initialValue}
-        onChange={(_, selected: AutocompleteOption) => {
-          action && action(selected);
-        }}
-        inputValue={inputValue}
-        onInputChange={(_, newInputValue) => {
-          setInputValue(newInputValue);
-        }}
-        isOptionEqualToValue={(
-          option: NonNullable<AutocompleteOption>,
-          value: AutocompleteOption
-        ) => option?.value === value?.value}
-        filterSelectedOptions
-        renderInput={(params) => <TextField {...params} label={label} />}
-        renderOption={(props, option) => {
-          return (
+    <Autocomplete
+      sx={{
+        ...style,
+        "& + .MuiAutocomplete-popper .MuiAutocomplete-option": {
+          borderBottom: "1px solid #DDD",
+          padding: "8px 16px",
+        },
+      }}
+      disablePortal
+      options={options}
+      value={initialValue}
+      onChange={(_, selected: AutocompleteOption) => {
+        action && action(selected);
+      }}
+      inputValue={inputValue}
+      onInputChange={(_, newInputValue) => {
+        setInputValue(newInputValue);
+      }}
+      isOptionEqualToValue={(
+        option: NonNullable<AutocompleteOption>,
+        value: AutocompleteOption
+      ) => option?.value === value?.value}
+      filterSelectedOptions
+      renderInput={(params) => <TextField {...params} label={label} />}
+      renderOption={(props, option) => {
+        return (
+          <>
             <li {...props} key={option.value}>
               {option.label}
             </li>
-          );
-        }}
-      />
-    </div>
+          </>
+        );
+      }}
+    />
   );
 }
 

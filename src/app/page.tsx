@@ -11,12 +11,10 @@ export default async function Home() {
   }));
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start p-8 pt-0 mt-16">
-      <header className="flex fixed top-0 h-16 p-4 text-lg font-bold">
-        GradeUFOP
-      </header>
+    <div className="flex  flex-col items-center justify-start p-8 pt-0 mt-16">
+     
       <CoursePicker courses={courses} />
       <DisciplinesPicker />
-    </main>
+    </div>
   );
 }
