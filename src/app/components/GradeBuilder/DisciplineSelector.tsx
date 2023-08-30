@@ -23,9 +23,15 @@ function DisciplinesSelector() {
   const [focused, setFocus] = useState<string>("");
   const [showDnd, setShowDnd] = useState(false);
   const [grids, setGrids] = useState<RequestResponse>(null);
+  const [generateDisabled, setGenerateDisabled] = useState(true);
 
   useEffect(() => {
     setShowDnd(true);
+
+    if (Object.values(state.disciplineSlots).length === 0) {
+      addDisciplinesSlot();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -61,6 +67,16 @@ function DisciplinesSelector() {
 
     fetchRequest();
   }, [dispatch, state.course?.value, state.coursedDisciplines]);
+
+  useEffect(() => {
+    const slots = Object.values(state.disciplineSlots);
+
+    if (slots.length === 0 || slots.some((slot) => slot.length === 0)) {
+      return setGenerateDisabled(true);
+    }
+
+    return setGenerateDisabled(false);
+  }, [state.disciplineSlots]);
 
   const addDisciplinesSlot = () => {
     const slotId = uuid();
@@ -142,7 +158,11 @@ function DisciplinesSelector() {
         <Button variant="contained" onClick={addDisciplinesSlot}>
           Adicionar Slot
         </Button>
-        <Button variant="contained" onClick={buildGrades}>
+        <Button
+          disabled={generateDisabled}
+          variant="contained"
+          onClick={buildGrades}
+        >
           Gerar Grade
         </Button>
       </div>

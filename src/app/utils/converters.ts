@@ -1,13 +1,17 @@
 const romanAlgs = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+const classTypeRegex = /\(T\+P\)|\(T\)|\(P\)/g;
+const conectives = ["E", "DE", "DO", "DA"];
 
 export function capitalize(value?: string | null) {
   if (!value) {
     return "";
   }
 
-  const words = value.split(" ");
+  const formatedvalue = value.replace(classTypeRegex, "");
+
+  const words = formatedvalue.split(" ");
   const capitalizedWords = words.map((word) => {
-    if (word === "E" || word === "DE") {
+    if (conectives.includes(word)) {
       return word.toLowerCase();
     }
 
