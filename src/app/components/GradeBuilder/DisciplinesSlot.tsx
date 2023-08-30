@@ -45,7 +45,6 @@ function DisciplinesSlot({
         !disciplineClassIdsFromOtherSlots.includes(option?.disciplineId)
     );
 
-    console.log(disciplineClassIdsFromOtherSlots);
     setOptions(diff);
   }, [state.availableOptions, state.selectedDisciplines, slotId]);
 
@@ -101,11 +100,15 @@ function DisciplinesSlot({
       {...provided.draggableProps}
       className="relative flex flex-row gap-4 items-center mb-8"
     >
-      <div className="absolute top-1/2 -translate-y-1/2 -left-8" itemRef={slotId} {...provided.dragHandleProps}>
+      <div
+        className="absolute top-1/2 -translate-y-1/2 -left-8"
+        itemRef={slotId}
+        {...provided.dragHandleProps}
+      >
         <DragIndicator />
       </div>
       <div
-        className={`relative min-w-full flex flex-col gap-4 px-4 py-2 border-gray-100 border-2 rounded-lg ${
+        className={`relative min-w-full max-w-[800px] flex flex-col gap-4 px-4 py-2 border-gray-100 border-2 rounded-lg ${
           !isFocused && "group py-6"
         } `}
       >
@@ -153,9 +156,11 @@ function DisciplinesSlot({
           <span>Nenhuma disciplina selecionada</span>
         )}
       </div>
-      <IconButton onClick={removeAction}>
-        <Delete />
-      </IconButton>
+      <div className="absolute top-1/2 -translate-y-1/2 -right-12">
+        <IconButton onClick={removeAction}>
+          <Delete />
+        </IconButton>
+      </div>
     </div>
   );
 }

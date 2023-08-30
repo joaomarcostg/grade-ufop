@@ -14,12 +14,15 @@ import { getAvailableDisciplines } from "@/lib/fetch-api/fetch-disciplines";
 import { ActionType } from "@/app/context/actions";
 import DisciplinesSlot from "./DisciplinesSlot";
 import { capitalize } from "@/app/utils/converters";
+import { RequestResponse, getGrades } from "@/lib/fetch-api/fetch-buildGrades";
+import ScheduleViewer from "./ScheduleViewer";
 
 function DisciplinesSelector() {
   const { state, dispatch } = useContext(StudentContext);
 
   const [focused, setFocus] = useState<string>("");
   const [showDnd, setShowDnd] = useState(false);
+  const [grids, setGrids] = useState<RequestResponse>(null);
 
   useEffect(() => {
     setShowDnd(true);
@@ -103,12 +106,20 @@ function DisciplinesSelector() {
     });
   };
 
+  async function buildGrades() {
+    const data = await getGrades({
+      disciplineSlots: state.disciplineSlots,
+    });
+
+    setGrids(data);
+  }
+
   return showDnd ? (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full max-w-[800px]">
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="options">
           {(provided) => (
-            <ul {...provided.droppableProps} ref={provided.innerRef} className="w-fit">
+            <ul {...provided.droppableProps} ref={provided.innerRef}>
               {Object.entries(state.disciplineSlots).map(([key, _], index) => (
                 <Draggable key={key} draggableId={key} index={index}>
                   {(provided) => (
@@ -131,9 +142,12 @@ function DisciplinesSelector() {
         <Button variant="contained" onClick={addDisciplinesSlot}>
           Adicionar Slot
         </Button>
-        <Button variant="contained" onClick={() => {}}>
+        <Button variant="contained" onClick={buildGrades}>
           Gerar Grade
         </Button>
+      </div>
+      <div className="flex">
+        {grids ? <ScheduleViewer combinations={grids} /> : <></>}
       </div>
     </div>
   ) : (

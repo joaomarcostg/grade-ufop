@@ -7,7 +7,7 @@ export function capitalize(value?: string | null) {
 
   const words = value.split(" ");
   const capitalizedWords = words.map((word) => {
-    if (word === "E" || word === "DE" ) {
+    if (word === "E" || word === "DE") {
       return word.toLowerCase();
     }
 
@@ -19,4 +19,9 @@ export function capitalize(value?: string | null) {
   });
 
   return capitalizedWords.join(" ");
+}
+
+export function convertDateToMinutes(date: Date | null) {
+  if (date === null) return -1;
+  return date.getUTCHours() * 60 + date.getUTCMinutes();
 }
