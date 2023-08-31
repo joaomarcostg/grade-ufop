@@ -96,6 +96,18 @@ function DisciplinesSelector() {
       return;
     }
 
+    const disciplinesFromSlot = Object.values(state.disciplineSlots[id]);
+
+    for (const discipline of disciplinesFromSlot) {
+      dispatch({
+        type: ActionType.REMOVE_FROM_SELECTED_DISCIPLINES,
+        payload: {
+          slotId: id,
+          disciplineId: discipline?.disciplineId ?? ''
+        },
+      });
+    }
+
     dispatch({
       type: ActionType.DELETE_DISCIPLINES_SLOT,
       payload: {
