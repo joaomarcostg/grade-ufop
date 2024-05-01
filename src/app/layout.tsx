@@ -1,6 +1,7 @@
 import "./globals.css";
 import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
 import { StudentProvider } from "./context/StudentContext";
+import { SessionProvider } from "next-auth/react"
 
 import { Roboto } from "next/font/google";
 
@@ -20,6 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    
     <html lang="en">
       <body className={`${roboto.className} min-h-screen`} suppressHydrationWarning={true}>
         <ThemeRegistry>
