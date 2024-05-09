@@ -1,11 +1,7 @@
-"use client";
-
 import type { Theme } from "@emotion/react";
 import type { SxProps } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import { useEffect, useState } from "react";
 
 export type AutocompleteOption = {
   index?: number;
@@ -19,22 +15,10 @@ type InputAutocompleteProps = {
   action?: (value: AutocompleteOption) => void;
   options: Array<any>;
   label: string;
-  initialValue?: AutocompleteOption;
   style?: SxProps<Theme>;
 };
 
-function InputAutocomplete({
-  action,
-  options,
-  label,
-  initialValue,
-  style,
-}: InputAutocompleteProps) {
-  const [inputValue, setInputValue] = useState("");
-
-  useEffect(() => {
-    setInputValue(initialValue?.label ?? "");
-  }, [initialValue]);
+function InputAutocomplete({ action, options, label, style }: InputAutocompleteProps) {
 
   return (
     <Autocomplete
@@ -45,29 +29,19 @@ function InputAutocomplete({
           padding: "8px 16px",
         },
       }}
-      disablePortal
       options={options}
-      value={initialValue}
+      disablePortal
       onChange={(_, selected: AutocompleteOption) => {
         action && action(selected);
       }}
-      inputValue={inputValue}
-      onInputChange={(_, newInputValue) => {
-        setInputValue(newInputValue);
-      }}
-      isOptionEqualToValue={(
-        option: NonNullable<AutocompleteOption>,
-        value: AutocompleteOption
-      ) => option?.value === value?.value}
+      isOptionEqualToValue={(option: NonNullable<AutocompleteOption>, value: AutocompleteOption) => option?.value === value?.value}
       filterSelectedOptions
       renderInput={(params) => <TextField {...params} label={label} />}
       renderOption={(props, option) => {
         return (
-          <>
-            <li {...props} key={option.value}>
-              {option.label}
-            </li>
-          </>
+          <li {...props} key={option.value}>
+            {option.label}
+          </li>
         );
       }}
     />
