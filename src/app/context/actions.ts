@@ -5,6 +5,7 @@ export enum ActionType {
   INIT_STATE = "INIT_STATE",
   SELECT_COURSE = "SELECT_COURSE",
   SELECT_COURSED_DISCIPLINE = "SELECT_COURSED_DISCIPLINE",
+  SET_MULTIPLE_COURSED_DISCIPLINES = "SET_MULTIPLE_COURSED_DISCIPLINES",
   SET_AVAILABLE_OPTIONS = "SET_AVAILABLE_OPTIONS",
   REMOVE_FROM_AVAILABLE_OPTIONS = "REMOVE_FROM_AVAILABLE_OPTIONS",
   ADD_TO_AVAILABLE_OPTIONS = "ADD_TO_AVAILABLE_OPTIONS",
@@ -24,6 +25,7 @@ export type Action =
       type: ActionType.SELECT_COURSE;
       payload: AutocompleteOption;
     }
+  | { type: ActionType.SET_MULTIPLE_COURSED_DISCIPLINES; payload: string[] }
   | { type: ActionType.SELECT_COURSED_DISCIPLINE; payload: string }
   | { type: ActionType.SET_AVAILABLE_OPTIONS; payload: NonNullable<AutocompleteOption>[] }
   | {
