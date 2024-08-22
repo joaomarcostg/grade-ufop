@@ -10,107 +10,131 @@ datasource db {
   extensions = [uuid_ossp(map: "uuid-ossp")]
 }
 
-model course {
-  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  code              String?             @db.VarChar
-  name              String?             @db.VarChar
-  created_at        DateTime?           @db.Timestamp(6)
-  discipline_course discipline_course[]
+model Course {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  code      String?
+  name      String?
+  createdAt DateTime? @map("created_at") @db.Timestamp(6)
+  disciplines DisciplineCourse[]
+
+  @@map("course")
 }
 
-model department {
-  id         String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  code       String?      @db.VarChar
-  name       String?      @db.VarChar
-  created_at DateTime?    @db.Timestamp(6)
-  discipline discipline[]
+model Department {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  code      String?
+  name      String?
+  createdAt DateTime? @map("created_at") @db.Timestamp(6)
+  disciplines Discipline[]
+
+  @@map("department")
 }
 
-model discipline {
-  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  code              String?             @db.VarChar
-  name              String?             @db.VarChar
-  description       String?             @db.VarChar
-  department_id     String?             @db.Uuid
-  created_at        DateTime?           @db.Timestamp(6)
-  department        department?         @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  discipline_class  discipline_class[]
-  discipline_course discipline_course[]
-  prerequisite      prerequisite[]
+model EquivalencyGroup {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  createdAt DateTime? @map("created_at") @db.Timestamp(6)
+  disciplines Discipline[]
+
+  @@map("equivalency_group")
 }
 
-model discipline_class {
-  id                        String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  class_number              String?                     @db.VarChar
-  discipline_id             String?                     @db.Uuid
-  semester                  String?                     @db.VarChar
-  professor                 String?                     @db.VarChar
-  created_at                DateTime?                   @db.Timestamp(6)
-  discipline                discipline?                 @relation(fields: [discipline_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  discipline_class_schedule discipline_class_schedule[]
+// Modify the Discipline model
+model Discipline {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  code      String?
+  name      String?
+  description String?
+  departmentId String? @map("department_id") @db.Uuid
+  createdAt DateTime? @map("created_at") @db.Timestamp(6)
+  equivalencyGroupId String? @map("equivalency_group_id") @db.Uuid
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  classes DisciplineClass[]
+  courses DisciplineCourse[]
+  prerequisites Prerequisite[] @relation("PrerequisiteDiscipline")
+  equivalencyGroup EquivalencyGroup? @relation(fields: [equivalencyGroupId], references: [id])
+
+  @@map("discipline")
 }
 
-model discipline_class_schedule {
-  id                  String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  discipline_class_id String?           @db.Uuid
-  day_of_week         String?           @db.VarChar
-  start_time          DateTime?         @db.Time(6)
-  end_time            DateTime?         @db.Time(6)
-  class_type          String?           @db.VarChar
-  created_at          DateTime?         @db.Timestamp(6)
-  discipline_class    discipline_class? @relation(fields: [discipline_class_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model DisciplineClass {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  classNumber String? @map("class_number")
+  disciplineId String? @map("discipline_id") @db.Uuid
+  semester String?
+  professor String?
+  createdAt DateTime? @map("created_at") @db.Timestamp(6)
+  discipline Discipline? @relation(fields: [disciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  schedules DisciplineClassSchedule[]
+
+  @@map("discipline_class")
 }
 
-model discipline_course {
-  id            String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  discipline_id String?        @db.Uuid
-  course_id     String?        @db.Uuid
-  mandatory     Boolean?
-  period        Int?
-  created_at    DateTime?      @db.Timestamp(6)
-  course        course?        @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  discipline    discipline?    @relation(fields: [discipline_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  prerequisite  prerequisite[]
+model DisciplineClassSchedule {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  disciplineClassId  String?   @map("discipline_class_id") @db.Uuid
+  dayOfWeek          String?   @map("day_of_week")
+  startTime          DateTime? @map("start_time") @db.Time(6)
+  endTime            DateTime? @map("end_time") @db.Time(6)
+  classType          String?   @map("class_type")  // Add this line
+  createdAt          DateTime? @map("created_at") @db.Timestamp(6)
+  disciplineClass    DisciplineClass? @relation(fields: [disciplineClassId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("discipline_class_schedule")
 }
 
-model prerequisite {
-  id                         String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  discipline_course_id       String?            @db.Uuid
-  prerequisite_discipline_id String?            @db.Uuid
-  created_at                 DateTime?          @db.Timestamp(6)
-  discipline_course          discipline_course? @relation(fields: [discipline_course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  discipline                 discipline?        @relation(fields: [prerequisite_discipline_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model DisciplineCourse {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  disciplineId String? @map("discipline_id") @db.Uuid
+  courseId String? @map("course_id") @db.Uuid
+  mandatory Boolean?
+  period Int?
+  createdAt DateTime? @map("created_at") @db.Timestamp(6)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  discipline Discipline? @relation(fields: [disciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prerequisites Prerequisite[]
+
+  @@map("discipline_course")
+}
+
+model Prerequisite {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  disciplineCourseId String? @map("discipline_course_id") @db.Uuid
+  prerequisiteDisciplineId String? @map("prerequisite_discipline_id") @db.Uuid
+  createdAt DateTime? @map("created_at") @db.Timestamp(6)
+  disciplineCourse DisciplineCourse? @relation(fields: [disciplineCourseId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prerequisiteDiscipline Discipline? @relation("PrerequisiteDiscipline", fields: [prerequisiteDisciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("prerequisite")
 }
 
 model Account {
-  id                 String  @id @default(cuid())
+  id                 String  @id
   userId             String
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
+  refresh_token      String?
+  access_token       String?
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String?  @db.Text
+  id_token           String?
   session_state      String?
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
 }
- 
+
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id
   sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
- 
+
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id
   name          String?
   email         String?   @unique
   emailVerified DateTime?
@@ -118,11 +142,11 @@ model User {
   accounts      Account[]
   sessions      Session[]
 }
- 
+
 model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
- 
+
   @@unique([identifier, token])
 }

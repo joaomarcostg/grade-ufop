@@ -4,8 +4,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- CreateTable
 CREATE TABLE "course" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
-    "code" VARCHAR,
-    "name" VARCHAR,
+    "code" TEXT,
+    "name" TEXT,
     "created_at" TIMESTAMP(6),
 
     CONSTRAINT "course_pkey" PRIMARY KEY ("id")
@@ -14,21 +14,30 @@ CREATE TABLE "course" (
 -- CreateTable
 CREATE TABLE "department" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
-    "code" VARCHAR,
-    "name" VARCHAR,
+    "code" TEXT,
+    "name" TEXT,
     "created_at" TIMESTAMP(6),
 
     CONSTRAINT "department_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
+CREATE TABLE "equivalency_group" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "created_at" TIMESTAMP(6),
+
+    CONSTRAINT "equivalency_group_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "discipline" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
-    "code" VARCHAR,
-    "name" VARCHAR,
-    "description" VARCHAR,
+    "code" TEXT,
+    "name" TEXT,
+    "description" TEXT,
     "department_id" UUID,
     "created_at" TIMESTAMP(6),
+    "equivalency_group_id" UUID,
 
     CONSTRAINT "discipline_pkey" PRIMARY KEY ("id")
 );
@@ -36,10 +45,10 @@ CREATE TABLE "discipline" (
 -- CreateTable
 CREATE TABLE "discipline_class" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
-    "class_number" VARCHAR,
+    "class_number" TEXT,
     "discipline_id" UUID,
-    "semester" VARCHAR,
-    "professor" VARCHAR,
+    "semester" TEXT,
+    "professor" TEXT,
     "created_at" TIMESTAMP(6),
 
     CONSTRAINT "discipline_class_pkey" PRIMARY KEY ("id")
@@ -49,10 +58,10 @@ CREATE TABLE "discipline_class" (
 CREATE TABLE "discipline_class_schedule" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "discipline_class_id" UUID,
-    "day_of_week" VARCHAR,
+    "day_of_week" TEXT,
     "start_time" TIME(6),
     "end_time" TIME(6),
-    "class_type" VARCHAR,
+    "classType" TEXT,
     "created_at" TIMESTAMP(6),
 
     CONSTRAINT "discipline_class_schedule_pkey" PRIMARY KEY ("id")
@@ -143,6 +152,9 @@ CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationTok
 
 -- AddForeignKey
 ALTER TABLE "discipline" ADD CONSTRAINT "discipline_department_id_fkey" FOREIGN KEY ("department_id") REFERENCES "department"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "discipline" ADD CONSTRAINT "discipline_equivalency_group_id_fkey" FOREIGN KEY ("equivalency_group_id") REFERENCES "equivalency_group"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "discipline_class" ADD CONSTRAINT "discipline_class_discipline_id_fkey" FOREIGN KEY ("discipline_id") REFERENCES "discipline"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
