@@ -18,25 +18,25 @@ async function getPrerequisitesByDisciplineCourseId(
 ) {
   const prerequisites = await prisma.prerequisite.findMany({
     where: {
-      discipline_course_id: disciplineCourseId,
+      disciplineCourseId,
     },
     include: {
-      discipline: true, // Including the prerequisite discipline details
+      prerequisiteDiscipline: true, // Including the prerequisite discipline details
     },
   });
 
   return prerequisites.map((prerequisite) => ({
     id: prerequisite.id,
-    discipline_id: prerequisite.prerequisite_discipline_id,
-    discipline: prerequisite.discipline, // Contains the details of the prerequisite discipline
+    discipline_id: prerequisite.disciplineCourseId,
+    discipline: prerequisite.prerequisiteDiscipline, // Contains the details of the prerequisite discipline
   }));
 }
 
 async function getDisciplineCourseId(courseId: string, disciplineId: string) {
-  const disciplineCourse = await prisma.discipline_course.findFirst({
+  const disciplineCourse = await prisma.disciplineCourse.findFirst({
     where: {
-      course_id: courseId,
-      discipline_id: disciplineId,
+      courseId,
+      disciplineId,
     },
   });
 
@@ -46,23 +46,23 @@ async function getDisciplineCourseId(courseId: string, disciplineId: string) {
 async function getDisciplinesForCourse(courseId: string) {
   const disciplines = await prisma.discipline.findMany({
     where: {
-      discipline_course: {
+      courses: {
         some: {
-          course_id: courseId,
+          courseId,
         },
       },
     },
     include: {
-      discipline_class: {
+      classes: {
         select: {
           id: true,
-          class_number: true,
+          classNumber: true,
           professor: true,
         },
       }, // Include the classes for each discipline
-      discipline_course: {
+      courses: {
         where: {
-          course_id: courseId,
+         courseId,
         },
         select: {
           period: true,
@@ -114,8 +114,8 @@ async function getAvailableDisciplines({
         code: discipline.code,
         name: discipline.name,
         isEnabled: true,
-        period: discipline.discipline_course[0]?.period,
-        classes: discipline.discipline_class, // Include the classes in the response
+        period: discipline.courses[0]?.period,
+        classes: discipline.classes, // Include the classes in the response
       });
     }
   }

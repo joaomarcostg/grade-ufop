@@ -37,23 +37,30 @@ function retrievePendingDisciplines(textContent: TextContent) {
 async function findAlreadyCoursedDisciplines(file: File, courseId: string) {
   const textContent = await getPDFContent(file);
   const pending = retrievePendingDisciplines(textContent);
+  console.log({pending});
 
-  const alreadyCoursedDisciplines = await prisma.discipline_course.findMany({
+  // First, get all disciplines for the course
+  const allCourseDisciplines = await prisma.discipline.findMany({
     where: {
-      course_id: courseId,
-      AND: {
-        discipline: {
-          code: {
-            notIn: pending,
-          },
-        },
-      },
+      courses: {
+        some: {
+          courseId: courseId
+        }
+      }
     },
   });
 
+  console.log({allCourseDisciplines});
+
+  // Manually filter out pending disciplines
+  const alreadyCoursedDisciplines = allCourseDisciplines.filter(
+    discipline => !pending.includes(discipline.code ?? '')
+  );
+
+  console.log({alreadyCoursedDisciplines});
+
   return alreadyCoursedDisciplines;
 }
-
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
   if (!formData) {

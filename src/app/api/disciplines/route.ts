@@ -16,20 +16,20 @@ export async function GET(request: NextRequest) {
     const disciplines = await prisma.discipline.findMany({
       
       where: {
-        discipline_course: {
-          some: { course_id: courseId, mandatory },
+        courses: {
+          some: { courseId: courseId, mandatory },
         },
       },
       include: {
-        discipline_course: true
+        courses: true
       },
      
     });
 
     // Sort disciplines by period
     const sortedDisciplines = disciplines.sort((a, b) => {
-      const periodA = a.discipline_course[0]?.period || 0; // Assuming the period is at index 0, adjust as needed
-      const periodB = b.discipline_course[0]?.period || 0;
+      const periodA = a.courses[0]?.period || 0; // Assuming the period is at index 0, adjust as needed
+      const periodB = b.courses[0]?.period || 0;
 
       if (periodA === periodB) {
         // If periods are the same, sort by discipline.code

@@ -12,12 +12,12 @@ export async function GET(request: NextRequest) {
   const disciplineClassId = searchParams.get("disciplineClassId");
 
   if (disciplineClassId) {
-    const disciplines = await prisma.discipline_class_schedule.findMany({
+    const disciplines = await prisma.disciplineClassSchedule.findMany({
       where: {
-        discipline_class_id: disciplineClassId,
+        disciplineClassId: disciplineClassId,
       },
       include: {
-        discipline_class: true,
+        disciplineClass: true,
       },
     });
 

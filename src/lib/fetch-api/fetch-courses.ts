@@ -1,16 +1,16 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-import { type course } from "@prisma/client";
+import { type Course } from "@prisma/client";
 import { fetchRequest } from "./utils";
 
 type FetchGetCoursesResponse = {
-  data: course[];
+  data: Course[];
 };
 
 export async function getCourses() {
   try {
     const res = await fetchRequest<FetchGetCoursesResponse>(
       `${API_BASE_URL}/courses`,
-      { method: "GET", next: { revalidate: 3600 } }
+      { method: "GET", cache: "no-store" }
     );
 
     if (!res.data) {

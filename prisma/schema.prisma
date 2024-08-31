@@ -10,12 +10,14 @@ datasource db {
   extensions = [uuid_ossp(map: "uuid-ossp")]
 }
 
+// Update the Course model to include the reverse relation
 model Course {
   id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   code      String?
   name      String?
   createdAt DateTime? @map("created_at") @db.Timestamp(6)
   disciplines DisciplineCourse[]
+  enrolledUsers UserCourseEnrollment[]
 
   @@map("course")
 }
@@ -38,7 +40,7 @@ model EquivalencyGroup {
   @@map("equivalency_group")
 }
 
-// Modify the Discipline model
+// Update the Discipline model to include the reverse relation
 model Discipline {
   id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   code      String?
@@ -52,6 +54,7 @@ model Discipline {
   courses DisciplineCourse[]
   prerequisites Prerequisite[] @relation("PrerequisiteDiscipline")
   equivalencyGroup EquivalencyGroup? @relation(fields: [equivalencyGroupId], references: [id])
+  completedByUsers UserCompletedDiscipline[]
 
   @@map("discipline")
 }
@@ -134,14 +137,55 @@ model Session {
 }
 
 model User {
-  id            String    @id
+  id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
+  enrollments   UserCourseEnrollment[]
+  completedDisciplines UserCompletedDiscipline[]
 }
+
+model UserCourseEnrollment {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId    String
+  courseId  String   @db.Uuid
+  startDate DateTime @db.Date
+  endDate   DateTime? @db.Date
+  status    EnrollmentStatus
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+  user      User     @relation(fields: [userId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+  @@map("user_course_enrollment")
+}
+
+model UserCompletedDiscipline {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId       String
+  disciplineId String   @db.Uuid
+  completedAt  DateTime @db.Date
+  grade        Float?
+  createdAt    DateTime @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime @updatedAt @db.Timestamp(6)
+  user         User     @relation(fields: [userId], references: [id])
+  discipline   Discipline @relation(fields: [disciplineId], references: [id])
+
+  @@unique([userId, disciplineId])
+  @@map("user_completed_discipline")
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  GRADUATED
+  WITHDRAWN
+  ON_LEAVE
+}
+
 
 model VerificationToken {
   identifier String

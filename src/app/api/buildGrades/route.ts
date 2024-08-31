@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { AutocompleteOption } from "@/app/components/InputAutocomplete";
-import type { discipline_class_schedule } from "@prisma/client";
+import type { DisciplineClassSchedule } from "@prisma/client";
 import { convertDateToMinutes } from "@/app/utils/converters";
 import {
   SelectedDiscipline,
@@ -18,8 +18,8 @@ type RequestBody = {
 };
 
 type ScheduleType = Pick<
-  discipline_class_schedule,
-  "start_time" | "end_time" | "day_of_week" | "class_type"
+  DisciplineClassSchedule,
+  "startTime" | "endTime" | "dayOfWeek" | "classType"
 >;
 
 export async function POST(request: NextRequest) {
@@ -40,15 +40,15 @@ async function getScheduleForSelectedDisciplines(
   for (const [slotId, selectedOptions] of Object.entries(selectedDisciplines)) {
     for (const selectedOption of selectedOptions) {
       const disciplineClassSchedules =
-        await prisma.discipline_class_schedule.findMany({
+        await prisma.disciplineClassSchedule.findMany({
           where: {
-            discipline_class_id: selectedOption.value,
+            disciplineClassId: selectedOption.value,
           },
           select: {
-            class_type: true,
-            day_of_week: true,
-            start_time: true,
-            end_time: true,
+            classType: true,
+            dayOfWeek: true,
+            startTime: true,
+            endTime: true,
           },
         });
 
@@ -154,16 +154,16 @@ async function getScheduleForSelectedDisciplines(
   const disciplineClasses: { [id: string]: SelectedDiscipline } = {};
 
   for (const disciplineClassId of Array.from(disciplineIds)) {
-    const disciplineData = await prisma.discipline_class.findUnique({
+    const disciplineData = await prisma.disciplineClass.findUnique({
       where: {
         id: disciplineClassId,
       },
       include: {
-        discipline_class_schedule: {
+        schedules: {
           select: {
-            day_of_week: true,
-            start_time: true,
-            end_time: true,
+            dayOfWeek: true,
+            startTime: true,
+            endTime: true,
           },
         },
         discipline: {
@@ -178,11 +178,11 @@ async function getScheduleForSelectedDisciplines(
 
     if (disciplineData) {
       disciplineClasses[disciplineClassId] = {
-        class_number: disciplineData?.class_number ?? "",
+        class_number: disciplineData?.classNumber ?? "",
         code: disciplineData.discipline?.code ?? "",
         name: disciplineData.discipline?.name ?? "",
         professor: disciplineData.professor ?? "",
-        schedule: formatSchedules(disciplineData.discipline_class_schedule),
+        schedule: formatSchedules(disciplineData.schedules),
       };
     }
   }
@@ -206,14 +206,14 @@ function hasTimeConflict(
   schedule2: ScheduleType
 ): boolean {
   // Step 1: Check if days of the week match
-  if (schedule1.day_of_week !== schedule2.day_of_week) {
+  if (schedule1.dayOfWeek !== schedule2.dayOfWeek) {
     return false;
   }
 
-  const schedule1Start = convertDateToMinutes(schedule1.start_time);
-  const schedule1End = convertDateToMinutes(schedule1.end_time);
-  const schedule2Start = convertDateToMinutes(schedule2.start_time);
-  const schedule2End = convertDateToMinutes(schedule2.end_time);
+  const schedule1Start = convertDateToMinutes(schedule1.startTime);
+  const schedule1End = convertDateToMinutes(schedule1.endTime);
+  const schedule2Start = convertDateToMinutes(schedule2.startTime);
+  const schedule2End = convertDateToMinutes(schedule2.endTime);
 
   // If any of the times are null, they cannot be compared
   if (
@@ -234,22 +234,22 @@ function hasTimeConflict(
 }
 
 function getFormatedTime({
-  start_time,
-  end_time,
+  startTime,
+  endTime,
 }: Partial<ScheduleType>): string {
-  const startTime = start_time
-    ? `${start_time.getUTCHours()}:${
-        start_time.getUTCMinutes() ? start_time.getUTCMinutes() : "00"
+  const _startTime = startTime
+    ? `${startTime.getUTCHours()}:${
+        startTime.getUTCMinutes() ? startTime.getUTCMinutes() : "00"
       }`
     : "";
 
-  const endTime = end_time
-    ? `${end_time.getUTCHours()}:${
-        end_time.getUTCMinutes() ? end_time.getUTCMinutes() : "00"
+  const _endTime = endTime
+    ? `${endTime.getUTCHours()}:${
+        endTime.getUTCMinutes() ? endTime.getUTCMinutes() : "00"
       }`
     : "";
 
-  return `${startTime} - ${endTime}`;
+  return `${_startTime} - ${_endTime}`;
 }
 
 function formatSchedules(rawSchedules: Array<Partial<ScheduleType>>) {
@@ -257,7 +257,7 @@ function formatSchedules(rawSchedules: Array<Partial<ScheduleType>>) {
 
   // Group schedules by day_of_week
   rawSchedules.forEach((schedule) => {
-    const day = schedule.day_of_week ?? "";
+    const day = schedule.dayOfWeek ?? "";
     if (!groupedSchedules[day]) {
       groupedSchedules[day] = [];
     }
@@ -272,25 +272,25 @@ function formatSchedules(rawSchedules: Array<Partial<ScheduleType>>) {
 
     schedulesForDay.forEach((schedule) => {
       if (
-        schedule.start_time &&
-        (lowestStartTime === null || schedule.start_time < lowestStartTime)
+        schedule.startTime &&
+        (lowestStartTime === null || schedule.startTime < lowestStartTime)
       ) {
-        lowestStartTime = schedule.start_time;
+        lowestStartTime = schedule.startTime;
       }
 
       if (
-        schedule.end_time &&
-        (highestEndTime === null || schedule.end_time > highestEndTime)
+        schedule.endTime &&
+        (highestEndTime === null || schedule.endTime > highestEndTime)
       ) {
-        highestEndTime = schedule.end_time;
+        highestEndTime = schedule.endTime;
       }
     });
 
     return {
       day_of_week: day,
       time: getFormatedTime({
-        start_time: lowestStartTime,
-        end_time: highestEndTime,
+        startTime: lowestStartTime,
+        endTime: highestEndTime,
       }),
     };
   });
