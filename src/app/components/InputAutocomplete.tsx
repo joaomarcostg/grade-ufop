@@ -9,17 +9,17 @@ export type AutocompleteOption = {
   value: string;
   disabled?: boolean;
   [key: string]: any;
-} | null;
-
-type InputAutocompleteProps = {
-  action?: (value: AutocompleteOption) => void;
-  options: Array<any>;
-  label: string;
-  style?: SxProps<Theme>;
 };
 
-function InputAutocomplete({ action, options, label, style }: InputAutocompleteProps) {
+type InputAutocompleteProps = {
+  onChange: (value: AutocompleteOption | null) => void;
+  options: AutocompleteOption[];
+  label: string;
+  style?: SxProps<Theme>;
+  value: AutocompleteOption | null;
+};
 
+function InputAutocomplete({ onChange, options, label, style, value }: InputAutocompleteProps) {
   return (
     <Autocomplete
       sx={{
@@ -31,10 +31,13 @@ function InputAutocomplete({ action, options, label, style }: InputAutocompleteP
       }}
       options={options}
       disablePortal
-      onChange={(_, selected: AutocompleteOption) => {
-        action && action(selected);
+      value={value}
+      onChange={(_, selected: AutocompleteOption | null) => {
+        onChange(selected);
       }}
-      isOptionEqualToValue={(option: NonNullable<AutocompleteOption>, value: AutocompleteOption) => option?.value === value?.value}
+      isOptionEqualToValue={(option, value) => 
+        option?.value === value?.value
+      }
       filterSelectedOptions
       renderInput={(params) => <TextField {...params} label={label} />}
       renderOption={(props, option) => {

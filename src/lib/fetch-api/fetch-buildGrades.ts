@@ -5,11 +5,11 @@ import { AutocompleteOption } from "@/app/components/InputAutocomplete";
 export type SelectedDiscipline = {
   code: string;
   name: string;
-  class_number: string;
+  classNumber: string;
   professor: string;
   schedule: {
-    day_of_week: string;
-    time: string;
+    dayOfWeek: string;
+    startTime: string;
   }[];
 };
 

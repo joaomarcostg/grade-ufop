@@ -60,7 +60,7 @@ export default function FileUploader() {
       setLoading(true);
 
       const data = await postUploadPDF({ file: uploadedFile, courseId: course.value });
-      const disciplineIDs = data.filter((d) => Boolean(d.discipline_id)).map((d) => d.discipline_id!);
+      const disciplineIDs = data.filter((d) => Boolean(d.disciplineId)).map((d) => d.disciplineId!);
       dispatch({ type: ActionType.SET_MULTIPLE_COURSED_DISCIPLINES, payload: disciplineIDs });
       
       setErrorMsg("");

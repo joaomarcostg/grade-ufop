@@ -121,7 +121,6 @@ function DisciplinesSlot({
           <>
             <div className="flex w-full flex-row gap-4 justify-start items-center">
               <Autocomplete
-                initialValue={selectedDiscipline}
                 options={options}
                 action={handleSelection}
                 label="Disciplina"

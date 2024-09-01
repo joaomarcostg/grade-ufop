@@ -49,7 +49,7 @@ function DisciplinesSelector() {
             index: acc.length,
             value: classItem.id,
             label: `${discipline.code} - ${capitalize(discipline.name)} - T${
-              classItem.class_number
+              classItem.classNumber
             } ${capitalize(classItem.professor)}`,
             professor: capitalize(classItem.professor),
             disciplineId: discipline.id,

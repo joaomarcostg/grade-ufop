@@ -80,7 +80,7 @@ async function getAvailableDisciplines({
 }: RequestBody) {
   const availableDisciplines = [];
   const disciplinesFromCourse = await getDisciplinesForCourse(courseId);
-
+  
   for (const discipline of disciplinesFromCourse) {
     const isCoursed = coursedDisciplines.includes(discipline.id);
 

@@ -3,12 +3,12 @@ import { useContext, useEffect, useState } from "react";
 import { StudentContext } from "@/app/context/StudentContext";
 import { ActionType } from "@/app/context/actions";
 import { getDisciplinesByCourse } from "@/lib/fetch-api/fetch-disciplines";
-import { type discipline } from "@prisma/client";
+import { type Discipline } from "@prisma/client";
 
 export default function ManualPicker() {
   const { state, dispatch } = useContext(StudentContext);
 
-  const [disciplines, setDisciplines] = useState<discipline[]>([]);
+  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
 
   const handleDisciplineSelection = (discipline: string) => {
     dispatch({

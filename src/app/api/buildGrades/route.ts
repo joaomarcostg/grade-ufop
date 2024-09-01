@@ -178,7 +178,7 @@ async function getScheduleForSelectedDisciplines(
 
     if (disciplineData) {
       disciplineClasses[disciplineClassId] = {
-        class_number: disciplineData?.classNumber ?? "",
+        classNumber: disciplineData?.classNumber ?? "",
         code: disciplineData.discipline?.code ?? "",
         name: disciplineData.discipline?.name ?? "",
         professor: disciplineData.professor ?? "",
@@ -287,8 +287,8 @@ function formatSchedules(rawSchedules: Array<Partial<ScheduleType>>) {
     });
 
     return {
-      day_of_week: day,
-      time: getFormatedTime({
+      dayOfWeek: day,
+      startTime: getFormatedTime({
         startTime: lowestStartTime,
         endTime: highestEndTime,
       }),
