@@ -1,26 +1,30 @@
 "use client";
-import React, { createContext, useReducer, useEffect, Dispatch } from "react";
+import React, { createContext, useReducer, useEffect, Dispatch, useCallback, useState } from "react";
 import { globalReducer } from "./reducers";
 import { type Action, ActionType } from "./actions";
-import { type InitialStateType } from "./types";
+import { type AppState } from "./types";
+import { getUserCourseAndDisciplines } from "@/lib/fetch-api/fetch-user-data";
 
-const initialState: InitialStateType = {
+const defaultState: AppState = {
   course: null,
   coursedDisciplines: [],
   availableOptions: [],
   disciplineSlots: {},
   selectedDisciplines: {},
+  setupCompleted: false,
 };
 
-const StudentContext = createContext<{
-  state: InitialStateType;
+interface StudentContextType {
+  state: AppState;
   dispatch: Dispatch<Action>;
-}>({
-  state: initialState,
+}
+
+const StudentContext = createContext<StudentContextType>({
+  state: defaultState,
   dispatch: () => null,
 });
 
-const saveToLocalStorage = (state: InitialStateType) => {
+const saveToLocalStorage = (state: AppState) => {
   try {
     const serializedState = JSON.stringify(state);
     localStorage.setItem("appState", serializedState);
@@ -29,35 +33,63 @@ const saveToLocalStorage = (state: InitialStateType) => {
   }
 };
 
-const loadFromLocalStorage = (): InitialStateType => {
+const loadFromLocalStorage = (): AppState | null => {
   try {
     const appState = localStorage.getItem("appState");
-    return appState ? (JSON.parse(appState) as InitialStateType) : initialState;
+    return appState ? (JSON.parse(appState) as AppState) : null;
   } catch (e) {
     console.error("Could not load state", e);
-    return initialState;
+    return null;
+  }
+};
+
+const loadFromDatabase = async (): Promise<AppState | null> => {
+  try {
+    const dbData = await getUserCourseAndDisciplines();
+    if (!dbData) return null;
+
+    const course = dbData.course
+      ? {
+          label: dbData.course.name,
+          value: dbData.course.id,
+        }
+      : null;
+    const coursedDisciplines = dbData.completedDisciplines.map((discipline) => discipline.disciplineId);
+
+    return {
+      ...defaultState,
+      course,
+      coursedDisciplines,
+    };
+  } catch (error) {
+    console.error("Failed to fetch initial data from database:", error);
+    return null;
   }
 };
 
 function StudentProvider({ children }: React.PropsWithChildren<{}>) {
-  const [state, dispatch] = useReducer(globalReducer, initialState);
+  const [initialized, setInitialized] = useState(false);
+  const [state, dispatch] = useReducer(globalReducer, defaultState);
+
+  const initializeState = async () => {
+    const existingState = loadFromLocalStorage() || (await loadFromDatabase());
+    dispatch({ type: ActionType.INIT_STATE, payload: existingState ?? defaultState });
+    setInitialized(true);
+  };
 
   useEffect(() => {
-    // Load the state from localStorage when the component mounts
-    if (typeof window === undefined) {
-      return;
-    }
-
-    const appState = loadFromLocalStorage();
-    dispatch({ type: ActionType["INIT_STATE"], payload: appState });
+    initializeState().catch((error) => {
+      console.error("Error initializing state:", error);
+      setInitialized(false);
+    });
   }, []);
 
   useEffect(() => {
-    const currentState = loadFromLocalStorage();
-    if (JSON.stringify(currentState) !== JSON.stringify(state)) {
-      saveToLocalStorage(state);
-    }
-  }, [state]);
+    if (!initialized) return;
+    saveToLocalStorage(state);
+  }, [state, initialized]);
+
+  if (!initialized) return <>{children}</>;
 
   return <StudentContext.Provider value={{ state, dispatch }}>{children}</StudentContext.Provider>;
 }

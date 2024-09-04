@@ -1,34 +1,23 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 import { getCourses } from "@/lib/fetch-api/fetch-courses";
-import CoursePicker from "@/components/CoursePicker";
-import DisciplinesPicker from "@/components/DisciplinesPicker";
-import { Container, Typography, Box } from "@mui/material";
 import { auth } from "@/lib/auth";
+import { Course } from "@prisma/client";
+import { AutocompleteOption } from "./components/InputAutocomplete";
+import HomeContent from "./components/HomeContent";
 
 export default async function Home() {
   const session = await auth();
 
   if (!session) {
-    redirect('/auth/login');
+    redirect("/auth/login");
   }
 
-  const coursesData = await getCourses();
+  const coursesData: Course[] = await getCourses();
 
-  const courses = coursesData.map((course) => ({
+  const courses: AutocompleteOption[] = coursesData.map((course) => ({
     label: course.name,
     value: course.id,
   }));
 
-
-  return (
-    <Container maxWidth="md">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Welcome, {session.user?.name}!
-        </Typography>
-        <CoursePicker courses={courses} />
-        <DisciplinesPicker />
-      </Box>
-    </Container>
-  );
+  return <HomeContent session={session} courses={courses} />;
 }

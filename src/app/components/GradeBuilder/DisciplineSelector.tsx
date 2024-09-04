@@ -1,12 +1,7 @@
 "use client";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import { v4 as uuid } from "uuid";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Button } from "@mui/material";
 import { type AutocompleteOption } from "@/components/InputAutocomplete"; // Import your Autocomplete component
 import { StudentContext } from "@/app/context/StudentContext";
@@ -21,36 +16,25 @@ function DisciplinesSelector() {
   const { state, dispatch } = useContext(StudentContext);
 
   const [focused, setFocus] = useState<string>("");
-  const [showDnd, setShowDnd] = useState(false);
+  const [showDnd, setShowDnd] = useState(true);
   const [grids, setGrids] = useState<RequestResponse>(null);
   const [generateDisabled, setGenerateDisabled] = useState(true);
 
   useEffect(() => {
-    setShowDnd(true);
-
-    if (Object.values(state.disciplineSlots).length === 0) {
-      addDisciplinesSlot();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     async function fetchRequest() {
+      if(!state.course?.value) return;
+
       const disciplines = await getAvailableDisciplines({
         coursedDisciplines: state.coursedDisciplines,
         courseId: state.course?.value ?? "",
       });
 
-      const autocompleteOptions = disciplines.reduce<
-        NonNullable<AutocompleteOption>[]
-      >((acc, discipline) => {
+      const autocompleteOptions = disciplines.reduce<NonNullable<AutocompleteOption>[]>((acc, discipline) => {
         discipline.classes.forEach((classItem) => {
           acc.push({
             index: acc.length,
             value: classItem.id,
-            label: `${discipline.code} - ${capitalize(discipline.name)} - T${
-              classItem.classNumber
-            } ${capitalize(classItem.professor)}`,
+            label: `${discipline.code} - ${capitalize(discipline.name)} - T${classItem.classNumber} ${capitalize(classItem.professor)}`,
             professor: capitalize(classItem.professor),
             disciplineId: discipline.id,
             disabled: !discipline.isEnabled,
@@ -68,17 +52,7 @@ function DisciplinesSelector() {
     fetchRequest();
   }, [dispatch, state.course?.value, state.coursedDisciplines]);
 
-  useEffect(() => {
-    const slots = Object.values(state.disciplineSlots);
-
-    if (slots.length === 0 || slots.some((slot) => slot.length === 0)) {
-      return setGenerateDisabled(true);
-    }
-
-    return setGenerateDisabled(false);
-  }, [state.disciplineSlots]);
-
-  const addDisciplinesSlot = () => {
+  const addDisciplinesSlot = useCallback(() => {
     const slotId = uuid();
 
     dispatch({
@@ -89,7 +63,7 @@ function DisciplinesSelector() {
     });
 
     setFocus(slotId);
-  };
+  }, [dispatch]);
 
   const removeDisciplinesSlot = (id: string) => {
     if (Object.keys(state.disciplineSlots).length <= 1) {
@@ -103,7 +77,7 @@ function DisciplinesSelector() {
         type: ActionType.REMOVE_FROM_SELECTED_DISCIPLINES,
         payload: {
           slotId: id,
-          disciplineId: discipline?.disciplineId ?? ''
+          disciplineId: discipline?.disciplineId ?? "",
         },
       });
     }
@@ -142,6 +116,18 @@ function DisciplinesSelector() {
     setGrids(data);
   }
 
+  useEffect(() => {
+    setShowDnd(true);
+
+    const slots = Object.values(state.disciplineSlots);
+
+    if (!slots.length) {
+      // addDisciplinesSlot();
+    }
+
+    return setGenerateDisabled(slots.length === 0 || slots.some((slot) => slot.length === 0));
+  }, [addDisciplinesSlot, state.disciplineSlots]);
+
   return showDnd ? (
     <div className="flex flex-col w-full max-w-[800px]">
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -170,17 +156,11 @@ function DisciplinesSelector() {
         <Button variant="contained" onClick={addDisciplinesSlot}>
           Adicionar Slot
         </Button>
-        <Button
-          disabled={generateDisabled}
-          variant="contained"
-          onClick={buildGrades}
-        >
+        <Button disabled={generateDisabled} variant="contained" onClick={buildGrades}>
           Gerar Grade
         </Button>
       </div>
-      <div className="flex">
-        {grids ? <ScheduleViewer combinations={grids} /> : <></>}
-      </div>
+      <div className="flex">{grids ? <ScheduleViewer combinations={grids} /> : <></>}</div>
     </div>
   ) : (
     <></>

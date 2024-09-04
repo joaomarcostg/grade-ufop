@@ -1,8 +1,8 @@
 import { Action, ActionType } from "./actions";
-import { InitialStateType } from "./types";
+import { AppState } from "./types";
 
 const updateSelectedDisciplines = (
-  obj: InitialStateType["selectedDisciplines"],
+  obj: AppState["selectedDisciplines"],
   payload: {
     slotId: string;
     disciplineId: string;
@@ -23,7 +23,7 @@ const updateSelectedDisciplines = (
 };
 
 const removeFromSelectedDisciplines = (
-  obj: InitialStateType["selectedDisciplines"],
+  obj: AppState["selectedDisciplines"],
   payload: {
     slotId: string;
     disciplineId: string;
@@ -39,7 +39,7 @@ const removeFromSelectedDisciplines = (
   return updated;
 };
 
-export const globalReducer = (state: InitialStateType, { type, payload }: Action): InitialStateType => {
+export const globalReducer = (state: AppState, { type, payload }: Action): AppState => {
   switch (type) {
     case ActionType.INIT_STATE:
       return payload;
@@ -143,6 +143,11 @@ export const globalReducer = (state: InitialStateType, { type, payload }: Action
       return {
         ...state,
         disciplineSlots: payload,
+      };
+    case ActionType.SET_SETUP_COMPLETED:
+      return {
+        ...state,
+        setupCompleted: payload,
       };
     default:
       return state;

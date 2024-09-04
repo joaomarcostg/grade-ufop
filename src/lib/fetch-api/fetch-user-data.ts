@@ -1,19 +1,18 @@
-import { User, Discipline } from "@prisma/client";
+import { User } from "@prisma/client";
 import { fetchRequest } from "./utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-type UserWithCourseAndDisciplines = User & {
+type UserWithCourseAndDisciplines = {
   course: { id: string; name: string } | null;
-  completedDisciplines: { discipline: Discipline }[];
+  completedDisciplines: { disciplineId: string }[];
 };
 
-export async function getUserCourseAndDisciplines(userId: string) {
+export async function getUserCourseAndDisciplines() {
   try {
-    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
-      `${API_BASE_URL}/users/${userId}/course-and-disciplines`,
-      { method: "GET", cache: "no-store" }
-    );
+    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/course-and-disciplines`, {
+      method: "GET",
+    });
 
     if (!res.data) {
       throw new Error("Failed to fetch data");
@@ -26,9 +25,10 @@ export async function getUserCourseAndDisciplines(userId: string) {
   }
 }
 
+// TODO: Implement the setUserCourse function
 export async function setUserCourse(courseId: string) {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/user/course`, {
+    const response = await fetch(`${API_BASE_URL}/user/course`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,14 +50,11 @@ export async function setUserCourse(courseId: string) {
 
 export async function addCompletedDiscipline(userId: string, disciplineId: string) {
   try {
-    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
-      `${API_BASE_URL}/users/${userId}/completed-disciplines`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ disciplineId }),
-      }
-    );
+    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/${userId}/completed-disciplines`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ disciplineId }),
+    });
 
     if (!res.data) {
       throw new Error("Failed to add completed discipline");
@@ -73,7 +70,7 @@ export async function addCompletedDiscipline(userId: string, disciplineId: strin
 export async function removeCompletedDiscipline(userId: string, disciplineId: string) {
   try {
     const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
-      `${API_BASE_URL}/users/${userId}/completed-disciplines/${disciplineId}`,
+      `${API_BASE_URL}/user/${userId}/completed-disciplines/${disciplineId}`,
       { method: "DELETE" }
     );
 

@@ -1,5 +1,5 @@
 import { AutocompleteOption } from "../components/InputAutocomplete";
-import { type InitialStateType } from "./types";
+import { type AppState } from "./types";
 
 export enum ActionType {
   INIT_STATE = "INIT_STATE",
@@ -16,11 +16,12 @@ export enum ActionType {
   ADD_TO_DISCIPLINES_SLOT = "ADD_TO_DISCIPLINES_SLOT",
   REMOVE_FROM_DISCIPLINES_SLOT = "REMOVE_FROM_DISCIPLINES_SLOT",
   SET_DISCIPLINES_SLOT = "SET_DISCIPLINES_SLOT",
+  SET_SETUP_COMPLETED = "SET_SETUP_COMPLETED",
 }
 
 // Define the Action type as a discriminated union
 export type Action =
-  | { type: ActionType.INIT_STATE; payload: InitialStateType }
+  | { type: ActionType.INIT_STATE; payload: AppState }
   | {
       type: ActionType.SELECT_COURSE;
       payload: AutocompleteOption;
@@ -81,4 +82,5 @@ export type Action =
       payload: {
         [slotId: string]: AutocompleteOption[];
       };
-    };
+    }
+  | { type: ActionType.SET_SETUP_COMPLETED; payload: boolean };

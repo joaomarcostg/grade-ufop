@@ -1,6 +1,6 @@
 import { type AutocompleteOption } from "../components/InputAutocomplete";
 
-export type InitialStateType = {
+export type AppState = {
   course: {
     label: string;
     value: string;
@@ -13,4 +13,5 @@ export type InitialStateType = {
   disciplineSlots: {
     [slotId: string]: AutocompleteOption[];
   };
+  setupCompleted: boolean;
 };
