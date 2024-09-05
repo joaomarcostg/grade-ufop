@@ -5,6 +5,8 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import { Adapter } from "next-auth/adapters";
+import { getToken } from "next-auth/jwt";
+import { NextRequest } from "next/server";
 
 const prisma = new PrismaClient();
 
@@ -21,10 +23,11 @@ export const config: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
   ],
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
     async signIn({ account, profile }) {
-      console.log("SignIn callback triggered", { account, profile });
-
       if (!account || !profile) {
         console.error("Sign in failed: Missing account or profile information");
         return false;
@@ -41,12 +44,10 @@ export const config: NextAuthOptions = {
         return false;
       }
 
-      console.log("Sign in successful");
       return true;
     },
 
-    async session({ session, user }) {
-      console.log("Session callback triggered", { session, user });
+    async session({ session }) {
       return session;
     },
   },
@@ -57,4 +58,13 @@ export function auth(
   ...args: [GetServerSidePropsContext["req"], GetServerSidePropsContext["res"]] | [NextApiRequest, NextApiResponse] | []
 ) {
   return getServerSession(...args, config);
+}
+
+export async function getSessionEmail(request: NextRequest) {
+  const session = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  return session?.email;
 }

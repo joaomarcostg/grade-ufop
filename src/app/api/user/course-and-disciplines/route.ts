@@ -1,17 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { getSessionEmail } from "@/lib/auth";
 
-export async function GET(_request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session || !session.user?.email) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    const email = await getSessionEmail(request);
+    
+    if (!email) {
+      return NextResponse.json({ error: "Email not found in session" }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email },
       include: {
         course: { select: { id: true, name: true } },
         completedDisciplines: {
