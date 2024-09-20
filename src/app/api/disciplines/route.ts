@@ -1,5 +1,5 @@
-import { NextResponse, NextRequest } from 'next/server';
-import prisma from '@/lib/prisma';
+import { NextResponse, NextRequest } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -9,21 +9,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: disciplines });
   }
 
-  const courseId = searchParams.get('courseId');
-  const mandatory = searchParams.has('mandatory') ? true : undefined;
+  const courseId = searchParams.get("courseId");
+  const semester = searchParams.get("semester") ?? process.env.NEXT_PUBLIC_CURRENT_SEMESTER;
+  const period = searchParams.get("period");
+  const mandatory = searchParams.has("mandatory") ? true : undefined;
 
   if (courseId) {
     const disciplines = await prisma.discipline.findMany({
-      
       where: {
         courses: {
-          some: { courseId: courseId, mandatory },
+          some: { courseId: courseId, mandatory, period: period ? parseInt(period) : undefined },
+        },
+        classes: {
+          some: {
+            semester,
+          },
         },
       },
       include: {
-        courses: true
+        courses: true,
       },
-     
     });
 
     // Sort disciplines by period
@@ -40,7 +45,6 @@ export async function GET(request: NextRequest) {
 
       return periodA - periodB;
     });
-
 
     const filteredDisciplines = sortedDisciplines.map((discipline) => ({
       ...discipline,

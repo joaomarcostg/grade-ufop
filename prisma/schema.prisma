@@ -13,9 +13,9 @@ datasource db {
 // Update the Course model to include the reverse relation
 model Course {
   id          String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  code        String?
-  name        String?
-  createdAt   DateTime?          @map("created_at") @db.Timestamp(6)
+  code        String
+  name        String
+  createdAt   DateTime          @map("created_at") @db.Timestamp(6)
   disciplines DisciplineCourse[]
   users       User[]
 
@@ -24,9 +24,9 @@ model Course {
 
 model Department {
   id          String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  code        String?
-  name        String?
-  createdAt   DateTime?    @map("created_at") @db.Timestamp(6)
+  code        String
+  name        String
+  createdAt   DateTime    @map("created_at") @db.Timestamp(6)
   disciplines Discipline[]
 
   @@map("department")
@@ -34,7 +34,7 @@ model Department {
 
 model EquivalencyGroup {
   id          String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  createdAt   DateTime?    @map("created_at") @db.Timestamp(6)
+  createdAt   DateTime    @map("created_at") @db.Timestamp(6)
   disciplines Discipline[]
 
   @@map("equivalency_group")
@@ -43,13 +43,13 @@ model EquivalencyGroup {
 // Update the Discipline model to include the reverse relation
 model Discipline {
   id                 String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  code               String?
-  name               String?
+  code               String
+  name               String
   description        String?
-  departmentId       String?               @map("department_id") @db.Uuid
-  createdAt          DateTime?             @map("created_at") @db.Timestamp(6)
+  departmentId       String               @map("department_id") @db.Uuid
+  createdAt          DateTime             @map("created_at") @db.Timestamp(6)
   equivalencyGroupId String?               @map("equivalency_group_id") @db.Uuid
-  department         Department?           @relation(fields: [departmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  department         Department           @relation(fields: [departmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   classes            DisciplineClass[]
   courses            DisciplineCourse[]
   prerequisites      Prerequisite[]        @relation("PrerequisiteDiscipline")
@@ -72,11 +72,11 @@ model CompletedDiscipline {
 model DisciplineClass {
   id           String                    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   classNumber  String?                   @map("class_number")
-  disciplineId String?                   @map("discipline_id") @db.Uuid
-  semester     String?
+  disciplineId String                   @map("discipline_id") @db.Uuid
+  semester     String
   professor    String?
-  createdAt    DateTime?                 @map("created_at") @db.Timestamp(6)
-  discipline   Discipline?               @relation(fields: [disciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt    DateTime                 @map("created_at") @db.Timestamp(6)
+  discipline   Discipline               @relation(fields: [disciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   schedules    DisciplineClassSchedule[]
 
   @@map("discipline_class")
@@ -84,26 +84,26 @@ model DisciplineClass {
 
 model DisciplineClassSchedule {
   id                String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  disciplineClassId String?          @map("discipline_class_id") @db.Uuid
-  dayOfWeek         String?          @map("day_of_week")
-  startTime         DateTime?        @map("start_time") @db.Time(6)
-  endTime           DateTime?        @map("end_time") @db.Time(6)
-  classType         String?          @map("class_type") // Add this line
-  createdAt         DateTime?        @map("created_at") @db.Timestamp(6)
-  disciplineClass   DisciplineClass? @relation(fields: [disciplineClassId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  disciplineClassId String          @map("discipline_class_id") @db.Uuid
+  dayOfWeek         String         @map("day_of_week")
+  startTime         DateTime        @map("start_time") @db.Time(6)
+  endTime           DateTime        @map("end_time") @db.Time(6)
+  classType         String          @map("class_type") // Add this line
+  createdAt         DateTime        @map("created_at") @db.Timestamp(6)
+  disciplineClass   DisciplineClass @relation(fields: [disciplineClassId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("discipline_class_schedule")
 }
 
 model DisciplineCourse {
   id            String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  disciplineId  String?        @map("discipline_id") @db.Uuid
-  courseId      String?        @map("course_id") @db.Uuid
-  mandatory     Boolean?
-  period        Int?
-  createdAt     DateTime?      @map("created_at") @db.Timestamp(6)
-  course        Course?        @relation(fields: [courseId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  discipline    Discipline?    @relation(fields: [disciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  disciplineId  String        @map("discipline_id") @db.Uuid
+  courseId      String        @map("course_id") @db.Uuid
+  mandatory     Boolean
+  period        Int
+  createdAt     DateTime      @map("created_at") @db.Timestamp(6)
+  course        Course        @relation(fields: [courseId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  discipline    Discipline    @relation(fields: [disciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   prerequisites Prerequisite[]
 
   @@map("discipline_course")
@@ -111,11 +111,11 @@ model DisciplineCourse {
 
 model Prerequisite {
   id                       String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  disciplineCourseId       String?           @map("discipline_course_id") @db.Uuid
-  prerequisiteDisciplineId String?           @map("prerequisite_discipline_id") @db.Uuid
-  createdAt                DateTime?         @map("created_at") @db.Timestamp(6)
-  disciplineCourse         DisciplineCourse? @relation(fields: [disciplineCourseId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  prerequisiteDiscipline   Discipline?       @relation("PrerequisiteDiscipline", fields: [prerequisiteDisciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  disciplineCourseId       String           @map("discipline_course_id") @db.Uuid
+  prerequisiteDisciplineId String           @map("prerequisite_discipline_id") @db.Uuid
+  createdAt                DateTime         @map("created_at") @db.Timestamp(6)
+  disciplineCourse         DisciplineCourse @relation(fields: [disciplineCourseId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prerequisiteDiscipline   Discipline       @relation("PrerequisiteDiscipline", fields: [prerequisiteDisciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("prerequisite")
 }

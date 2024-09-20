@@ -21,14 +21,18 @@ export type RequestResponse = {
 
 export async function getGrades({
   disciplineSlots,
+  dayWeight = 1,
+  gapWeight = 1,
 }: {
   disciplineSlots: {
     [slotId: string]: AutocompleteOption[];
   };
+  dayWeight?: number;
+  gapWeight?: number;
 }): Promise<RequestResponse> {
   try {
     let apiUrl = `${API_BASE_URL}/buildGrades`;
-    const body = JSON.stringify(disciplineSlots);
+    const body = JSON.stringify({ disciplineSlots, dayWeight, gapWeight });
 
     const res = await fetchRequest<any>(apiUrl, {
       method: "POST",

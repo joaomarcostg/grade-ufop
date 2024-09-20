@@ -23,13 +23,23 @@ type ScheduleType = Pick<
 >;
 
 export async function POST(request: NextRequest) {
-  const body: RequestBody = await request.json();
-  const conflictFreeOptions = await getScheduleForSelectedDisciplines(body);
+  const {
+    disciplineSlots,
+    dayWeight = 1,
+    gapWeight = 1,
+  } = await request.json();
+  const conflictFreeOptions = await getScheduleForSelectedDisciplines(
+    disciplineSlots,
+    dayWeight,
+    gapWeight
+  );
   return NextResponse.json({ data: conflictFreeOptions });
 }
 
 async function getScheduleForSelectedDisciplines(
-  selectedDisciplines: RequestBody
+  selectedDisciplines: RequestBody,
+  dayWeight: number,
+  gapWeight: number
 ) {
   const slotsSchedules: {
     [slotId: string]: {
@@ -137,15 +147,17 @@ async function getScheduleForSelectedDisciplines(
   generateCombinations({}, 0);
 
   // Rank the valid combinations
-  allCombinations.sort((a, b) => {
-    return Object.keys(b).length - Object.keys(a).length;
-  });
+  const rankedCombinations = allCombinations.map((combination) => ({
+    combination,
+    score: calculateScore(combination, slotsSchedules, dayWeight, gapWeight),
+  }));
+
+  rankedCombinations.sort((a, b) => a.score - b.score);
 
   // Convert objects to arrays (assuming values are arrays)
-  const bestCombinations = allCombinations.slice(
-    0,
-    Math.min(5, allCombinations.length)
-  );
+  const bestCombinations = rankedCombinations
+    .slice(0, 5)
+    .map((rc) => rc.combination);
 
   const disciplineIds = new Set(
     bestCombinations.map((obj) => Object.values(obj).flat()).flat()
@@ -178,9 +190,9 @@ async function getScheduleForSelectedDisciplines(
 
     if (disciplineData) {
       disciplineClasses[disciplineClassId] = {
-        classNumber: disciplineData?.classNumber ?? "",
-        code: disciplineData.discipline?.code ?? "",
-        name: disciplineData.discipline?.name ?? "",
+        classNumber: disciplineData.classNumber ?? "",
+        code: disciplineData.discipline.code ?? "",
+        name: disciplineData.discipline.name ?? "",
         professor: disciplineData.professor ?? "",
         schedule: formatSchedules(disciplineData.schedules),
       };
@@ -201,11 +213,61 @@ async function getScheduleForSelectedDisciplines(
   return responseObj;
 }
 
+function calculateScore(
+  combination: { [slotId: string]: string },
+  slotsSchedules: {
+    [slotId: string]: { [disciplineClassId: string]: ScheduleType[] };
+  },
+  dayWeight: number,
+  gapWeight: number
+): number {
+  const allSchedules: ScheduleType[] = [];
+  for (const [slotId, disciplineClassId] of Object.entries(combination)) {
+    allSchedules.push(...slotsSchedules[slotId][disciplineClassId]);
+  }
+
+  const daysWithClasses = new Set(allSchedules.map((s) => s.dayOfWeek)).size;
+  const dayScore = daysWithClasses * dayWeight;
+
+  const gapScore = calculateGapScore(allSchedules) * gapWeight;
+
+  return dayScore + gapScore;
+}
+
+function calculateGapScore(schedules: ScheduleType[]): number {
+  let totalGapMinutes = 0;
+
+  const schedulesByDay: { [day: string]: ScheduleType[] } = {};
+  schedules.forEach((schedule) => {
+    if (!schedulesByDay[schedule.dayOfWeek]) {
+      schedulesByDay[schedule.dayOfWeek] = [];
+    }
+    schedulesByDay[schedule.dayOfWeek].push(schedule);
+  });
+
+  for (const daySchedules of Object.values(schedulesByDay)) {
+    daySchedules.sort(
+      (a, b) =>
+        convertDateToMinutes(a.startTime) - convertDateToMinutes(b.startTime)
+    );
+
+    for (let i = 1; i < daySchedules.length; i++) {
+      const gap =
+        convertDateToMinutes(daySchedules[i].startTime) -
+        convertDateToMinutes(daySchedules[i - 1].endTime);
+      if (gap > 0) {
+        totalGapMinutes += gap;
+      }
+    }
+  }
+
+  return totalGapMinutes;
+}
+
 function hasTimeConflict(
   schedule1: ScheduleType,
   schedule2: ScheduleType
 ): boolean {
-  // Step 1: Check if days of the week match
   if (schedule1.dayOfWeek !== schedule2.dayOfWeek) {
     return false;
   }
@@ -215,7 +277,6 @@ function hasTimeConflict(
   const schedule2Start = convertDateToMinutes(schedule2.startTime);
   const schedule2End = convertDateToMinutes(schedule2.endTime);
 
-  // If any of the times are null, they cannot be compared
   if (
     schedule1Start === -1 ||
     schedule1End === -1 ||
@@ -225,18 +286,20 @@ function hasTimeConflict(
     return false;
   }
 
-  // Check for time overlap
   if (schedule1End <= schedule2Start || schedule1Start >= schedule2End) {
     return false;
   }
 
-  return true; // Time overlap exists, hence a conflict
+  return true;
 }
 
 function getFormatedTime({
   startTime,
   endTime,
-}: Partial<ScheduleType>): string {
+}: {
+  startTime: Date | null;
+  endTime: Date | null;
+}): string {
   const _startTime = startTime
     ? `${startTime.getUTCHours()}:${
         startTime.getUTCMinutes() ? startTime.getUTCMinutes() : "00"
@@ -255,7 +318,6 @@ function getFormatedTime({
 function formatSchedules(rawSchedules: Array<Partial<ScheduleType>>) {
   const groupedSchedules: Record<string, Partial<ScheduleType>[]> = {};
 
-  // Group schedules by day_of_week
   rawSchedules.forEach((schedule) => {
     const day = schedule.dayOfWeek ?? "";
     if (!groupedSchedules[day]) {

@@ -1,9 +1,32 @@
 "use client";
-import React, { useState, useContext, useEffect, useCallback } from "react";
+import React, { useContext, useEffect, useCallback, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { Button } from "@mui/material";
-import { type AutocompleteOption } from "@/components/InputAutocomplete"; // Import your Autocomplete component
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "@hello-pangea/dnd";
+import {
+  Button,
+  Tooltip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Stepper,
+  Step,
+  StepLabel,
+  Typography,
+  Divider,
+} from "@mui/material";
+import {
+  Add,
+  Create,
+  Visibility,
+  HelpOutline,
+  ExpandMore,
+} from "@mui/icons-material";
+import { type AutocompleteOption } from "@/components/InputAutocomplete";
 import { StudentContext } from "@/app/context/StudentContext";
 import { getAvailableDisciplines } from "@/lib/fetch-api/fetch-disciplines";
 import { ActionType } from "@/app/context/actions";
@@ -11,30 +34,45 @@ import DisciplinesSlot from "./DisciplinesSlot";
 import { capitalize } from "@/app/utils/converters";
 import { RequestResponse, getGrades } from "@/lib/fetch-api/fetch-buildGrades";
 import ScheduleViewer from "./ScheduleViewer";
+import { FilterProvider, useFilter } from "./FilterContext";
+import { FilterSection } from "./FilterSection";
 
-function DisciplinesSelector() {
+function DisciplinesSelectorContent() {
   const { state, dispatch } = useContext(StudentContext);
+  const { timeSlots, days, dayWeight, gapWeight } = useFilter();
 
   const [focused, setFocus] = useState<string>("");
-  const [showDnd, setShowDnd] = useState(true);
-  const [grids, setGrids] = useState<RequestResponse>(null);
+  const [results, setResults] = useState<RequestResponse>(null);
+  const [resultsDialogOpen, setResultsDialogOpen] = useState(false);
   const [generateDisabled, setGenerateDisabled] = useState(true);
+  const [activeStep, setActiveStep] = useState(0);
+
+  const steps = [
+    {
+      label: "Filtre (Opcional)",
+      description: "Refine suas opções de disciplinas",
+    },
+    {
+      label: "Adicione Disciplinas",
+      description: "Selecione as disciplinas desejadas",
+    },
+    { label: "Gere Grades", description: "Crie combinações de horários" },
+  ];
 
   useEffect(() => {
     async function fetchRequest() {
-      if(!state.course?.value) return;
-
-      const disciplines = await getAvailableDisciplines({
-        coursedDisciplines: state.coursedDisciplines,
-        courseId: state.course?.value ?? "",
-      });
-
-      const autocompleteOptions = disciplines.reduce<NonNullable<AutocompleteOption>[]>((acc, discipline) => {
+      if (!state.course?.value) return;
+      const disciplines = await getAvailableDisciplines({ timeSlots, days });
+      const autocompleteOptions = disciplines.reduce<
+        NonNullable<AutocompleteOption[]>
+      >((acc, discipline) => {
         discipline.classes.forEach((classItem) => {
           acc.push({
             index: acc.length,
             value: classItem.id,
-            label: `${discipline.code} - ${capitalize(discipline.name)} - T${classItem.classNumber} ${capitalize(classItem.professor)}`,
+            label: `${discipline.code} - ${capitalize(discipline.name)} - T${
+              classItem.classNumber
+            } ${capitalize(classItem.professor)}`,
             professor: capitalize(classItem.professor),
             disciplineId: discipline.id,
             disabled: !discipline.isEnabled,
@@ -42,37 +80,39 @@ function DisciplinesSelector() {
         });
         return acc;
       }, []);
-
       dispatch({
         type: ActionType["SET_AVAILABLE_OPTIONS"],
         payload: autocompleteOptions,
       });
     }
-
     fetchRequest();
-  }, [dispatch, state.course?.value, state.coursedDisciplines]);
+  }, [
+    dispatch,
+    state.course?.value,
+    state.coursedDisciplines,
+    timeSlots,
+    days,
+  ]);
+
+  useEffect(() => {
+    const slots = Object.values(state.disciplineSlots);
+    setGenerateDisabled(
+      slots.length === 0 || slots.some((slot) => slot.length === 0)
+    );
+  }, [state.disciplineSlots]);
 
   const addDisciplinesSlot = useCallback(() => {
     const slotId = uuid();
-
     dispatch({
       type: ActionType.CREATE_DISCIPLINES_SLOT,
-      payload: {
-        slotId,
-      },
+      payload: { slotId },
     });
-
     setFocus(slotId);
   }, [dispatch]);
 
   const removeDisciplinesSlot = (id: string) => {
-    if (Object.keys(state.disciplineSlots).length <= 1) {
-      return;
-    }
-
-    const disciplinesFromSlot = Object.values(state.disciplineSlots[id]);
-
-    for (const discipline of disciplinesFromSlot) {
+    if (Object.keys(state.disciplineSlots).length <= 1) return;
+    Object.values(state.disciplineSlots[id]).forEach((discipline) => {
       dispatch({
         type: ActionType.REMOVE_FROM_SELECTED_DISCIPLINES,
         payload: {
@@ -80,91 +120,147 @@ function DisciplinesSelector() {
           disciplineId: discipline?.disciplineId ?? "",
         },
       });
-    }
-
+    });
     dispatch({
       type: ActionType.DELETE_DISCIPLINES_SLOT,
-      payload: {
-        slotId: id,
-      },
+      payload: { slotId: id },
     });
   };
 
   const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) {
-      return;
-    }
-
-    // Handling drag and drop while disciplineSlots is an object
+    if (!result.destination) return;
     const items = Object.entries(state.disciplineSlots);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-
-    const reorderedSlots = Object.fromEntries(items);
-
     dispatch({
       type: ActionType.SET_DISCIPLINES_SLOT,
-      payload: reorderedSlots,
+      payload: Object.fromEntries(items),
     });
   };
 
   async function buildGrades() {
     const data = await getGrades({
       disciplineSlots: state.disciplineSlots,
+      dayWeight,
+      gapWeight,
     });
-
-    setGrids(data);
+    setResults(data);
+    setResultsDialogOpen(true);
   }
 
-  useEffect(() => {
-    setShowDnd(true);
-
-    const slots = Object.values(state.disciplineSlots);
-
-    if (!slots.length) {
-      // addDisciplinesSlot();
-    }
-
-    return setGenerateDisabled(slots.length === 0 || slots.some((slot) => slot.length === 0));
-  }, [addDisciplinesSlot, state.disciplineSlots]);
-
-  return showDnd ? (
-    <div className="flex flex-col w-full max-w-[800px]">
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="options">
-          {(provided) => (
-            <ul {...provided.droppableProps} ref={provided.innerRef}>
-              {Object.entries(state.disciplineSlots).map(([key, _], index) => (
-                <Draggable key={key} draggableId={key} index={index}>
-                  {(provided) => (
-                    <DisciplinesSlot
-                      provided={provided}
-                      removeAction={() => removeDisciplinesSlot(key)}
-                      isFocused={focused === key}
-                      changeFocus={() => setFocus(key)}
-                      slotId={key}
-                    />
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </ul>
-          )}
-        </Droppable>
-      </DragDropContext>
-      <div className="flex justify-between items-center">
-        <Button variant="contained" onClick={addDisciplinesSlot}>
-          Adicionar Slot
-        </Button>
-        <Button disabled={generateDisabled} variant="contained" onClick={buildGrades}>
-          Gerar Grade
-        </Button>
+  return (
+    <div className="flex flex-col w-full max-w-[800px] space-y-6">
+      <div className="bg-gray-100 p-4 rounded-lg">
+        <Stepper activeStep={-1} alternativeLabel>
+          {steps.map((step) => (
+            <Step key={step.label}>
+              <StepLabel>
+                <Typography variant="body2">{step.label}</Typography>
+                <Typography variant="caption" className="text-gray-600">
+                  {step.description}
+                </Typography>
+              </StepLabel>
+            </Step>
+          ))}
+        </Stepper>
       </div>
-      <div className="flex">{grids ? <ScheduleViewer combinations={grids} /> : <></>}</div>
+
+      <FilterSection />
+
+      <div className="py-6">
+        <div className="flex items-center mb-4">
+          <h2 className="text-xl font-bold">Slots de Disciplinas</h2>
+          <Tooltip title="Os slots representam diferentes opções de disciplinas para o mesmo horário. Arraste os slots para reordená-los e adicione múltiplas disciplinas em cada slot para criar combinações.">
+            <HelpOutline className="ml-2 cursor-help" />
+          </Tooltip>
+        </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="options">
+            {(provided) => (
+              <ul
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="space-y-8"
+              >
+                {Object.entries(state.disciplineSlots).map(
+                  ([key, _], index) => (
+                    <Draggable key={key} draggableId={key} index={index}>
+                      {(provided) => (
+                        <DisciplinesSlot
+                          provided={provided}
+                          removeAction={() => removeDisciplinesSlot(key)}
+                          isFocused={focused === key}
+                          changeFocus={() => setFocus(key)}
+                          slotId={key}
+                        />
+                      )}
+                    </Draggable>
+                  )
+                )}
+                {provided.placeholder}
+              </ul>
+            )}
+          </Droppable>
+        </DragDropContext>
+        <div className="mt-4 flex items-center gap-4 justify-center">
+          <div className="flex-1 border" />
+          <Tooltip title="Adicione um novo slot para incluir mais opções de disciplinas">
+            <Button
+              variant="text"
+              onClick={addDisciplinesSlot}
+              startIcon={<Add />}
+            >
+              Adicionar Slot
+            </Button>
+          </Tooltip>
+          <div className="flex-1 border" />
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <Tooltip title="Gerar novas combinações de grade com base nas seleções atuais">
+          <span>
+            <Button
+              disabled={generateDisabled}
+              variant="contained"
+              onClick={() => {
+                buildGrades();
+                setActiveStep(2);
+              }}
+              startIcon={<Create />}
+            >
+              Gerar Grades
+            </Button>
+          </span>
+        </Tooltip>
+        {results && (
+          <Tooltip title="Visualizar as combinações de grade geradas">
+            <Button
+              variant="outlined"
+              onClick={() => setResultsDialogOpen(true)}
+              startIcon={<Visibility />}
+            >
+              Exibir Resultados
+            </Button>
+          </Tooltip>
+        )}
+      </div>
+
+      {results && (
+        <ScheduleViewer
+          combinations={results}
+          open={resultsDialogOpen}
+          onClose={() => setResultsDialogOpen(false)}
+        />
+      )}
     </div>
-  ) : (
-    <></>
   );
 }
 
-export default DisciplinesSelector;
+export default function DisciplinesSelector() {
+  return (
+    <FilterProvider>
+      <DisciplinesSelectorContent />
+    </FilterProvider>
+  );
+}

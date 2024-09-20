@@ -9,18 +9,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: disciplines });
   }
 
-  const disciplineClassId = searchParams.get("disciplineClassId");
+  const disciplineId = searchParams.get("disciplineId") ?? undefined;
+  const semester =
+    searchParams.get("semester") ?? process.env.NEXT_PUBLIC_CURRENT_SEMESTER;
 
-  if (disciplineClassId) {
-    const disciplines = await prisma.disciplineClassSchedule.findMany({
-      where: {
-        disciplineClassId: disciplineClassId,
-      },
-      include: {
-        disciplineClass: true,
-      },
-    });
+  const disciplines = await prisma.disciplineClass.findMany({
+    where: {
+      semester,
+      disciplineId,
+    },
+  });
 
-    return NextResponse.json({ data: disciplines });
-  }
+  return NextResponse.json({ data: disciplines });
 }

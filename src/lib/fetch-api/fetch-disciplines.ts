@@ -3,16 +3,10 @@ import { type Discipline } from "@prisma/client";
 import { fetchRequest } from "./utils";
 
 type FetchGetDisciplinesByCourseResponse = {
-  data: Discipline[] ;
+  data: Discipline[];
 };
 
-export async function getDisciplinesByCourse({
-  course,
-  mandatoryOnly,
-}: {
-  course?: string | null;
-  mandatoryOnly?: boolean;
-}) {
+export async function getDisciplinesByCourse({ course, mandatoryOnly }: { course?: string | null; mandatoryOnly?: boolean }) {
   try {
     if (!course) {
       return [];
@@ -24,15 +18,12 @@ export async function getDisciplinesByCourse({
       apiUrl += "&mandatory";
     }
 
-    const res = await fetchRequest<FetchGetDisciplinesByCourseResponse>(
-      apiUrl,
-      {
-        method: "GET",
-        next: {
-          revalidate: 3600,
-        },
-      }
-    );
+    const res = await fetchRequest<FetchGetDisciplinesByCourseResponse>(apiUrl, {
+      method: "GET",
+      next: {
+        revalidate: 3600,
+      },
+    });
 
     if (!res.data) {
       throw new Error("Failed to fetch data");
@@ -44,7 +35,6 @@ export async function getDisciplinesByCourse({
   }
 }
 
-
 type FetchGetAvailableDisciplinesResponse = {
   data: {
     id: string;
@@ -53,37 +43,43 @@ type FetchGetAvailableDisciplinesResponse = {
     isEnabled: boolean;
     period: number | null;
     classes: {
-        id: string;
-        classNumber: string | null;
-        professor: string | null;
+      id: string;
+      classNumber: string | null;
+      professor: string | null;
+      schedules: {
+        dayOfWeek: string | null;
+        startTime: string | null;
+        endTime: string | null;
+        classType: string | null;
+      }[];
     }[];
-}[] ;
+    courseId: string;
+  }[];
 };
 
-export async function getAvailableDisciplines({
-  courseId,
-  coursedDisciplines,
-}: {
-  courseId: string;
-  coursedDisciplines: string[];
-}) {
+export async function getAvailableDisciplines(filters: { timeSlots?: string[]; days?: string[]; includeOtherCourses?: boolean }) {
   try {
-    let apiUrl = `${API_BASE_URL}/availableDisciplines`;
-    const body = JSON.stringify({
-      courseId,
-      coursedDisciplines
-    });
+    const timeSlots = filters.timeSlots?.join(",") || "";
+    const days = filters.days?.join(",") || "";
+    const includeOtherCourses = filters.includeOtherCourses ? "true" : "";
 
-    const res = await fetchRequest<FetchGetAvailableDisciplinesResponse>(
-      apiUrl,
-      {
-        method: "POST",
-        body,
-        next: {
-          revalidate: 3600,
-        },
-      }
-    );
+    let queryParams = "";
+    if (timeSlots) {
+      queryParams += `timeSlots=${timeSlots}&`;
+    }
+    if (days) {
+      queryParams += `days=${days}&`;
+    }
+    if (includeOtherCourses) {
+      queryParams += `includeOtherCourses=${includeOtherCourses}`;
+    }
+
+    const res = await fetchRequest<FetchGetAvailableDisciplinesResponse>(`${API_BASE_URL}/availableDisciplines?${queryParams}`, {
+      method: "GET",
+      next: {
+        revalidate: 3600,
+      },
+    });
 
     if (!res.data) {
       throw new Error("Failed to fetch data");
@@ -91,6 +87,7 @@ export async function getAvailableDisciplines({
 
     return res.data;
   } catch (error) {
+    console.error("Error fetching available disciplines:", error);
     return [];
   }
 }

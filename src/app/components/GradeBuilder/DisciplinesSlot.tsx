@@ -29,7 +29,7 @@ function DisciplinesSlot({
   const { state, dispatch } = useContext(StudentContext);
 
   const [selectedDiscipline, setSelectedDiscipline] =
-    useState<AutocompleteOption>(null);
+    useState<AutocompleteOption | null>(null);
   const [options, setOptions] = useState<AutocompleteOption[]>([]);
   useEffect(() => {
     // Collect all disciplineClassId values from all slots except the current one
@@ -90,7 +90,7 @@ function DisciplinesSlot({
     });
   };
 
-  const handleSelection = (value: AutocompleteOption) => {
+  const handleSelection = (value: AutocompleteOption | null) => {
     setSelectedDiscipline(value);
   };
 
@@ -98,7 +98,7 @@ function DisciplinesSlot({
     <div
       ref={provided.innerRef}
       {...provided.draggableProps}
-      className="relative flex flex-row gap-4 items-center mb-8"
+      className="relative flex flex-row gap-4 items-center"
     >
       <div
         className="absolute top-1/2 -translate-y-1/2 -left-8"
@@ -108,9 +108,9 @@ function DisciplinesSlot({
         <DragIndicator />
       </div>
       <div
-        className={`relative min-w-full max-w-[800px] flex flex-col gap-4 px-4 py-2 border-gray-100 border-2 rounded-lg ${
-          !isFocused && "group py-6"
-        } `}
+        className={`relative min-w-full max-w-[800px] flex flex-col gap-4 p-4 ${
+          isFocused ? "border-primary" : "border-gray-100"
+        } border-2 rounded-lg ${!isFocused && "group py-6"} `}
       >
         <div className="group-hover:flex hidden absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 bg-white border-gray-100  border-2 rounded-[50%]">
           <IconButton size="small" onClick={changeFocus}>
@@ -119,11 +119,12 @@ function DisciplinesSlot({
         </div>
         {isFocused && (
           <>
-            <div className="flex w-full flex-row gap-4 justify-start items-center">
+            <div className="mt-2 flex w-full flex-row gap-4 justify-start items-center">
               <Autocomplete
                 options={options}
-                action={handleSelection}
+                onChange={handleSelection}
                 label="Disciplina"
+                value={selectedDiscipline}
                 style={{
                   flex: 1,
                   maxWidth: 400,
