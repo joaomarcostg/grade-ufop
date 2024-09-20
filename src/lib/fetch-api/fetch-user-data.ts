@@ -8,39 +8,63 @@ type UserWithCourseAndDisciplines = {
   completedDisciplines: { disciplineId: string }[];
 };
 
+export type UserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  image: string;
+  course: { id: string; name: string } | null;
+  coursedDisciplines: Array<{ id: string; name: string }>;
+  savedCombinations: Array<{ id: string; name: string }>;
+};
+
 export async function getUserCourseAndDisciplines() {
   try {
-    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/course-and-disciplines`, {
+    const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/course-and-disciplines`, {
       method: "GET",
     });
 
-    if (!res.data) {
+    if (!data) {
       throw new Error("Failed to fetch data");
     }
 
-    return res.data;
+    return data;
   } catch (error) {
     console.error("Error fetching user course and disciplines:", error);
     return null;
   }
 }
 
-// TODO: Implement the setUserCourse function
-export async function setUserCourse(courseId: string) {
+export async function getUserProfile(): Promise<UserProfile | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/course`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ courseId }),
+    const { data } = await fetchRequest<{ data: UserProfile }>(`${API_BASE_URL}/user/profile`, {
+      method: "GET",
     });
 
-    if (!response.ok) {
+    if (!data) {
+      throw new Error("Failed to fetch user profile");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return null;
+  }
+}
+
+export async function setUserCourse(courseId: string) {
+  try {
+    const body = JSON.stringify({ courseId });
+
+    const { data } = await fetchRequest<{ data: User }>(`${API_BASE_URL}/user/course`, {
+      method: "POST",
+      body,
+    });
+
+    if (!data) {
       throw new Error("Failed to update user course");
     }
 
-    const data: User = await response.json();
     return data;
   } catch (error) {
     console.error("Error setting user course:", error);
@@ -48,37 +72,58 @@ export async function setUserCourse(courseId: string) {
   }
 }
 
-export async function addCompletedDiscipline(userId: string, disciplineId: string) {
+export async function updateCoursedDisciplines(disciplineIds: string[]) {
   try {
-    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/${userId}/completed-disciplines`, {
+    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/coursed-disciplines`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ disciplineIds }),
+    });
+
+    if (!res.data) {
+      throw new Error("Failed to update coursed disciplines");
+    }
+
+    return res.data;
+  } catch (error) {
+    console.error("Error updating coursed disciplines:", error);
+    return null;
+  }
+}
+
+export async function addCompletedDiscipline(disciplineId: string) {
+  try {
+    const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/completed-disciplines`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ disciplineId }),
     });
 
-    if (!res.data) {
+    if (!data) {
       throw new Error("Failed to add completed discipline");
     }
 
-    return res.data;
+    return data;
   } catch (error) {
     console.error("Error adding completed discipline:", error);
     return null;
   }
 }
 
-export async function removeCompletedDiscipline(userId: string, disciplineId: string) {
+export async function removeCompletedDiscipline(disciplineId: string) {
   try {
-    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
-      `${API_BASE_URL}/user/${userId}/completed-disciplines/${disciplineId}`,
-      { method: "DELETE" }
+    const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
+      `${API_BASE_URL}/user/completed-disciplines/${disciplineId}`,
+      {
+        method: "DELETE",
+      }
     );
 
-    if (!res.data) {
+    if (!data) {
       throw new Error("Failed to remove completed discipline");
     }
 
-    return res.data;
+    return data;
   } catch (error) {
     console.error("Error removing completed discipline:", error);
     return null;

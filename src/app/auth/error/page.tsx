@@ -1,16 +1,17 @@
-import { useRouter } from 'next/router';
+"use client";
+import { useSearchParams } from "next/navigation";
 import { Container, Typography, Box, Button } from "@mui/material";
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function AuthError() {
-  const router = useRouter();
-  const { error } = router.query;
+  const searchParams = useSearchParams();
 
-  let errorMessage = "An unknown error occurred during authentication.";
-  if (error === 'AccessDenied') {
-    errorMessage = "Access denied. Please use an @ufop.edu.br email address.";
-  } else if (error === 'OAuthAccountNotLinked') {
-    errorMessage = "There was an issue linking your account. Please try signing in again.";
+  const error = searchParams.get("error");
+  let errorMessage = "Um erro desconhecido ocorreu. Por favor, tente novamente.";
+  if (error === "AccessDenied") {
+    errorMessage = "Accesso negado. Por favor use um email @ufop.edu.br.";
+  } else if (error === "OAuthAccountNotLinked") {
+    errorMessage = "Teve algum erro ao conectar sua conta. Por favor tente se conectar novamente.";
   }
 
   console.error("Authentication error:", error);
@@ -19,16 +20,16 @@ export default function AuthError() {
     <Container maxWidth="sm">
       <Box sx={{ marginTop: 8, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Typography component="h1" variant="h5" gutterBottom>
-          Authentication Error
+          Erro de autenticação
         </Typography>
         <Typography align="center" paragraph>
           {errorMessage}
         </Typography>
         <Typography align="center" paragraph color="error">
-          Error details: {error}
+          Detalhes do erro: {error}
         </Typography>
         <Button component={Link} href="/auth/login" variant="contained">
-          Back to Login
+          Voltar para o login
         </Button>
       </Box>
     </Container>

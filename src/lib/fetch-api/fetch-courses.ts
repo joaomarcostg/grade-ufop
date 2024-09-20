@@ -1,24 +1,32 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-import { type Course } from "@prisma/client";
-import { fetchRequest } from "./utils";
+import prisma from '@/lib/prisma'
+import { fetchRequest } from './utils';
+import { Course } from '@prisma/client';
 
-type FetchGetCoursesResponse = {
-  data: Course[];
-};
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function getCourses() {
   try {
-    const res = await fetchRequest<FetchGetCoursesResponse>(
-      `${API_BASE_URL}/courses`,
-      { method: "GET", cache: "no-store" }
-    );
+    const courses = await prisma.course.findMany()
 
-    if (!res.data) {
-      throw new Error("Failed to fetch data");
-    }
-
-    return res.data;
+    return courses;
   } catch (error) {
     return [];
+  }
+}
+
+export async function fetchCourses(): Promise<Course[] | null> {
+  try {
+    const { data } = await fetchRequest<{ data: Course[] }>(`${API_BASE_URL}/courses`, {
+      method: "GET",
+    });
+
+    if (!data) {
+      throw new Error("Failed to fetch courses");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    return null;
   }
 }

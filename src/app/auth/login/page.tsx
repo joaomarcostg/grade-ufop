@@ -21,7 +21,7 @@ export default async function LoginPage() {
         }}
       >
         <Typography component="h1" variant="h5">
-          Welcome to GradeUFOP
+          Seja bem-vindo ao GradeUFOP
         </Typography>
         <Box sx={{ mt: 3 }}>
           <GoogleLoginButton />

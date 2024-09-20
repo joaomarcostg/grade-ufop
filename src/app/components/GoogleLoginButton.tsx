@@ -6,7 +6,7 @@ export default function GoogleLoginButton() {
   return (
     <>
       <Button onClick={() => signIn("google")} fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-        Sign in with Google
+        Conectar com Google
       </Button>
     </>
   );
