@@ -1,3 +1,4 @@
+import { type  Discipline } from "@prisma/client";
 import { AutocompleteOption } from "../components/InputAutocomplete";
 import { type AppState } from "./types";
 
@@ -26,8 +27,8 @@ export type Action =
       type: ActionType.SELECT_COURSE;
       payload: AutocompleteOption;
     }
-  | { type: ActionType.SET_MULTIPLE_COURSED_DISCIPLINES; payload: string[] }
-  | { type: ActionType.SELECT_COURSED_DISCIPLINE; payload: string }
+  | { type: ActionType.SET_MULTIPLE_COURSED_DISCIPLINES; payload: Discipline[] }
+  | { type: ActionType.SELECT_COURSED_DISCIPLINE; payload: Discipline }
   | { type: ActionType.SET_AVAILABLE_OPTIONS; payload: NonNullable<AutocompleteOption>[] }
   | {
       type: ActionType.REMOVE_FROM_AVAILABLE_OPTIONS;

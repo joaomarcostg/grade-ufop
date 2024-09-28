@@ -12,7 +12,7 @@ export default function DisciplinesPicker() {
   return (
     <div className="w-full flex flex-col items-center mb-8">
       <div
-        className={`mt-8 w-[460px] h-[40px] flex rounded-3xl border-solid border text-sm ${
+        className={`mt-8 w-[460px] h-[40px] flex rounded-3xl border-solid border text-sm mb-8 ${
           !state.course ? "border-gray-400 text-gray-400 cursor-not-allowed" : " border-primary text-primary cursor-pointer"
         } overflow-hidden`}
       >

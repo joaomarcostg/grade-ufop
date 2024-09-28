@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         course: { select: { id: true, name: true } },
         completedDisciplines: {
           select: {
-            disciplineId: true,
+            discipline: true,
           },
         },
       },

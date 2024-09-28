@@ -2,8 +2,23 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { type Discipline } from "@prisma/client";
 import { fetchRequest } from "./utils";
 
+interface FetchedDiscipline extends Discipline {
+  period: number | null;
+  classes: {
+    id: string;
+    classNumber: string | null;
+    professor: string | null;
+    schedules: {
+      dayOfWeek: string | null;
+      startTime: string | null;
+      endTime: string | null;
+      classType: string | null;
+    }[];
+  }[];
+}
+
 type FetchGetDisciplinesByCourseResponse = {
-  data: Discipline[];
+  data: FetchedDiscipline[];
 };
 
 export async function getDisciplinesByCourse({ course, mandatoryOnly }: { course?: string | null; mandatoryOnly?: boolean }) {

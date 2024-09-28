@@ -147,12 +147,19 @@ async function getScheduleForSelectedDisciplines(
   generateCombinations({}, 0);
 
   // Rank the valid combinations
-  const rankedCombinations = allCombinations.map((combination) => ({
-    combination,
-    score: calculateScore(combination, slotsSchedules, dayWeight, gapWeight),
-  }));
-
-  rankedCombinations.sort((a, b) => a.score - b.score);
+  const rankedCombinations = allCombinations.map((combination) => {
+    const { slotsUsed, weightedScore } = calculateScore(combination, slotsSchedules, dayWeight, gapWeight);
+    return { combination, slotsUsed, weightedScore };
+  });
+  
+  rankedCombinations.sort((a, b) => {
+    // First, sort by number of slots used (descending)
+    if (b.slotsUsed !== a.slotsUsed) {
+      return b.slotsUsed - a.slotsUsed;
+    }
+    // If slots used are equal, then sort by weighted score (ascending)
+    return a.weightedScore - b.weightedScore;
+  });
 
   // Convert objects to arrays (assuming values are arrays)
   const bestCombinations = rankedCombinations
@@ -220,22 +227,30 @@ function calculateScore(
   },
   dayWeight: number,
   gapWeight: number
-): number {
+): { slotsUsed: number; weightedScore: number } {
   const allSchedules: ScheduleType[] = [];
+  const slotsUsed = Object.keys(combination).length;
+  
   for (const [slotId, disciplineClassId] of Object.entries(combination)) {
-    allSchedules.push(...slotsSchedules[slotId][disciplineClassId]);
+    if (disciplineClassId) {  // Only count non-empty slots
+      allSchedules.push(...slotsSchedules[slotId][disciplineClassId]);
+    }
   }
-
+  
   const daysWithClasses = new Set(allSchedules.map((s) => s.dayOfWeek)).size;
   const dayScore = daysWithClasses * dayWeight;
 
   const gapScore = calculateGapScore(allSchedules) * gapWeight;
-
-  return dayScore + gapScore;
+  
+  return {
+    slotsUsed,
+    weightedScore: dayScore + gapScore
+  };
 }
 
 function calculateGapScore(schedules: ScheduleType[]): number {
-  let totalGapMinutes = 0;
+  // Gap is defined by how many hours there is between 2 classes
+  let totalGap = 0;
 
   const schedulesByDay: { [day: string]: ScheduleType[] } = {};
   schedules.forEach((schedule) => {
@@ -253,15 +268,17 @@ function calculateGapScore(schedules: ScheduleType[]): number {
 
     for (let i = 1; i < daySchedules.length; i++) {
       const gap =
-        convertDateToMinutes(daySchedules[i].startTime) -
-        convertDateToMinutes(daySchedules[i - 1].endTime);
+        Math.round(
+          convertDateToMinutes(daySchedules[i].startTime) -
+            convertDateToMinutes(daySchedules[i - 1].endTime)
+        ) / 60;
       if (gap > 0) {
-        totalGapMinutes += gap;
+        totalGap += gap;
       }
     }
   }
 
-  return totalGapMinutes;
+  return totalGap;
 }
 
 function hasTimeConflict(

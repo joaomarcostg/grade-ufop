@@ -39,7 +39,10 @@ const removeFromSelectedDisciplines = (
   return updated;
 };
 
-export const globalReducer = (state: AppState, { type, payload }: Action): AppState => {
+export const globalReducer = (
+  state: AppState,
+  { type, payload }: Action
+): AppState => {
   switch (type) {
     case ActionType.INIT_STATE:
       return payload;
@@ -66,35 +69,41 @@ export const globalReducer = (state: AppState, { type, payload }: Action): AppSt
         return state;
       }
 
-      const idx = state.coursedDisciplines.indexOf(payload);
-      if (idx === -1) {
-        return {
-          ...state,
-          coursedDisciplines: [...state.coursedDisciplines, payload],
-        };
+      const coursedDisciplines = new Map(state.coursedDisciplines)
+      
+      if (coursedDisciplines.has(payload.id)) {
+        coursedDisciplines.delete(payload.id);
+      } else {
+        coursedDisciplines.set(payload.id, payload);
       }
 
       return {
         ...state,
-        coursedDisciplines: state.coursedDisciplines.filter((discipline) => discipline !== payload),
+        coursedDisciplines
       };
 
     case ActionType.SET_MULTIPLE_COURSED_DISCIPLINES:
       return {
         ...state,
-        coursedDisciplines: payload,
+        coursedDisciplines: new Map(payload.map((d) => [d.id, d])),
       };
 
     case ActionType.ADD_TO_SELECTED_DISCIPLINES:
       return {
         ...state,
-        selectedDisciplines: updateSelectedDisciplines(state.selectedDisciplines, payload),
+        selectedDisciplines: updateSelectedDisciplines(
+          state.selectedDisciplines,
+          payload
+        ),
       };
 
     case ActionType.REMOVE_FROM_SELECTED_DISCIPLINES:
       return {
         ...state,
-        selectedDisciplines: removeFromSelectedDisciplines(state.selectedDisciplines, payload),
+        selectedDisciplines: removeFromSelectedDisciplines(
+          state.selectedDisciplines,
+          payload
+        ),
       };
 
     case ActionType.CREATE_DISCIPLINES_SLOT:
@@ -119,9 +128,14 @@ export const globalReducer = (state: AppState, { type, payload }: Action): AppSt
         ...state,
         disciplineSlots: {
           ...state.disciplineSlots,
-          [payload.slotId]: [...(state.disciplineSlots[payload.slotId] || []), payload.value],
+          [payload.slotId]: [
+            ...(state.disciplineSlots[payload.slotId] || []),
+            payload.value,
+          ],
         },
-        availableOptions: state.availableOptions.filter((item) => item?.value !== payload.value?.value),
+        availableOptions: state.availableOptions.filter(
+          (item) => item?.value !== payload.value?.value
+        ),
       };
 
     case ActionType.REMOVE_FROM_DISCIPLINES_SLOT:
@@ -132,7 +146,9 @@ export const globalReducer = (state: AppState, { type, payload }: Action): AppSt
         ...state,
         disciplineSlots: {
           ...state.disciplineSlots,
-          [payload.slotId]: (state.disciplineSlots[payload.slotId] || []).filter(
+          [payload.slotId]: (
+            state.disciplineSlots[payload.slotId] || []
+          ).filter(
             (disciplineClass) => disciplineClass?.value !== payload.value?.value
           ),
         },

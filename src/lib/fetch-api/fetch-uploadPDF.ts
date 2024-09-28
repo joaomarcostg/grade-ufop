@@ -1,15 +1,9 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+import { Discipline } from "@prisma/client";
 import { fetchRequest } from "./utils";
 
 type FetchUploadPDFResponse = {
-  data: {
-    id: string;
-    disciplineId: string | null;
-    courseId: string | null;
-    mandatory: boolean | null;
-    period: number | null;
-    createdAt: Date | null;
-  }[];
+  data: Discipline[];
 };
 
 function createFormData(file: File, courseId: string) {

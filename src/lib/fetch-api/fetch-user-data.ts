@@ -1,11 +1,11 @@
-import { User } from "@prisma/client";
+import { Discipline, User } from "@prisma/client";
 import { fetchRequest } from "./utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 type UserWithCourseAndDisciplines = {
   course: { id: string; name: string } | null;
-  completedDisciplines: { disciplineId: string }[];
+  completedDisciplines: Discipline[];
 };
 
 export type UserProfile = {

@@ -10,22 +10,12 @@ import {
 import {
   Button,
   Tooltip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Stepper,
   Step,
   StepLabel,
   Typography,
-  Divider,
 } from "@mui/material";
-import {
-  Add,
-  Create,
-  Visibility,
-  HelpOutline,
-  ExpandMore,
-} from "@mui/icons-material";
+import { Add, Create, Visibility, HelpOutline } from "@mui/icons-material";
 import { type AutocompleteOption } from "@/components/InputAutocomplete";
 import { StudentContext } from "@/app/context/StudentContext";
 import { getAvailableDisciplines } from "@/lib/fetch-api/fetch-disciplines";
@@ -45,7 +35,16 @@ function DisciplinesSelectorContent() {
   const [results, setResults] = useState<RequestResponse>(null);
   const [resultsDialogOpen, setResultsDialogOpen] = useState(false);
   const [generateDisabled, setGenerateDisabled] = useState(true);
-  const [activeStep, setActiveStep] = useState(0);
+  const [slotsAdditionDisabled, setSlotsAdditionDisabled] = useState(false);
+
+  useEffect(() => {
+    console.log(Object.keys(state.disciplineSlots));
+    if (Object.keys(state.disciplineSlots).length >= 8) {
+      setSlotsAdditionDisabled(true);
+    } else {
+      setSlotsAdditionDisabled(false);
+    }
+  }, [state.disciplineSlots]);
 
   const steps = [
     {
@@ -96,9 +95,7 @@ function DisciplinesSelectorContent() {
 
   useEffect(() => {
     const slots = Object.values(state.disciplineSlots);
-    setGenerateDisabled(
-      slots.length === 0 || slots.some((slot) => slot.length === 0)
-    );
+    setGenerateDisabled(slots.length === 0);
   }, [state.disciplineSlots]);
 
   const addDisciplinesSlot = useCallback(() => {
@@ -111,7 +108,6 @@ function DisciplinesSelectorContent() {
   }, [dispatch]);
 
   const removeDisciplinesSlot = (id: string) => {
-    if (Object.keys(state.disciplineSlots).length <= 1) return;
     Object.values(state.disciplineSlots[id]).forEach((discipline) => {
       dispatch({
         type: ActionType.REMOVE_FROM_SELECTED_DISCIPLINES,
@@ -139,8 +135,14 @@ function DisciplinesSelectorContent() {
   };
 
   async function buildGrades() {
+    const validSlots = Object.entries(state.disciplineSlots).filter(
+      ([_, disciplines]) => disciplines.length > 0
+    );
+
+    const disciplineSlots = Object.fromEntries(validSlots);
+
     const data = await getGrades({
-      disciplineSlots: state.disciplineSlots,
+      disciplineSlots,
       dayWeight,
       gapWeight,
     });
@@ -170,7 +172,7 @@ function DisciplinesSelectorContent() {
       <div className="py-6">
         <div className="flex items-center mb-4">
           <h2 className="text-xl font-bold">Slots de Disciplinas</h2>
-          <Tooltip title="Os slots representam diferentes opções de disciplinas para o mesmo horário. Arraste os slots para reordená-los e adicione múltiplas disciplinas em cada slot para criar combinações.">
+          <Tooltip title="Os slots representam diferentes opções de disciplinas para o mesmo horário. Arraste os slots para reordená-los por prioridade e adicione múltiplas disciplinas em cada slot para criar combinações.">
             <HelpOutline className="ml-2 cursor-help" />
           </Tooltip>
         </div>
@@ -209,6 +211,7 @@ function DisciplinesSelectorContent() {
               variant="text"
               onClick={addDisciplinesSlot}
               startIcon={<Add />}
+              disabled={slotsAdditionDisabled}
             >
               Adicionar Slot
             </Button>
@@ -225,7 +228,6 @@ function DisciplinesSelectorContent() {
               variant="contained"
               onClick={() => {
                 buildGrades();
-                setActiveStep(2);
               }}
               startIcon={<Create />}
             >

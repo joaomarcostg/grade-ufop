@@ -18,7 +18,11 @@ export async function GET(request: NextRequest) {
     const disciplines = await prisma.discipline.findMany({
       where: {
         courses: {
-          some: { courseId: courseId, mandatory, period: period ? parseInt(period) : undefined },
+          some: { 
+            courseId: courseId,
+            mandatory,
+            period: period ? parseInt(period) : undefined
+          },
         },
         classes: {
           some: {
@@ -27,30 +31,35 @@ export async function GET(request: NextRequest) {
         },
       },
       include: {
-        courses: true,
+        courses: {
+          where: { courseId: courseId },
+          select: { period: true, mandatory: true }
+        },
       },
     });
 
-    // Sort disciplines by period
-    const sortedDisciplines = disciplines.sort((a, b) => {
-      const periodA = a.courses[0]?.period || 0; // Assuming the period is at index 0, adjust as needed
-      const periodB = b.courses[0]?.period || 0;
+    const filteredDisciplines = disciplines.map(discipline => ({
+      id: discipline.id,
+      code: discipline.code,
+      name: discipline.name,
+      period: discipline.courses[0]?.period ?? null,
+      mandatory: discipline.courses[0]?.mandatory ?? false,
+    }));
+
+    // Sort disciplines by period and then by code
+    const sortedDisciplines = filteredDisciplines.sort((a, b) => {
+      const periodA = a.period || 0;
+      const periodB = b.period || 0;
 
       if (periodA === periodB) {
-        // If periods are the same, sort by discipline.code
-        const codeA = a.code || "";
-        const codeB = b.code || "";
-        return codeA.localeCompare(codeB);
+        return (a.code || "").localeCompare(b.code || "");
       }
 
       return periodA - periodB;
     });
 
-    const filteredDisciplines = sortedDisciplines.map((discipline) => ({
-      ...discipline,
-      discipline_course: undefined,
-    }));
-
-    return NextResponse.json({ data: filteredDisciplines });
+    return NextResponse.json({ data: sortedDisciplines });
   }
+
+  return NextResponse.json({ data: [] });
 }

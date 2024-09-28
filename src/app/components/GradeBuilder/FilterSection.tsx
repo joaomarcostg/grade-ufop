@@ -15,6 +15,7 @@ import {
   Typography,
   Tooltip,
   Box,
+  IconButton,
 } from "@mui/material";
 import {
   AccessTime,
@@ -22,27 +23,9 @@ import {
   FilterList,
   HelpOutline,
   TuneRounded,
+  Settings,
 } from "@mui/icons-material";
-import { useFilter } from "./FilterContext";
-
-const TIME_SLOTS = [
-  "07:30-09:10",
-  "09:20-11:00",
-  "11:10-12:50",
-  "13:30-15:10",
-  "15:20-17:00",
-  "17:10-19:00",
-  "19:00-20:40",
-  "21:00-22:40",
-];
-
-const DAYS_OF_WEEK = [
-  { label: "Segunda", value: "SEG" },
-  { label: "Terça", value: "TER" },
-  { label: "Quarta", value: "QUA" },
-  { label: "Quinta", value: "QUI" },
-  { label: "Sexta", value: "SEX" },
-];
+import { useFilter, TIME_SLOTS, DAYS_OF_WEEK } from "./FilterContext";
 
 const FilterSummary: React.FC<{
   timeSlots: string[];
@@ -122,18 +105,32 @@ export const FilterSection: React.FC = () => {
     gapWeight,
     setGapWeight,
   } = useFilter();
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [filterAnchorEl, setFilterAnchorEl] =
+    useState<HTMLButtonElement | null>(null);
+  const [settingsAnchorEl, setSettingsAnchorEl] =
+    useState<HTMLButtonElement | null>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setFilterAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleFilterClose = () => {
+    setFilterAnchorEl(null);
   };
 
-  const open = Boolean(anchorEl);
-  const id = open ? "filter-popover" : undefined;
+  const handleSettingsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setSettingsAnchorEl(event.currentTarget);
+  };
+
+  const handleSettingsClose = () => {
+    setSettingsAnchorEl(null);
+  };
+
+  const filterOpen = Boolean(filterAnchorEl);
+  const filterId = filterOpen ? "filter-popover" : undefined;
+
+  const settingsOpen = Boolean(settingsAnchorEl);
+  const settingsId = settingsOpen ? "settings-popover" : undefined;
 
   const allTimesSelected =
     timeSlots.length > 0 && timeSlots.length === TIME_SLOTS.length;
@@ -163,19 +160,23 @@ export const FilterSection: React.FC = () => {
       <div className="flex justify-between">
         <span className="font-bold text-lg">Filtrando por:</span>
         <Box className="mb-4">
-          <Button
-            variant="contained"
-            onClick={handleClick}
-            startIcon={<FilterList />}
-            sx={{ textTransform: "none" }}
-          >
-            Filtros
-          </Button>
+          <div className="flex gap-4">
+            <Tooltip title="Filtros">
+              <IconButton onClick={handleFilterClick}>
+                <FilterList />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Preferências">
+              <IconButton onClick={handleSettingsClick}>
+                <Settings />
+              </IconButton>
+            </Tooltip>
+          </div>
           <Popover
-            id={id}
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handleClose}
+            id={filterId}
+            open={filterOpen}
+            anchorEl={filterAnchorEl}
+            onClose={handleFilterClose}
             anchorOrigin={{
               vertical: "bottom",
               horizontal: "left",
@@ -238,17 +239,31 @@ export const FilterSection: React.FC = () => {
                   ))}
                 </Select>
               </FormControl>
-
-              <Box>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  Peso dos dias com aulas
-                  <Tooltip title="Um valor mais alto prioriza grades com menos dias de aula na semana.">
-                    <HelpOutline
-                      fontSize="small"
-                      className="ml-2 cursor-help"
-                    />
-                  </Tooltip>
-                </Typography>
+            </Box>
+          </Popover>
+          <Popover
+            id={settingsId}
+            open={settingsOpen}
+            anchorEl={settingsAnchorEl}
+            onClose={handleSettingsClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            slotProps={{
+              paper: {
+                style: { width: "400px", padding: "16px" },
+              },
+            }}
+          >
+            <Box>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Peso dos dias com aulas
+                <Tooltip title="Um valor mais alto prioriza grades com menos dias de aula na semana.">
+                  <HelpOutline fontSize="small" className="ml-2 cursor-help" />
+                </Tooltip>
+              </Typography>
+              <div className="px-2">
                 <Slider
                   value={dayWeight}
                   onChange={(_, newValue) => setDayWeight(newValue as number)}
@@ -258,18 +273,17 @@ export const FilterSection: React.FC = () => {
                   min={1}
                   max={5}
                 />
-              </Box>
+              </div>
+            </Box>
 
-              <Box>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  Peso dos intervalos entre aulas
-                  <Tooltip title="Um valor mais alto prioriza grades com menos intervalos vazios entre as aulas.">
-                    <HelpOutline
-                      fontSize="small"
-                      className="ml-2 cursor-help"
-                    />
-                  </Tooltip>
-                </Typography>
+            <Box>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Peso dos intervalos entre aulas
+                <Tooltip title="Um valor mais alto prioriza grades com menos intervalos vazios entre as aulas.">
+                  <HelpOutline fontSize="small" className="ml-2 cursor-help" />
+                </Tooltip>
+              </Typography>
+              <div className="px-2">
                 <Slider
                   value={gapWeight}
                   onChange={(_, newValue) => setGapWeight(newValue as number)}
@@ -279,7 +293,7 @@ export const FilterSection: React.FC = () => {
                   min={1}
                   max={5}
                 />
-              </Box>
+              </div>
             </Box>
           </Popover>
         </Box>

@@ -1,15 +1,33 @@
 "use client";
-import React, { useState, useContext, useEffect } from "react";
+import React, {
+  useState,
+  useContext,
+  useEffect,
+  useMemo,
+  KeyboardEvent,
+} from "react";
 import { type DraggableProvided } from "@hello-pangea/dnd";
 import IconButton from "@mui/material/IconButton";
-import { DragIndicator, Add, Delete, Edit } from "@mui/icons-material";
+import {
+  DragIndicator,
+  Add,
+  PlaylistAdd,
+  Delete,
+  Edit,
+} from "@mui/icons-material";
 import Autocomplete, {
   type AutocompleteOption,
-} from "@/components/InputAutocomplete"; // Import your Autocomplete component
+} from "@/components/InputAutocomplete";
 import { StudentContext } from "@/app/context/StudentContext";
 import Chip from "./Chip";
 import { ActionType } from "@/app/context/actions";
-import { Button, Divider } from "@mui/material";
+import {
+  Button,
+  Divider,
+  Tooltip,
+  Checkbox,
+  FormControlLabel,
+} from "@mui/material";
 
 type DisciplinesSlotProps = {
   slotId: string;
@@ -31,15 +49,26 @@ function DisciplinesSlot({
   const [selectedDiscipline, setSelectedDiscipline] =
     useState<AutocompleteOption | null>(null);
   const [options, setOptions] = useState<AutocompleteOption[]>([]);
+  const [addAllClasses, setAddAllClasses] = useState(false);
+
+  const groupedOptions = useMemo(() => {
+    const grouped: { [key: string]: AutocompleteOption[] } = {};
+    options.forEach((option) => {
+      if (!grouped[option.disciplineId]) {
+        grouped[option.disciplineId] = [];
+      }
+      grouped[option.disciplineId].push(option);
+    });
+    return grouped;
+  }, [options]);
+
   useEffect(() => {
-    // Collect all disciplineClassId values from all slots except the current one
     const disciplineClassIdsFromOtherSlots = Object.entries(
       state.selectedDisciplines
     )
       .filter(([otherSlotId]) => otherSlotId !== slotId)
       .flatMap(([, disciplineClassIds]) => disciplineClassIds);
 
-    // Filter available options by removing disciplines that are selected in other slots
     const diff = state.availableOptions.filter(
       (option) =>
         !disciplineClassIdsFromOtherSlots.includes(option?.disciplineId)
@@ -50,29 +79,36 @@ function DisciplinesSlot({
 
   const handleAdd = () => {
     if (selectedDiscipline) {
-      // Add chip and remove the selected discipline from availableDisciplines
-      dispatch({
-        type: ActionType.ADD_TO_DISCIPLINES_SLOT,
-        payload: {
-          slotId,
-          value: selectedDiscipline,
-        },
-      });
-
-      dispatch({
-        type: ActionType.ADD_TO_SELECTED_DISCIPLINES,
-        payload: {
-          slotId,
-          disciplineId: selectedDiscipline.disciplineId,
-        },
-      });
-
+      if (addAllClasses) {
+        const allClassesForDiscipline =
+          groupedOptions[selectedDiscipline.disciplineId];
+        allClassesForDiscipline.forEach(addDiscipline);
+      } else {
+        addDiscipline(selectedDiscipline);
+      }
       setSelectedDiscipline(null);
     }
   };
 
+  const addDiscipline = (discipline: AutocompleteOption) => {
+    dispatch({
+      type: ActionType.ADD_TO_DISCIPLINES_SLOT,
+      payload: {
+        slotId,
+        value: discipline,
+      },
+    });
+
+    dispatch({
+      type: ActionType.ADD_TO_SELECTED_DISCIPLINES,
+      payload: {
+        slotId,
+        disciplineId: discipline.disciplineId,
+      },
+    });
+  };
+
   const handleRemove = (chip: NonNullable<AutocompleteOption>) => {
-    // Remove chip and add the removed chip back to availableDisciplines
     dispatch({
       type: ActionType.REMOVE_FROM_DISCIPLINES_SLOT,
       payload: {
@@ -92,6 +128,13 @@ function DisciplinesSlot({
 
   const handleSelection = (value: AutocompleteOption | null) => {
     setSelectedDiscipline(value);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" && selectedDiscipline) {
+      event.preventDefault();
+      handleAdd();
+    }
   };
 
   return (
@@ -123,16 +166,36 @@ function DisciplinesSlot({
               <Autocomplete
                 options={options}
                 onChange={handleSelection}
+                onKeyDown={handleKeyDown}
                 label="Disciplina"
                 value={selectedDiscipline}
                 style={{
-                  flex: 1,
+                  width: "100%",
                   maxWidth: 400,
                 }}
               />
-              <Button variant="text" onClick={handleAdd} endIcon={<Add />}>
-                Adicionar
-              </Button>
+              <div className="flex-1 flex items-center justify-between">
+                <Button
+                  variant="text"
+                  onClick={handleAdd}
+                  endIcon={addAllClasses ? <PlaylistAdd /> : <Add />}
+                  disabled={!selectedDiscipline}
+                >
+                  Adicionar
+                </Button>
+                <Tooltip title="Adicionar todas as turmas desta disciplina">
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        color="primary"
+                        checked={addAllClasses}
+                        onChange={(e) => setAddAllClasses(e.target.checked)}
+                      />
+                    }
+                    label="Todas as turmas"
+                  />
+                </Tooltip>
+              </div>
             </div>
             <Divider />
           </>

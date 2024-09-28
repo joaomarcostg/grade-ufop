@@ -1,7 +1,17 @@
 "use client";
 import CoursePicker from "@/components/CoursePicker";
 import DisciplinesPicker from "@/components/DisciplinesPicker";
-import { Container, Typography, Box, Button, Step, StepLabel, Stepper } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Box,
+  Button,
+  Step,
+  StepLabel,
+  Stepper,
+  Tooltip,
+} from "@mui/material";
+import { HelpOutline } from "@mui/icons-material";
 import { AutocompleteOption } from "./InputAutocomplete";
 import { Session } from "next-auth/core/types";
 import { useContext, useEffect, useState } from "react";
@@ -25,9 +35,15 @@ export default function HomeContent({ session, courses }: HomeProps) {
   } = useContext(StudentContext);
 
   const [activeStep, setActiveStep] = useState<number>(0);
-  const [selectedCourse, setSelectedCourse] = useState<AutocompleteOption | null>(course);
+  const [selectedCourse, setSelectedCourse] =
+    useState<AutocompleteOption | null>(course);
 
-  const steps: string[] = ["Bem-vindo", "Selecione seu curso", "Selecione suas disciplinas", "Confirmação"];
+  const steps: string[] = [
+    "Bem-vindo",
+    "Selecione seu curso",
+    "Selecione suas disciplinas",
+    "Confirmação",
+  ];
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -69,15 +85,15 @@ export default function HomeContent({ session, courses }: HomeProps) {
     router.push("/montar-grade");
   };
 
-  useEffect(() => {
-    if (setupCompleted) {
-      router.push("/montar-grade");
-    }
-  }, [setupCompleted, router]);
+  // useEffect(() => {
+  //   if (setupCompleted) {
+  //     router.push("/montar-grade");
+  //   }
+  // }, [setupCompleted, router]);
 
-  if (setupCompleted) {
-    return <></>;
-  }
+  // if (setupCompleted) {
+  //   return <></>;
+  // }
 
   return (
     <Container maxWidth="md">
@@ -96,8 +112,9 @@ export default function HomeContent({ session, courses }: HomeProps) {
               Bem-vindo ao GradeUFOP, {capitalize(session.user?.name)}!
             </Typography>
             <Typography variant="body1" paragraph>
-              Estamos animados para ajudá-lo a organizar sua jornada acadêmica. Vamos começar selecionando seu curso e as disciplinas que
-              você já concluiu.
+              Estamos animados para ajudá-lo a organizar sua jornada acadêmica.
+              Vamos começar selecionando seu curso e as disciplinas que você já
+              concluiu.
             </Typography>
             <Button variant="contained" onClick={handleNext}>
               Começar
@@ -107,7 +124,14 @@ export default function HomeContent({ session, courses }: HomeProps) {
 
         {activeStep === 1 && (
           <>
-            <CoursePicker courses={courses} selectedCourse={selectedCourse} handleCourseChange={setSelectedCourse} />
+            <Typography variant="h5" gutterBottom marginBottom={4}>
+              Selecione o curso que você está cursando
+            </Typography>
+            <CoursePicker
+              courses={courses}
+              selectedCourse={selectedCourse}
+              handleCourseChange={setSelectedCourse}
+            />
             <div className="w-full flex justify-between items-center">
               <Button onClick={handleBack} sx={{ mr: 1 }}>
                 Voltar
@@ -138,16 +162,27 @@ export default function HomeContent({ session, courses }: HomeProps) {
 
         {activeStep === 3 && (
           <>
-            <Typography variant="h5" gutterBottom>
+            <Typography variant="h5" gutterBottom mb={4}>
               Confirme suas seleções
+              <Tooltip title="Você pode alterar suas seleções posteriormente na página de Perfil">
+                <HelpOutline fontSize="small" className="ml-2 cursor-help" />
+              </Tooltip>
             </Typography>
             <Typography variant="body1" paragraph>
-              Curso: {course?.label}
+              <span className="font-bold">Curso:</span> {course?.label}
             </Typography>
             <Typography variant="body1" paragraph>
-              Disciplinas selecionadas: {coursedDisciplines.length}
+              <span className="font-bold">Disciplinas selecionadas:</span>{" "}
+              {coursedDisciplines.size}
             </Typography>
-            <div className="w-full flex justify-between items-center">
+            <div className="flex flex-col gap-2 max-h-[360px] overflow-y-auto">
+              {Array.from(coursedDisciplines.values()).map((discipline) => (
+                <Typography key={discipline.id} variant="body2">
+                  {discipline.code} - {discipline.name}
+                </Typography>
+              ))}
+            </div>
+            <div className="w-full mt-8 flex justify-between items-center">
               <Button onClick={handleBack} sx={{ mr: 1 }}>
                 Voltar
               </Button>

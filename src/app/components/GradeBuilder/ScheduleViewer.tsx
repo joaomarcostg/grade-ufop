@@ -110,7 +110,7 @@ const ScheduleViewer = ({
       PaperProps={{
         style: {
           height: "100%",
-          maxHeight: fullScreen ? '100%' : '540px',
+          maxHeight: fullScreen ? '100%' : '800px',
           display: 'flex',
           flexDirection: 'column',
         },

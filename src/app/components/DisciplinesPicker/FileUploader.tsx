@@ -59,9 +59,8 @@ export default function FileUploader() {
       setFile(uploadedFile);
       setLoading(true);
 
-      const data = await postUploadPDF({ file: uploadedFile, courseId: course.value });
-      const disciplineIDs = data.filter((d) => Boolean(d.disciplineId)).map((d) => d.disciplineId!);
-      dispatch({ type: ActionType.SET_MULTIPLE_COURSED_DISCIPLINES, payload: disciplineIDs });
+      const coursedDisciplines = await postUploadPDF({ file: uploadedFile, courseId: course.value });
+      dispatch({ type: ActionType.SET_MULTIPLE_COURSED_DISCIPLINES, payload: coursedDisciplines });
       
       setErrorMsg("");
     } catch (error) {
@@ -73,7 +72,7 @@ export default function FileUploader() {
 
   return (
     <div>
-      <div className="relative mt-8 w-[600px] border-dashed border border-gray-400 py-6 flex flex-col gap-2 justify-center items-center rounded">
+      <div className="relative w-[600px] border-dashed border border-gray-400 py-6 flex flex-col gap-2 justify-center items-center rounded">
         <UploadFile color={"primary"} fontSize="large" />
         <div>
           <span className="underline text-primary cursor-pointer">Clique para upload</span>
