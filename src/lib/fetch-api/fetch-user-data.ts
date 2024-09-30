@@ -1,5 +1,6 @@
 import { Discipline, User } from "@prisma/client";
 import { fetchRequest } from "./utils";
+import { UserProfile } from "@/app/context/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -8,21 +9,14 @@ type UserWithCourseAndDisciplines = {
   completedDisciplines: Discipline[];
 };
 
-export type UserProfile = {
-  id: string;
-  name: string;
-  email: string;
-  image: string;
-  course: { id: string; name: string } | null;
-  coursedDisciplines: Array<{ id: string; name: string }>;
-  savedCombinations: Array<{ id: string; name: string }>;
-};
-
 export async function getUserCourseAndDisciplines() {
   try {
-    const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/course-and-disciplines`, {
-      method: "GET",
-    });
+    const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
+      `${API_BASE_URL}/user/course-and-disciplines`,
+      {
+        method: "GET",
+      }
+    );
 
     if (!data) {
       throw new Error("Failed to fetch data");
@@ -37,9 +31,12 @@ export async function getUserCourseAndDisciplines() {
 
 export async function getUserProfile(): Promise<UserProfile | null> {
   try {
-    const { data } = await fetchRequest<{ data: UserProfile }>(`${API_BASE_URL}/user/profile`, {
-      method: "GET",
-    });
+    const { data } = await fetchRequest<{ data: UserProfile }>(
+      `${API_BASE_URL}/user/profile`,
+      {
+        method: "GET",
+      }
+    );
 
     if (!data) {
       throw new Error("Failed to fetch user profile");
@@ -56,10 +53,13 @@ export async function setUserCourse(courseId: string) {
   try {
     const body = JSON.stringify({ courseId });
 
-    const { data } = await fetchRequest<{ data: User }>(`${API_BASE_URL}/user/course`, {
-      method: "POST",
-      body,
-    });
+    const { data } = await fetchRequest<{ data: User }>(
+      `${API_BASE_URL}/user/course`,
+      {
+        method: "POST",
+        body,
+      }
+    );
 
     if (!data) {
       throw new Error("Failed to update user course");
@@ -74,11 +74,14 @@ export async function setUserCourse(courseId: string) {
 
 export async function updateCoursedDisciplines(disciplineIds: string[]) {
   try {
-    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/coursed-disciplines`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ disciplineIds }),
-    });
+    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
+      `${API_BASE_URL}/user/completed-disciplines`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disciplineIds }),
+      }
+    );
 
     if (!res.data) {
       throw new Error("Failed to update coursed disciplines");
@@ -93,11 +96,14 @@ export async function updateCoursedDisciplines(disciplineIds: string[]) {
 
 export async function addCompletedDiscipline(disciplineId: string) {
   try {
-    const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(`${API_BASE_URL}/user/completed-disciplines`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ disciplineId }),
-    });
+    const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
+      `${API_BASE_URL}/user/completed-disciplines`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disciplineId }),
+      }
+    );
 
     if (!data) {
       throw new Error("Failed to add completed discipline");

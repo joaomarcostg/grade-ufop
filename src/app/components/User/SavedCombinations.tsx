@@ -9,7 +9,7 @@ const SavedCombinations: React.FC<SavedCombinationsProps> = ({ combinations }) =
   return (
     <div>
       <h3 className="text-lg font-semibold mb-2">Grades Salvas</h3>
-      {combinations.length > 0 ? (
+      {combinations?.length > 0 ? (
         <ul>
           {combinations.map(combination => (
             <li key={combination.id}>{combination.name}</li>

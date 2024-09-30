@@ -23,7 +23,7 @@ type InputAutocompleteProps = {
 
 function InputAutocomplete({
   onChange,
-  onKeyDown,
+  onKeyDown = () => {},
   options,
   label,
   style,

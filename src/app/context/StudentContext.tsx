@@ -14,6 +14,7 @@ import { getUserCourseAndDisciplines } from "@/lib/fetch-api/fetch-user-data";
 
 const defaultState: AppState = {
   course: null,
+  user: null,
   coursedDisciplines: new Map(),
   availableOptions: [],
   disciplineSlots: {},
@@ -51,8 +52,6 @@ const loadFromLocalStorage = (): AppState | null => {
     const appStateObj = JSON.parse(appState) as ObjAppState;
     const coursedDisciplines = new Map();
 
-    console.log(appStateObj)
-
     for (const key in appStateObj.coursedDisciplines) {
       coursedDisciplines.set(key, appStateObj.coursedDisciplines[key]);
     }
@@ -70,7 +69,6 @@ const loadFromLocalStorage = (): AppState | null => {
 const loadFromDatabase = async (): Promise<AppState | null> => {
   try {
     const dbData = await getUserCourseAndDisciplines();
-    console.log("dbData", dbData);
 
     if (!dbData) return null;
 
@@ -84,8 +82,6 @@ const loadFromDatabase = async (): Promise<AppState | null> => {
     const coursedDisciplines = new Map(
       dbData.completedDisciplines.map((d) => [d.id, d])
     );
-
-    console.log("coursedDisciplines", coursedDisciplines);
 
     return {
       ...defaultState,
@@ -103,7 +99,7 @@ function StudentProvider({ children }: React.PropsWithChildren<{}>) {
   const [state, dispatch] = useReducer(globalReducer, defaultState);
 
   const initializeState = async () => {
-    const existingState = loadFromLocalStorage() || (await loadFromDatabase());
+    const existingState =  (await loadFromDatabase());
     dispatch({
       type: ActionType.INIT_STATE,
       payload: existingState ?? defaultState,

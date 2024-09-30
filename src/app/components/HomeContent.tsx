@@ -18,7 +18,7 @@ import { useContext, useEffect, useState } from "react";
 import { StudentContext } from "../context/StudentContext";
 import { useRouter } from "next/navigation";
 import { ActionType } from "../context/actions";
-import { setUserCourse } from "@/lib/fetch-api/fetch-user-data";
+import { setUserCourse, updateCoursedDisciplines } from "@/lib/fetch-api/fetch-user-data";
 import { capitalize } from "@/app/utils/converters";
 
 interface HomeProps {
@@ -73,27 +73,31 @@ export default function HomeContent({ session, courses }: HomeProps) {
     }
   };
 
-  const handleSaveAndBuildGrid = () => {
-    console.log("Curso selecionado:", course);
-    console.log("Disciplinas selecionadas:", coursedDisciplines);
+  const handleSave = async () => {
+    try {
+      dispatch({
+        type: ActionType.SET_SETUP_COMPLETED,
+        payload: true,
+      });
 
-    dispatch({
-      type: ActionType.SET_SETUP_COMPLETED,
-      payload: true,
-    });
+      const completedDisciplines = Array.from(coursedDisciplines.values()).map(d => d.id)
+      await updateCoursedDisciplines(completedDisciplines);
 
-    router.push("/montar-grade");
+      router.push("/montar-grade");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  // useEffect(() => {
-  //   if (setupCompleted) {
-  //     router.push("/montar-grade");
-  //   }
-  // }, [setupCompleted, router]);
+  useEffect(() => {
+    if (setupCompleted) {
+      router.push("/montar-grade");
+    }
+  }, [setupCompleted, router]);
 
-  // if (setupCompleted) {
-  //   return <></>;
-  // }
+  if (setupCompleted) {
+    return <></>;
+  }
 
   return (
     <Container maxWidth="md">
@@ -186,7 +190,7 @@ export default function HomeContent({ session, courses }: HomeProps) {
               <Button onClick={handleBack} sx={{ mr: 1 }}>
                 Voltar
               </Button>
-              <Button variant="contained" onClick={handleSaveAndBuildGrid}>
+              <Button variant="contained" onClick={handleSave}>
                 Salvar e Continuar
               </Button>
             </div>

@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       data: {
         course,
-        completedDisciplines,
+        completedDisciplines: completedDisciplines.map((cd) => cd.discipline),
       },
     });
   } catch (error) {

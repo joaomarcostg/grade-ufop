@@ -1,27 +1,26 @@
 // app/profile/components/CoursedDisciplines.tsx
 "use client";
 
-import React, { useState } from "react";
-import { Chip, Button, Dialog, DialogTitle, DialogContent, DialogActions, Checkbox, FormControlLabel } from "@mui/material";
+import React, { useContext, useState } from "react";
+import { Button } from "@mui/material";
+import { SaveOutlined, Edit } from "@mui/icons-material";
 import { updateCoursedDisciplines } from "@/lib/fetch-api/fetch-user-data"; // You'll need to implement this
-import EditIcon from "@mui/icons-material/Edit";
+import ManualPicker from "../DisciplinesPicker/ManualPicker";
+import { StudentContext } from "@/app/context/StudentContext";
 
-interface CoursedDisciplinesProps {
-  coursedDisciplines: Array<{ id: string; name: string }>;
-}
-
-const CoursedDisciplines: React.FC<CoursedDisciplinesProps> = ({ coursedDisciplines }) => {
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<string[]>(coursedDisciplines.map((d) => d.id));
-
-  const handleToggle = (disciplineId: string) => {
-    setSelected((prev) => (prev.includes(disciplineId) ? prev.filter((id) => id !== disciplineId) : [...prev, disciplineId]));
-  };
+function CoursedDisciplines() {
+  const [isEditing, setIsEditing] = useState(false);
+  const {
+    state: { coursedDisciplines },
+  } = useContext(StudentContext);
 
   const handleSave = async () => {
     try {
-      await updateCoursedDisciplines(selected);
-      setOpen(false);
+      const completedDisciplines = Array.from(coursedDisciplines.values()).map(
+        (d) => d.id
+      );
+      await updateCoursedDisciplines(completedDisciplines);
+      setIsEditing(false)
     } catch (error) {
       console.error("Failed to update coursed disciplines:", error);
     }
@@ -29,38 +28,21 @@ const CoursedDisciplines: React.FC<CoursedDisciplinesProps> = ({ coursedDiscipli
 
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold mb-2">Disciplinas cursadas</h3>
-      <div className="flex items-center gap-4">
-        <div className="flex flex-wrap gap-2">
-          {coursedDisciplines.length > 0 ? (
-            coursedDisciplines.map((discipline) => <Chip key={discipline.id} label={discipline.name} />)
-          ) : (
-            <>Nenhuma disciplina cursada ainda.</>
-          )}
-        </div>
-        <Button onClick={() => setOpen(true)} startIcon={<EditIcon />}>
+      <h3 className="text-lg font-semibold mb-2 flex items-center gap-4">
+        <span>Disciplinas cursadas</span>
+        {
+          isEditing ? <Button startIcon={<SaveOutlined />} onClick={handleSave}>
+          Salvar
+        </Button> :  <Button startIcon={<Edit />} onClick={() => setIsEditing(true)}>
           Editar
         </Button>
+        }
+      </h3>
+      <div className="flex items-center gap-4">
+        <ManualPicker disabled={!isEditing} />
       </div>
-
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>Editar Disciplinas Cursadas</DialogTitle>
-        <DialogContent>
-          {coursedDisciplines.map((discipline) => (
-            <FormControlLabel
-              key={discipline.id}
-              control={<Checkbox checked={selected.includes(discipline.id)} onChange={() => handleToggle(discipline.id)} />}
-              label={discipline.name}
-            />
-          ))}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button onClick={handleSave}>Salvar</Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
-};
+}
 
 export default CoursedDisciplines;

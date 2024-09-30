@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSessionEmail } from "@/lib/auth";
 
-export async function POST(request: NextRequest, { params }: { params: { userId: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { userId: string } }
+) {
   try {
     const { disciplineId } = await request.json();
     await prisma.completedDiscipline.create({
@@ -25,7 +28,10 @@ export async function POST(request: NextRequest, { params }: { params: { userId:
     return NextResponse.json({ data: updatedUser });
   } catch (error) {
     console.error("Error adding completed discipline:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -33,7 +39,10 @@ export async function PUT(request: NextRequest) {
   const email = await getSessionEmail(request);
 
   if (!email) {
-    return NextResponse.json({ error: "Email not found in session" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Email not found in session" },
+      { status: 400 }
+    );
   }
 
   const { disciplineIds } = await request.json();
@@ -52,9 +61,36 @@ export async function PUT(request: NextRequest) {
       where: { userId: user.id },
     });
 
+    const selectedDisciplines = await prisma.discipline.findMany({
+      where: {
+        id: {
+          in: disciplineIds,
+        },
+      },
+    });
+
+    const equivalencyGroups = selectedDisciplines
+      .map((s) => s.equivalencyGroupId)
+      .filter((val) => val !== null);
+
+    const equivalentDisciplines = await prisma.discipline.findMany({
+      where: {
+        equivalencyGroupId: {
+          in: equivalencyGroups,
+        },
+      },
+    });
+
+    const coursedDisciplineIds = [
+      ...disciplineIds,
+      ...equivalentDisciplines.map((d) => d.id),
+    ];
+
+    const completedDisciplineSet = new Set(coursedDisciplineIds);
+
     // Add new completed disciplines
     await prisma.completedDiscipline.createMany({
-      data: disciplineIds.map((disciplineId: string) => ({
+      data: Array.from(completedDisciplineSet).map((disciplineId: string) => ({
         userId: user.id,
         disciplineId,
       })),
@@ -75,6 +111,9 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error("Error updating coursed disciplines:", error);
-    return NextResponse.json({ error: "Failed to update coursed disciplines" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update coursed disciplines" },
+      { status: 500 }
+    );
   }
 }

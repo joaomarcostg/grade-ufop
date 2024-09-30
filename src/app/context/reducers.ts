@@ -47,6 +47,12 @@ export const globalReducer = (
     case ActionType.INIT_STATE:
       return payload;
 
+    case ActionType.SET_USER_DATA:
+      return {
+        ...state,
+        user: payload,
+      };
+
     case ActionType.SET_AVAILABLE_OPTIONS:
       return {
         ...state,

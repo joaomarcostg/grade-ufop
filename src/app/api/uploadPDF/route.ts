@@ -36,21 +36,15 @@ function retrievePendingDisciplines(textContent: TextContent) {
 
 async function findAlreadyCoursedDisciplines(file: File, courseId: string) {
   const textContent = await getPDFContent(file);
-  const pending = retrievePendingDisciplines(textContent);
+  const pendingCodes = retrievePendingDisciplines(textContent);
 
-  // // Convert old pending disciplines to new ones
-  // const pending = oldPending.map(oldCode => {
-  //   const mappingObject = disciplineMapping.find(mapping => Object.keys(mapping)[0] === oldCode);
-  //   return mappingObject ? Object.values(mappingObject)[0] : oldCode;
-  // });
-
-  const alreadyCoursedDisciplines = await prisma.disciplineCourse.findMany({
+  const pending = await prisma.disciplineCourse.findMany({
     where: {
       courseId: courseId,
       AND: {
         discipline: {
           code: {
-            notIn: pending,
+            in: pendingCodes,
           },
         },
       },
@@ -60,7 +54,41 @@ async function findAlreadyCoursedDisciplines(file: File, courseId: string) {
     },
   });
 
-  console.log({ alreadyCoursedDisciplines });
+  const equivalencyGroups = pending
+    .map((pd) => pd.discipline.equivalencyGroupId)
+    .filter((val) => val !== null);
+
+  const equivalentDisciplines = await prisma.discipline.findMany({
+    where: {
+      equivalencyGroupId: {
+        in: equivalencyGroups,
+      },
+    },
+  });
+
+  const pendingDisciplineIds = [
+    ...pending.map((d) => d.discipline.id),
+    ...equivalentDisciplines.map((d) => d.id),
+  ];
+
+  const pendingDisciplines = Array.from(new Set(pendingDisciplineIds));
+
+  const alreadyCoursedDisciplines = await prisma.disciplineCourse.findMany({
+    where: {
+      courseId: courseId,
+      mandatory: true,
+      AND: {
+        discipline: {
+          id: {
+            notIn: pendingDisciplines,
+          },
+        },
+      },
+    },
+    select: {
+      discipline: true,
+    },
+  });
 
   return alreadyCoursedDisciplines;
 }
@@ -95,7 +123,7 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({
-      data: alreadyCoursedDisciplines,
+      data: alreadyCoursedDisciplines.map(d => d.discipline),
     });
   } catch (error) {
     return NextResponse.json(

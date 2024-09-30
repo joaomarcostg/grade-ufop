@@ -258,10 +258,15 @@ export const FilterSection: React.FC = () => {
           >
             <Box>
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                Peso dos dias com aulas
-                <Tooltip title="Um valor mais alto prioriza grades com menos dias de aula na semana.">
-                  <HelpOutline fontSize="small" className="ml-2 cursor-help" />
-                </Tooltip>
+                <div className="flex items-center">
+                  Peso dos dias com aulas
+                  <Tooltip title="Um valor mais alto prioriza grades com menos dias de aula na semana.">
+                    <HelpOutline
+                      fontSize="small"
+                      className="ml-2 cursor-help"
+                    />
+                  </Tooltip>
+                </div>
               </Typography>
               <div className="px-2">
                 <Slider
@@ -278,10 +283,15 @@ export const FilterSection: React.FC = () => {
 
             <Box>
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                Peso dos intervalos entre aulas
-                <Tooltip title="Um valor mais alto prioriza grades com menos intervalos vazios entre as aulas.">
-                  <HelpOutline fontSize="small" className="ml-2 cursor-help" />
-                </Tooltip>
+                <div className="flex items-center">
+                  Peso dos intervalos entre aulas
+                  <Tooltip title="Um valor mais alto prioriza grades com menos intervalos vazios entre as aulas.">
+                    <HelpOutline
+                      fontSize="small"
+                      className="ml-2 cursor-help"
+                    />
+                  </Tooltip>
+                </div>
               </Typography>
               <div className="px-2">
                 <Slider

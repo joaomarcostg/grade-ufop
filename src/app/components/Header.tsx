@@ -10,20 +10,13 @@ const Header = async () => {
   return (
     <AppBar position="fixed">
       <Toolbar>
-        <Button
-          color="inherit"
-          component={Link}
-          href="/"
-          sx={{
-            flexGrow: 1,
-            justifyContent: "flex-start",
-            textTransform: "none",
-          }}
-        >
-          <Typography variant="h6" component="div">
-            GradeUFOP
-          </Typography>
-        </Button>
+        <div className="flex-1">
+          <Button color="inherit" component={Link} href="/">
+            <Typography variant="h6" component="div">
+              GradeUFOP
+            </Typography>
+          </Button>
+        </div>
 
         {session?.user && (
           <Button color="inherit" component={Link} href="/profile">

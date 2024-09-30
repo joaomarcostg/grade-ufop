@@ -1,6 +1,6 @@
 "use client";
 import { FormEvent, useContext, useRef, useState } from "react";
-import { UploadFile, Delete } from "@mui/icons-material";
+import { UploadFile, Delete, InsertDriveFileOutlined } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { StudentContext } from "@/app/context/StudentContext";
 import { ActionType } from "@/app/context/actions";
@@ -90,7 +90,7 @@ export default function FileUploader() {
       {file && (
         <div className="flex w-full gap-4 p-4 items-center">
           <div>
-            <UploadFile color={"primary"} fontSize="large" />
+            <InsertDriveFileOutlined color={"primary"} fontSize="large" />
           </div>
           <div className="flex flex-col flex-1">
             <span>{file.name}</span>
@@ -98,7 +98,7 @@ export default function FileUploader() {
           </div>
           <div className=" text-gray-500">
             <IconButton onClick={() => handleRemoveFile()}>
-              <Delete color="inherit" fontSize="large" />
+              <Delete color="inherit" fontSize="medium" />
             </IconButton>
           </div>
         </div>

@@ -38,7 +38,6 @@ function DisciplinesSelectorContent() {
   const [slotsAdditionDisabled, setSlotsAdditionDisabled] = useState(false);
 
   useEffect(() => {
-    console.log(Object.keys(state.disciplineSlots));
     if (Object.keys(state.disciplineSlots).length >= 8) {
       setSlotsAdditionDisabled(true);
     } else {

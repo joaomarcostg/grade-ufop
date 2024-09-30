@@ -1,9 +1,10 @@
 import { type  Discipline } from "@prisma/client";
 import { AutocompleteOption } from "../components/InputAutocomplete";
-import { type AppState } from "./types";
+import { UserProfile, type AppState } from "./types";
 
 export enum ActionType {
   INIT_STATE = "INIT_STATE",
+  SET_USER_DATA = "SET_USER_DATA",
   SELECT_COURSE = "SELECT_COURSE",
   SELECT_COURSED_DISCIPLINE = "SELECT_COURSED_DISCIPLINE",
   SET_MULTIPLE_COURSED_DISCIPLINES = "SET_MULTIPLE_COURSED_DISCIPLINES",
@@ -23,6 +24,7 @@ export enum ActionType {
 // Define the Action type as a discriminated union
 export type Action =
   | { type: ActionType.INIT_STATE; payload: AppState }
+  | { type: ActionType.SET_USER_DATA; payload: UserProfile | null}
   | {
       type: ActionType.SELECT_COURSE;
       payload: AutocompleteOption;

@@ -17,9 +17,16 @@ type FilterParams = {
 };
 
 function toDateTime(time: string): Date {
-  const [hours, minutes] = time.split(':').map(Number);
-  
-  if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+  const [hours, minutes] = time.split(":").map(Number);
+
+  if (
+    isNaN(hours) ||
+    isNaN(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
     throw new Error(`Invalid time format: ${time}. Expected format is HH:MM.`);
   }
 
@@ -44,7 +51,10 @@ function getTimesSlots(timeSlots: string | null) {
 export async function GET(request: NextRequest) {
   const session = await getSessionEmail(request);
   if (!session) {
-    return NextResponse.json({ error: "Email not found in session" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Email not found in session" },
+      { status: 400 }
+    );
   }
 
   const searchParams = request.nextUrl.searchParams;
@@ -64,6 +74,7 @@ export async function GET(request: NextRequest) {
       completedDisciplines: {
         select: {
           disciplineId: true,
+          discipline: true,
         },
       },
     },
@@ -73,7 +84,10 @@ export async function GET(request: NextRequest) {
   };
 
   if (!courseId) {
-    return NextResponse.json({ error: "User course not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "User course not found" },
+      { status: 404 }
+    );
   }
 
   const disciplineCourses = await getAvailableDisciplines({
@@ -85,7 +99,9 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ data: disciplineCourses });
 }
 
-async function getPrerequisitesByDisciplineCourseId(disciplineCourseId: string) {
+async function getPrerequisitesByDisciplineCourseId(
+  disciplineCourseId: string
+) {
   const prerequisites = await prisma.prerequisite.findMany({
     where: {
       disciplineCourseId,
@@ -113,7 +129,11 @@ async function getDisciplineCourseId(courseId: string, disciplineId: string) {
   return disciplineCourse?.id;
 }
 
-async function getDisciplinesForCourse(courseId: string, semester: string, filterParams: FilterParams) {
+async function getDisciplinesForCourse(
+  courseId: string,
+  semester: string,
+  filterParams: FilterParams
+) {
   const { days, timeSlots } = filterParams;
 
   const disciplines = await prisma.discipline.findMany({
@@ -157,22 +177,36 @@ async function getDisciplinesForCourse(courseId: string, semester: string, filte
         classes: discipline.classes.filter((classItem) => {
           // Check if all schedules of the class meet the criteria
           return classItem.schedules.every((schedule) => {
-            const dayMatch = !days?.length || days.includes(schedule.dayOfWeek ?? "");
+            const dayMatch =
+              !days?.length || days.includes(schedule.dayOfWeek ?? "");
             const timeMatch =
-              !timeSlots?.length || timeSlots.some((slot) => schedule.startTime >= slot.startTime && schedule.endTime <= slot.endTime);
+              !timeSlots?.length ||
+              timeSlots.some(
+                (slot) =>
+                  schedule.startTime >= slot.startTime &&
+                  schedule.endTime <= slot.endTime
+              );
             return dayMatch && timeMatch;
           });
         }),
       };
     })
     .filter((discipline) => discipline.classes.length > 0);
-  
+
   return filteredDisciplines;
 }
-async function getAvailableDisciplines({ courseId, completedDisciplines, filterParams }: UserInfo & { filterParams: FilterParams }) {
+async function getAvailableDisciplines({
+  courseId,
+  completedDisciplines,
+  filterParams,
+}: UserInfo & { filterParams: FilterParams }) {
   const availableDisciplines = [];
   const semester = process.env.NEXT_PUBLIC_CURRENT_SEMESTER ?? "2024/1";
-  const disciplinesFromCourse = await getDisciplinesForCourse(courseId, semester, filterParams);
+  const disciplinesFromCourse = await getDisciplinesForCourse(
+    courseId,
+    semester,
+    filterParams
+  );
 
   for (const discipline of disciplinesFromCourse) {
     const isCoursed = completedDisciplines.includes(discipline.id);
@@ -180,15 +214,22 @@ async function getAvailableDisciplines({ courseId, completedDisciplines, filterP
       continue;
     }
 
-    const disciplineCourseId = await getDisciplineCourseId(courseId, discipline.id);
+    const disciplineCourseId = await getDisciplineCourseId(
+      courseId,
+      discipline.id
+    );
 
     if (!disciplineCourseId) {
       continue;
     }
 
-    const prerequisites = await getPrerequisitesByDisciplineCourseId(disciplineCourseId);
+    const prerequisites = await getPrerequisitesByDisciplineCourseId(
+      disciplineCourseId
+    );
 
-    const prerequisitesMet = prerequisites.every((prerequisite) => completedDisciplines.includes(prerequisite.discipline_id ?? ""));
+    const prerequisitesMet = prerequisites.every((prerequisite) =>
+      completedDisciplines.includes(prerequisite.discipline_id ?? "")
+    );
 
     if (!isCoursed && prerequisitesMet) {
       availableDisciplines.push({
