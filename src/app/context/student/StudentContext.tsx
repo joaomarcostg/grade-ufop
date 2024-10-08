@@ -12,7 +12,11 @@ import React, {
 import { studentReducer } from "./reducer";
 import { type StudentAction, StudentActionType } from "./actions";
 import { type StudentState } from "./types";
-import { getUserCourseAndDisciplines, fetchCourses } from "@/lib/fetch-api";
+import {
+  getUserCourseAndDisciplines,
+  fetchCourses,
+  getUserProfile,
+} from "@/lib/fetch-api";
 import {
   saveToLocalStorage,
   loadFromLocalStorage,
@@ -44,6 +48,8 @@ const StudentContext = createContext<StudentContextType>({
 const loadFromDatabase = async (): Promise<StudentState> => {
   const storageData = loadFromLocalStorage("studentState", defaultState);
   const dbData = await getUserCourseAndDisciplines();
+  const userData = await getUserProfile();
+
   const coursesData = await fetchCourses();
 
   const course = dbData?.course
@@ -59,6 +65,7 @@ const loadFromDatabase = async (): Promise<StudentState> => {
 
   return {
     ...storageData,
+    user: userData,
     course,
     coursedDisciplines,
     courses,
