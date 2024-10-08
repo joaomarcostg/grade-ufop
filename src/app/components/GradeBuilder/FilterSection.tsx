@@ -29,16 +29,24 @@ import {
   TuneRounded,
   Settings,
 } from "@mui/icons-material";
-import { useFilter, TIME_SLOTS, DAYS_OF_WEEK } from "./FilterContext";
+import {
+  useFilter,
+  FilterActionType,
+  TIME_SLOTS,
+  DAYS_OF_WEEK,
+} from "@/app/context/filter";
 
 const FilterSummary: React.FC = () => {
   const {
-    timeSlots,
-    days,
-    includeElective,
-    ignorePrerequisite,
-    dayWeight,
-    gapWeight,
+    state: {
+      timeSlots,
+      days,
+      includeElective,
+      ignorePrerequisite,
+      dayWeight,
+      gapWeight,
+    },
+    dispatch,
   } = useFilter();
 
   if (
@@ -122,18 +130,15 @@ const FilterSummary: React.FC = () => {
 
 export const FilterSection: React.FC = () => {
   const {
-    timeSlots,
-    setTimeSlots,
-    days,
-    setDays,
-    includeElective,
-    setIncludeElective,
-    ignorePrerequisite,
-    setIgnorePrerequisite,
-    dayWeight,
-    setDayWeight,
-    gapWeight,
-    setGapWeight,
+    state: {
+      timeSlots,
+      days,
+      includeElective,
+      ignorePrerequisite,
+      dayWeight,
+      gapWeight,
+    },
+    dispatch,
   } = useFilter();
   const [filterAnchorEl, setFilterAnchorEl] =
     useState<HTMLButtonElement | null>(null);
@@ -167,22 +172,64 @@ export const FilterSection: React.FC = () => {
   const allDaysSelected =
     days.length > 0 && days.length === DAYS_OF_WEEK.length;
 
-  const handleTimeSlotChange = (event: SelectChangeEvent<typeof timeSlots>) => {
+  const handleTimeSlotChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value;
-    if (value[value.length - 1] === "all") {
-      setTimeSlots(allTimesSelected ? [] : TIME_SLOTS);
-      return;
-    }
-    setTimeSlots(typeof value === "string" ? value.split(",") : value);
+    dispatch({
+      type: FilterActionType.SET_TIME_SLOTS,
+      payload: value.includes("all")
+        ? allTimesSelected
+          ? []
+          : TIME_SLOTS
+        : typeof value === "string"
+        ? value.split(",")
+        : value,
+    });
   };
 
-  const handleDaysChange = (event: SelectChangeEvent<typeof days>) => {
+  const handleDaysChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value;
-    if (value[value.length - 1] === "all") {
-      setDays(allDaysSelected ? [] : DAYS_OF_WEEK.map((day) => day.value));
-      return;
-    }
-    setDays(typeof value === "string" ? value.split(",") : value);
+    dispatch({
+      type: FilterActionType.SET_DAYS,
+      payload: value.includes("all")
+        ? allDaysSelected
+          ? []
+          : DAYS_OF_WEEK.map((day) => day.value)
+        : typeof value === "string"
+        ? value.split(",")
+        : value,
+    });
+  };
+
+  const handleIgnorePrerequisiteChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    dispatch({
+      type: FilterActionType.SET_IGNORE_PREREQUISITE,
+      payload: event.target.checked,
+    });
+  };
+
+  const handleIncludeElectiveChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    dispatch({
+      type: FilterActionType.SET_INCLUDE_ELECTIVE,
+      payload: event.target.checked,
+    });
+  };
+
+  const handleGapWeightChange = (_: Event, newValue: number | number[]) => {
+    dispatch({
+      type: FilterActionType.SET_GAP_WEIGHT,
+      payload: newValue as number,
+    });
+  };
+
+  const handleDayWeightChange = (_: Event, newValue: number | number[]) => {
+    dispatch({
+      type: FilterActionType.SET_DAY_WEIGHT,
+      payload: newValue as number,
+    });
   };
 
   return (
@@ -223,7 +270,7 @@ export const FilterSection: React.FC = () => {
                     control={
                       <Switch
                         checked={ignorePrerequisite}
-                        onChange={(e) => setIgnorePrerequisite(e.target.checked)}
+                        onChange={handleIgnorePrerequisiteChange}
                         color="primary"
                       />
                     }
@@ -244,7 +291,7 @@ export const FilterSection: React.FC = () => {
                     control={
                       <Switch
                         checked={includeElective}
-                        onChange={(e) => setIncludeElective(e.target.checked)}
+                        onChange={handleIncludeElectiveChange}
                         color="primary"
                       />
                     }
@@ -349,9 +396,7 @@ export const FilterSection: React.FC = () => {
                   <div className="px-2">
                     <Slider
                       value={dayWeight}
-                      onChange={(_, newValue) =>
-                        setDayWeight(newValue as number)
-                      }
+                      onChange={handleDayWeightChange}
                       valueLabelDisplay="auto"
                       step={1}
                       marks
@@ -380,9 +425,7 @@ export const FilterSection: React.FC = () => {
                   <div className="px-2">
                     <Slider
                       value={gapWeight}
-                      onChange={(_, newValue) =>
-                        setGapWeight(newValue as number)
-                      }
+                      onChange={handleGapWeightChange}
                       valueLabelDisplay="auto"
                       step={1}
                       marks

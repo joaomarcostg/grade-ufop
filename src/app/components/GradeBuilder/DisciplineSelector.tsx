@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useCallback, useState } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { v4 as uuid } from "uuid";
 import {
   DragDropContext,
@@ -17,20 +17,19 @@ import {
 } from "@mui/material";
 import { Add, Create, Visibility, HelpOutline } from "@mui/icons-material";
 import { type AutocompleteOption } from "@/components/InputAutocomplete";
-import { StudentContext } from "@/app/context/StudentContext";
+import { useStudent, useFilter, StudentActionType } from "@/app/context";
 import { getAvailableDisciplines } from "@/lib/fetch-api/fetch-disciplines";
-import { ActionType } from "@/app/context/actions";
 import DisciplinesSlot from "./DisciplinesSlot";
 import { capitalize } from "@/app/utils/converters";
 import { RequestResponse, getGrades } from "@/lib/fetch-api/fetch-buildGrades";
 import ScheduleViewer from "./ScheduleViewer";
-import { FilterProvider, useFilter } from "./FilterContext";
 import { FilterSection } from "./FilterSection";
 
-function DisciplinesSelectorContent() {
-  const { state, dispatch } = useContext(StudentContext);
-  const { timeSlots, days, includeElective, dayWeight, gapWeight } =
-    useFilter();
+export default function DisciplinesSelector() {
+  const { state, dispatch } = useStudent();
+  const {
+    state: { timeSlots, days, includeElective, dayWeight, gapWeight },
+  } = useFilter();
 
   const [focused, setFocus] = useState<string>("");
   const [results, setResults] = useState<RequestResponse>(null);
@@ -84,12 +83,19 @@ function DisciplinesSelectorContent() {
         return acc;
       }, []);
       dispatch({
-        type: ActionType["SET_AVAILABLE_OPTIONS"],
+        type: StudentActionType["SET_AVAILABLE_OPTIONS"],
         payload: autocompleteOptions,
       });
     }
     fetchRequest();
-  }, [dispatch, state.course?.value, state.coursedDisciplines, timeSlots, days, includeElective]);
+  }, [
+    dispatch,
+    state.course?.value,
+    state.coursedDisciplines,
+    timeSlots,
+    days,
+    includeElective,
+  ]);
 
   useEffect(() => {
     const slots = Object.values(state.disciplineSlots);
@@ -99,7 +105,7 @@ function DisciplinesSelectorContent() {
   const addDisciplinesSlot = useCallback(() => {
     const slotId = uuid();
     dispatch({
-      type: ActionType.CREATE_DISCIPLINES_SLOT,
+      type: StudentActionType.CREATE_DISCIPLINES_SLOT,
       payload: { slotId },
     });
     setFocus(slotId);
@@ -108,7 +114,7 @@ function DisciplinesSelectorContent() {
   const removeDisciplinesSlot = (id: string) => {
     Object.values(state.disciplineSlots[id]).forEach((discipline) => {
       dispatch({
-        type: ActionType.REMOVE_FROM_SELECTED_DISCIPLINES,
+        type: StudentActionType.REMOVE_FROM_SELECTED_DISCIPLINES,
         payload: {
           slotId: id,
           disciplineId: discipline?.disciplineId ?? "",
@@ -116,7 +122,7 @@ function DisciplinesSelectorContent() {
       });
     });
     dispatch({
-      type: ActionType.DELETE_DISCIPLINES_SLOT,
+      type: StudentActionType.DELETE_DISCIPLINES_SLOT,
       payload: { slotId: id },
     });
   };
@@ -127,7 +133,7 @@ function DisciplinesSelectorContent() {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
     dispatch({
-      type: ActionType.SET_DISCIPLINES_SLOT,
+      type: StudentActionType.SET_DISCIPLINES_SLOT,
       payload: Object.fromEntries(items),
     });
   };
@@ -257,10 +263,3 @@ function DisciplinesSelectorContent() {
   );
 }
 
-export default function DisciplinesSelector() {
-  return (
-    <FilterProvider>
-      <DisciplinesSelectorContent />
-    </FilterProvider>
-  );
-}

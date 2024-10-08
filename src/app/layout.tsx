@@ -2,9 +2,10 @@
 import "./globals.css";
 import { Roboto } from "next/font/google";
 import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
-import { StudentProvider } from "./context/StudentContext";
+import { AppProvider } from "./context/AppProvider";
 import Header from "./components/Header";
 import React from "react";
+import LayoutWrapper from "./components/LayoutWrapper";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -27,12 +28,14 @@ const HeaderWrapper = () => {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${roboto.className} min-h-screen`} suppressHydrationWarning={true}>
+      <body
+        className={`${roboto.className} min-h-screen`}
+      >
         <ThemeRegistry>
-          <StudentProvider>
+          <AppProvider>
             <HeaderWrapper />
-            <main className="pt-16 pb-8 px-4">{children}</main>
-          </StudentProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </AppProvider>
         </ThemeRegistry>
       </body>
     </html>

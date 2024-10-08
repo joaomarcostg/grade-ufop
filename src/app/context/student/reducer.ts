@@ -1,8 +1,8 @@
-import { Action, ActionType } from "./actions";
-import { AppState } from "./types";
+import { StudentAction, StudentActionType } from "./actions";
+import { StudentState } from "./types";
 
 const updateSelectedDisciplines = (
-  obj: AppState["selectedDisciplines"],
+  obj: StudentState["selectedDisciplines"],
   payload: {
     slotId: string;
     disciplineId: string;
@@ -23,7 +23,7 @@ const updateSelectedDisciplines = (
 };
 
 const removeFromSelectedDisciplines = (
-  obj: AppState["selectedDisciplines"],
+  obj: StudentState["selectedDisciplines"],
   payload: {
     slotId: string;
     disciplineId: string;
@@ -39,27 +39,33 @@ const removeFromSelectedDisciplines = (
   return updated;
 };
 
-export const globalReducer = (
-  state: AppState,
-  { type, payload }: Action
-): AppState => {
+export const studentReducer = (
+  state: StudentState,
+  { type, payload }: StudentAction
+): StudentState => {
   switch (type) {
-    case ActionType.INIT_STATE:
+    case StudentActionType.INIT_STATE:
       return payload;
 
-    case ActionType.SET_USER_DATA:
+    case StudentActionType.SET_USER_DATA:
       return {
         ...state,
         user: payload,
       };
 
-    case ActionType.SET_AVAILABLE_OPTIONS:
+    case StudentActionType.SET_COURSES:
       return {
         ...state,
-        availableOptions: payload,
+        courses: payload,
       };
 
-    case ActionType.SELECT_COURSE:
+    case StudentActionType.SET_AVAILABLE_OPTIONS:
+      return {
+        ...state,
+        availableDisciplineOptions: payload,
+      };
+
+    case StudentActionType.SELECT_COURSE:
       return {
         ...state,
         course: payload
@@ -70,13 +76,13 @@ export const globalReducer = (
           : null,
       };
 
-    case ActionType.SELECT_COURSED_DISCIPLINE:
+    case StudentActionType.SELECT_COURSED_DISCIPLINE:
       if (!payload) {
         return state;
       }
 
-      const coursedDisciplines = new Map(state.coursedDisciplines)
-      
+      const coursedDisciplines = new Map(state.coursedDisciplines);
+
       if (coursedDisciplines.has(payload.id)) {
         coursedDisciplines.delete(payload.id);
       } else {
@@ -85,16 +91,16 @@ export const globalReducer = (
 
       return {
         ...state,
-        coursedDisciplines
+        coursedDisciplines,
       };
 
-    case ActionType.SET_MULTIPLE_COURSED_DISCIPLINES:
+    case StudentActionType.SET_MULTIPLE_COURSED_DISCIPLINES:
       return {
         ...state,
         coursedDisciplines: new Map(payload.map((d) => [d.id, d])),
       };
 
-    case ActionType.ADD_TO_SELECTED_DISCIPLINES:
+    case StudentActionType.ADD_TO_SELECTED_DISCIPLINES:
       return {
         ...state,
         selectedDisciplines: updateSelectedDisciplines(
@@ -103,7 +109,7 @@ export const globalReducer = (
         ),
       };
 
-    case ActionType.REMOVE_FROM_SELECTED_DISCIPLINES:
+    case StudentActionType.REMOVE_FROM_SELECTED_DISCIPLINES:
       return {
         ...state,
         selectedDisciplines: removeFromSelectedDisciplines(
@@ -112,7 +118,7 @@ export const globalReducer = (
         ),
       };
 
-    case ActionType.CREATE_DISCIPLINES_SLOT:
+    case StudentActionType.CREATE_DISCIPLINES_SLOT:
       return {
         ...state,
         disciplineSlots: {
@@ -121,7 +127,7 @@ export const globalReducer = (
         },
       };
 
-    case ActionType.DELETE_DISCIPLINES_SLOT:
+    case StudentActionType.DELETE_DISCIPLINES_SLOT:
       const updatedDisciplineSlots = { ...state.disciplineSlots };
       delete updatedDisciplineSlots[payload.slotId];
       return {
@@ -129,7 +135,7 @@ export const globalReducer = (
         disciplineSlots: updatedDisciplineSlots,
       };
 
-    case ActionType.ADD_TO_DISCIPLINES_SLOT:
+    case StudentActionType.ADD_TO_DISCIPLINES_SLOT:
       return {
         ...state,
         disciplineSlots: {
@@ -139,13 +145,16 @@ export const globalReducer = (
             payload.value,
           ],
         },
-        availableOptions: state.availableOptions.filter(
+        availableDisciplineOptions: state.availableDisciplineOptions.filter(
           (item) => item?.value !== payload.value?.value
         ),
       };
 
-    case ActionType.REMOVE_FROM_DISCIPLINES_SLOT:
-      const newArrayWithAdded = [...state.availableOptions, payload.value];
+    case StudentActionType.REMOVE_FROM_DISCIPLINES_SLOT:
+      const newArrayWithAdded = [
+        ...state.availableDisciplineOptions,
+        payload.value,
+      ];
       newArrayWithAdded.sort((a, b) => (a?.index || 0) - (b?.index || 0));
 
       return {
@@ -158,15 +167,15 @@ export const globalReducer = (
             (disciplineClass) => disciplineClass?.value !== payload.value?.value
           ),
         },
-        availableOptions: newArrayWithAdded,
+        availableDisciplineOptions: newArrayWithAdded,
       };
 
-    case ActionType.SET_DISCIPLINES_SLOT:
+    case StudentActionType.SET_DISCIPLINES_SLOT:
       return {
         ...state,
         disciplineSlots: payload,
       };
-    case ActionType.SET_SETUP_COMPLETED:
+    case StudentActionType.SET_SETUP_COMPLETED:
       return {
         ...state,
         setupCompleted: payload,

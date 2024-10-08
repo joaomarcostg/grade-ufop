@@ -1,25 +1,20 @@
 // app/profile/components/UserInfo.tsx
 "use client";
-
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import { setUserCourse } from "@/lib/fetch-api/fetch-user-data"; // You'll need to implement this
+import { setUserCourse } from "@/lib/fetch-api/fetch-user-data";
 import CoursePicker from "../CoursePicker";
-import { AutocompleteOption } from "../InputAutocomplete";
-import { StudentContext } from "@/app/context/StudentContext";
-import { fetchCourses } from "@/lib/fetch-api/fetch-courses";
-import { ActionType } from "@/app/context/actions";
+import { useStudent, StudentActionType } from "@/app/context/student";
 
 function UserInfo() {
   const {
-    state: { user, course },
+    state: { user, course, courses },
     dispatch,
-  } = useContext(StudentContext);
+  } = useStudent();
 
-  const [selectedCourse, setCourse] = useState<AutocompleteOption | null>(course);
-  const [courses, setCourses] = useState<AutocompleteOption[]>([]);
+  const [selectedCourse, setCourse] = useState(course);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleCourseUpdate = async () => {
@@ -27,31 +22,15 @@ function UserInfo() {
     try {
       await setUserCourse(selectedCourse.value);
       dispatch({
-        type: ActionType.SELECT_COURSE,
+        type: StudentActionType.SELECT_COURSE,
         payload: selectedCourse,
       });
-      
+
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update course:", error);
     }
   };
-
-  useEffect(() => {
-    async function fetchData() {
-      const coursesData = await fetchCourses();
-      const _courses = coursesData
-        ? coursesData.map((course) => ({
-            label: course.name,
-            value: course.id,
-          }))
-        : [];
-
-      setCourses(_courses);
-    }
-
-    fetchData();
-  }, []);
 
   if (!user) return null;
 

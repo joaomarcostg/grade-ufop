@@ -1,4 +1,4 @@
-import { type AutocompleteOption } from "../components/InputAutocomplete";
+import { type AutocompleteOption } from "@/components/InputAutocomplete";
 import { type Discipline } from "@prisma/client";
 
 export type UserProfile = {
@@ -8,14 +8,12 @@ export type UserProfile = {
   image: string;
 };
 
-export type AppState = {
+export type StudentState = {
   user: UserProfile | null;
-  course: {
-    label: string;
-    value: string;
-  } | null;
+  course: AutocompleteOption | null;
+  courses: AutocompleteOption[];
   coursedDisciplines: Map<string, Discipline>;
-  availableOptions: AutocompleteOption[];
+  availableDisciplineOptions: AutocompleteOption[];
   selectedDisciplines: {
     [slotId: string]: string[];
   };
@@ -23,8 +21,4 @@ export type AppState = {
     [slotId: string]: AutocompleteOption[];
   };
   setupCompleted: boolean;
-};
-
-export type ObjAppState = AppState & {
-  coursedDisciplines: Record<string, Discipline>;
 };

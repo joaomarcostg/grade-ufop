@@ -1,6 +1,6 @@
 import { Discipline, User } from "@prisma/client";
 import { fetchRequest } from "./utils";
-import { UserProfile } from "@/app/context/types";
+import { UserProfile } from "@/app/context";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 

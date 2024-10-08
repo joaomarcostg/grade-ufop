@@ -1,11 +1,5 @@
 "use client";
-import React, {
-  useState,
-  useContext,
-  useEffect,
-  useMemo,
-  KeyboardEvent,
-} from "react";
+import React, { useState, useEffect, useMemo, KeyboardEvent } from "react";
 import { type DraggableProvided } from "@hello-pangea/dnd";
 import IconButton from "@mui/material/IconButton";
 import {
@@ -18,9 +12,8 @@ import {
 import Autocomplete, {
   type AutocompleteOption,
 } from "@/components/InputAutocomplete";
-import { StudentContext } from "@/app/context/StudentContext";
+import { useStudent, StudentActionType } from "@/app/context/student";
 import Chip from "./Chip";
-import { ActionType } from "@/app/context/actions";
 import {
   Button,
   Divider,
@@ -44,7 +37,7 @@ function DisciplinesSlot({
   changeFocus,
   removeAction,
 }: DisciplinesSlotProps) {
-  const { state, dispatch } = useContext(StudentContext);
+  const { state, dispatch } = useStudent();
 
   const [selectedDiscipline, setSelectedDiscipline] =
     useState<AutocompleteOption | null>(null);
@@ -69,13 +62,13 @@ function DisciplinesSlot({
       .filter(([otherSlotId]) => otherSlotId !== slotId)
       .flatMap(([, disciplineClassIds]) => disciplineClassIds);
 
-    const diff = state.availableOptions.filter(
+    const diff = state.availableDisciplineOptions.filter(
       (option) =>
         !disciplineClassIdsFromOtherSlots.includes(option?.disciplineId)
     );
 
     setOptions(diff);
-  }, [state.availableOptions, state.selectedDisciplines, slotId]);
+  }, [state.availableDisciplineOptions, state.selectedDisciplines, slotId]);
 
   const handleAdd = () => {
     if (selectedDiscipline) {
@@ -92,7 +85,7 @@ function DisciplinesSlot({
 
   const addDiscipline = (discipline: AutocompleteOption) => {
     dispatch({
-      type: ActionType.ADD_TO_DISCIPLINES_SLOT,
+      type: StudentActionType.ADD_TO_DISCIPLINES_SLOT,
       payload: {
         slotId,
         value: discipline,
@@ -100,7 +93,7 @@ function DisciplinesSlot({
     });
 
     dispatch({
-      type: ActionType.ADD_TO_SELECTED_DISCIPLINES,
+      type: StudentActionType.ADD_TO_SELECTED_DISCIPLINES,
       payload: {
         slotId,
         disciplineId: discipline.disciplineId,
@@ -110,7 +103,7 @@ function DisciplinesSlot({
 
   const handleRemove = (chip: NonNullable<AutocompleteOption>) => {
     dispatch({
-      type: ActionType.REMOVE_FROM_DISCIPLINES_SLOT,
+      type: StudentActionType.REMOVE_FROM_DISCIPLINES_SLOT,
       payload: {
         slotId,
         value: chip,
@@ -118,7 +111,7 @@ function DisciplinesSlot({
     });
 
     dispatch({
-      type: ActionType.REMOVE_FROM_SELECTED_DISCIPLINES,
+      type: StudentActionType.REMOVE_FROM_SELECTED_DISCIPLINES,
       payload: {
         slotId,
         disciplineId: chip.disciplineId,

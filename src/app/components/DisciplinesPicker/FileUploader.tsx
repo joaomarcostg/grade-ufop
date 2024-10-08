@@ -1,9 +1,12 @@
 "use client";
-import { FormEvent, useContext, useRef, useState } from "react";
-import { UploadFile, Delete, InsertDriveFileOutlined } from "@mui/icons-material";
+import { FormEvent, useRef, useState } from "react";
+import {
+  UploadFile,
+  Delete,
+  InsertDriveFileOutlined,
+} from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import { StudentContext } from "@/app/context/StudentContext";
-import { ActionType } from "@/app/context/actions";
+import { useStudent, StudentActionType } from "@/app/context";
 import { postUploadPDF } from "@/lib/fetch-api/fetch-uploadPDF";
 import LinearLoadingBar from "./LinearLoadingBar";
 import { getErrorMessage } from "@/app/utils/error";
@@ -18,7 +21,7 @@ export default function FileUploader() {
   const {
     state: { course },
     dispatch,
-  } = useContext(StudentContext);
+  } = useStudent();
 
   function getFile(event: FormEvent<HTMLInputElement>) {
     const target = event.target as HTMLInputElement & {
@@ -59,9 +62,15 @@ export default function FileUploader() {
       setFile(uploadedFile);
       setLoading(true);
 
-      const coursedDisciplines = await postUploadPDF({ file: uploadedFile, courseId: course.value });
-      dispatch({ type: ActionType.SET_MULTIPLE_COURSED_DISCIPLINES, payload: coursedDisciplines });
-      
+      const coursedDisciplines = await postUploadPDF({
+        file: uploadedFile,
+        courseId: course.value,
+      });
+      dispatch({
+        type: StudentActionType.SET_MULTIPLE_COURSED_DISCIPLINES,
+        payload: coursedDisciplines,
+      });
+
       setErrorMsg("");
     } catch (error) {
       setErrorMsg(getErrorMessage(error));
@@ -75,7 +84,9 @@ export default function FileUploader() {
       <div className="relative w-[600px] border-dashed border border-gray-400 py-6 flex flex-col gap-2 justify-center items-center rounded">
         <UploadFile color={"primary"} fontSize="large" />
         <div>
-          <span className="underline text-primary cursor-pointer">Clique para upload</span>
+          <span className="underline text-primary cursor-pointer">
+            Clique para upload
+          </span>
           <span> ou arraste e solte o arquivo aqui</span>
         </div>
         <input

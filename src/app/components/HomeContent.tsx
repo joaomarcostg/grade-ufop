@@ -14,25 +14,26 @@ import {
 import { HelpOutline } from "@mui/icons-material";
 import { AutocompleteOption } from "./InputAutocomplete";
 import { Session } from "next-auth/core/types";
-import { useContext, useEffect, useState } from "react";
-import { StudentContext } from "../context/StudentContext";
+import { useEffect, useState } from "react";
+import { useStudent, StudentActionType } from "@/app/context/student";
 import { useRouter } from "next/navigation";
-import { ActionType } from "../context/actions";
-import { setUserCourse, updateCoursedDisciplines } from "@/lib/fetch-api/fetch-user-data";
+import {
+  setUserCourse,
+  updateCoursedDisciplines,
+} from "@/lib/fetch-api/fetch-user-data";
 import { capitalize } from "@/app/utils/converters";
 
 interface HomeProps {
   session: Session;
-  courses: AutocompleteOption[];
 }
 
-export default function HomeContent({ session, courses }: HomeProps) {
+export default function HomeContent({ session }: HomeProps) {
   const router = useRouter();
 
   const {
-    state: { course, coursedDisciplines, setupCompleted },
+    state: { course, courses, coursedDisciplines, setupCompleted },
     dispatch,
-  } = useContext(StudentContext);
+  } = useStudent();
 
   const [activeStep, setActiveStep] = useState<number>(0);
   const [selectedCourse, setSelectedCourse] =
@@ -64,7 +65,7 @@ export default function HomeContent({ session, courses }: HomeProps) {
       }
 
       dispatch({
-        type: ActionType.SELECT_COURSE,
+        type: StudentActionType.SELECT_COURSE,
         payload: selectedCourse,
       });
       handleNext();
@@ -76,11 +77,13 @@ export default function HomeContent({ session, courses }: HomeProps) {
   const handleSave = async () => {
     try {
       dispatch({
-        type: ActionType.SET_SETUP_COMPLETED,
+        type: StudentActionType.SET_SETUP_COMPLETED,
         payload: true,
       });
 
-      const completedDisciplines = Array.from(coursedDisciplines.values()).map(d => d.id)
+      const completedDisciplines = Array.from(coursedDisciplines.values()).map(
+        (d) => d.id
+      );
       await updateCoursedDisciplines(completedDisciplines);
 
       router.push("/montar-grade");

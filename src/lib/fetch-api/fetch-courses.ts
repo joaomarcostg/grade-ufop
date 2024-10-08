@@ -1,18 +1,7 @@
-import prisma from '@/lib/prisma'
 import { fetchRequest } from './utils';
 import { Course } from '@prisma/client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-export async function getCourses() {
-  try {
-    const courses = await prisma.course.findMany()
-
-    return courses;
-  } catch (error) {
-    return [];
-  }
-}
 
 export async function fetchCourses(): Promise<Course[] | null> {
   try {

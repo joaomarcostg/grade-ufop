@@ -1,7 +1,6 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
-import { StudentContext } from "@/app/context/StudentContext";
-import { ActionType } from "@/app/context/actions";
+import { useEffect, useState } from "react";
+import { useStudent, StudentActionType } from "@/app/context/student";
 import { getDisciplinesByCourse } from "@/lib/fetch-api/fetch-disciplines";
 import { type Discipline } from "@prisma/client";
 import { Tooltip } from "@mui/material";
@@ -15,8 +14,9 @@ export default function ManualPicker({
 }: {
   disabled?: boolean;
 }) {
-  const { state, dispatch } = useContext(StudentContext);
-  const [disciplinesByPeriod, setDisciplinesByPeriod] = useState<DisciplinesByPeriod>({});
+  const { state, dispatch } = useStudent();
+  const [disciplinesByPeriod, setDisciplinesByPeriod] =
+    useState<DisciplinesByPeriod>({});
   const [maxPeriod, setMaxPeriod] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,7 +57,7 @@ export default function ManualPicker({
     if (!disabled) {
       dispatch({
         payload: discipline,
-        type: ActionType.SELECT_COURSED_DISCIPLINE,
+        type: StudentActionType.SELECT_COURSED_DISCIPLINE,
       });
     }
   };
@@ -84,14 +84,20 @@ export default function ManualPicker({
   }
 
   return (
-    <div className={`overflow-x-auto ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+    <div
+      className={`overflow-x-auto ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
+      }`}
+    >
       <table className="min-w-full border-collapse">
         <thead>
           <tr>
             {Array.from({ length: maxPeriod + 1 }, (_, i) => (
               <th
                 key={i}
-                className={`border p-2 ${!disabled ? 'cursor-pointer hover:bg-red-100' : ''} transition-colors duration-200 w-20`}
+                className={`border p-2 ${
+                  !disabled ? "cursor-pointer hover:bg-red-100" : ""
+                } transition-colors duration-200 w-20`}
                 onClick={() => !disabled && handlePeriodSelection(i)}
               >
                 <div className="flex items-center justify-center">
@@ -118,14 +124,18 @@ export default function ManualPicker({
                     <td
                       key={colIndex}
                       className={`border p-2 transition-colors ${
-                        !disabled ? 'cursor-pointer' : ''
+                        !disabled ? "cursor-pointer" : ""
                       } duration-200 ${
                         isSelected
                           ? "bg-red-200"
-                          : colIndex !== 0 && !disabled ? "hover:bg-red-100" : ""
+                          : colIndex !== 0 && !disabled
+                          ? "hover:bg-red-100"
+                          : ""
                       }`}
                       onClick={() =>
-                        discipline && !disabled && handleDisciplineSelection(discipline)
+                        discipline &&
+                        !disabled &&
+                        handleDisciplineSelection(discipline)
                       }
                     >
                       {discipline && (
