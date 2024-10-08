@@ -41,15 +41,13 @@ async function findAlreadyCoursedDisciplines(file: File, courseId: string) {
   const pending = await prisma.disciplineCourse.findMany({
     where: {
       courseId: courseId,
-      AND: {
-        discipline: {
-          code: {
-            in: pendingCodes,
-          },
+      discipline: {
+        code: {
+          in: pendingCodes,
         },
       },
     },
-    select: {
+    include: {
       discipline: true,
     },
   });
@@ -123,7 +121,7 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({
-      data: alreadyCoursedDisciplines.map(d => d.discipline),
+      data: alreadyCoursedDisciplines.map((d) => d.discipline),
     });
   } catch (error) {
     return NextResponse.json(

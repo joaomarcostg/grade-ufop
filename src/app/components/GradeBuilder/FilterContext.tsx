@@ -24,6 +24,10 @@ type FilterContextType = {
   setTimeSlots: React.Dispatch<React.SetStateAction<string[]>>;
   days: string[];
   setDays: React.Dispatch<React.SetStateAction<string[]>>;
+  includeElective: boolean;
+  setIncludeElective: React.Dispatch<React.SetStateAction<boolean>>;
+  ignorePrerequisite: boolean;
+  setIgnorePrerequisite: React.Dispatch<React.SetStateAction<boolean>>;
   dayWeight: number;
   setDayWeight: React.Dispatch<React.SetStateAction<number>>;
   gapWeight: number;
@@ -36,7 +40,11 @@ export const FilterProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [timeSlots, setTimeSlots] = useState<string[]>(TIME_SLOTS);
-  const [days, setDays] = useState<string[]>(DAYS_OF_WEEK.map((day) => day.value));
+  const [days, setDays] = useState<string[]>(
+    DAYS_OF_WEEK.map((day) => day.value)
+  );
+  const [ignorePrerequisite, setIgnorePrerequisite] = useState<boolean>(false);
+  const [includeElective, setIncludeElective] = useState<boolean>(true);
   const [dayWeight, setDayWeight] = useState<number>(1);
   const [gapWeight, setGapWeight] = useState<number>(1);
 
@@ -47,6 +55,10 @@ export const FilterProvider: React.FC<{ children: ReactNode }> = ({
         setTimeSlots,
         days,
         setDays,
+        includeElective,
+        setIncludeElective,
+        ignorePrerequisite,
+        setIgnorePrerequisite,
         dayWeight,
         setDayWeight,
         gapWeight,

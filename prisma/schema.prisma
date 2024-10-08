@@ -78,6 +78,7 @@ model DisciplineClass {
   createdAt    DateTime                 @map("created_at") @db.Timestamp(6)
   discipline   Discipline               @relation(fields: [disciplineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   schedules    DisciplineClassSchedule[]
+  scheduleClasses ScheduleClass[]
 
   @@map("discipline_class")
 }
@@ -152,6 +153,29 @@ model Session {
   @@map("session")
 }
 
+model Schedule {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String
+  semester   String   // Format: "YYYY/N" (e.g., "2024/1")
+  name       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
+  classes    ScheduleClass[]
+
+  @@map("schedule")
+}
+
+model ScheduleClass {
+  id                String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  scheduleId        String           @db.Uuid
+  disciplineClassId String           @db.Uuid
+  schedule          Schedule         @relation(fields: [scheduleId], references: [id])
+  disciplineClass   DisciplineClass  @relation(fields: [disciplineClassId], references: [id])
+
+  @@map("schedule_class")
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -160,6 +184,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  schedules Schedule[]
 
   courseId             String?   @db.Uuid  // Add @db.Uuid here
   course               Course?   @relation(fields: [courseId], references: [id])

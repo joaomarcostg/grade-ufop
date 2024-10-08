@@ -32,7 +32,7 @@ export async function getUserCourseAndDisciplines() {
 export async function getUserProfile(): Promise<UserProfile | null> {
   try {
     const { data } = await fetchRequest<{ data: UserProfile }>(
-      `${API_BASE_URL}/user/profile`,
+      `${API_BASE_URL}/user`,
       {
         method: "GET",
       }
@@ -77,7 +77,7 @@ export async function updateCoursedDisciplines(disciplineIds: string[]) {
     const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
       `${API_BASE_URL}/user/completed-disciplines`,
       {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ disciplineIds }),
       }

@@ -16,7 +16,7 @@ import {
   useTheme,
   useMediaQuery
 } from "@mui/material";
-import { RequestResponse } from "@/lib/fetch-api/fetch-buildGrades";
+import { DayOfWeek, RequestResponse } from "@/lib/fetch-api/fetch-buildGrades";
 import { capitalize } from "@/app/utils/converters";
 import { HelpOutline, Close } from "@mui/icons-material";
 
@@ -28,7 +28,7 @@ type ScheduleViewerProps = {
 
 type ChoosedDisciplinesKey = "code" | "classNumber" | "name" | "professor";
 
-const daysOfWeekMap: Record<string, string> = {
+const daysOfWeekMap: Record<DayOfWeek, string> = {
   SEG: "Segunda",
   TER: "Terça",
   QUA: "Quarta",

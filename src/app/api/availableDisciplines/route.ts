@@ -13,7 +13,8 @@ type FilterParams = {
     endTime: Date;
   }[];
   days?: string[];
-  includeOtherCourses?: boolean;
+  includeElective?: boolean;
+  ignorePrerequisite?: boolean;
 };
 
 function toDateTime(time: string): Date {
@@ -64,7 +65,8 @@ export async function GET(request: NextRequest) {
   const filterParams: FilterParams = {
     timeSlots,
     days: searchParams.get("days")?.split(","),
-    includeOtherCourses: searchParams.get("includeOtherCourses") === "true",
+    includeElective: searchParams.get("includeElective") === "true",
+    ignorePrerequisite: searchParams.get("ignorePrerequisite") === "true",
   };
 
   const { courseId, completedDisciplines } = (await prisma.user.findUnique({
@@ -113,20 +115,19 @@ async function getPrerequisitesByDisciplineCourseId(
 
   return prerequisites.map((prerequisite) => ({
     id: prerequisite.id,
-    discipline_id: prerequisite.disciplineCourseId,
     discipline: prerequisite.prerequisiteDiscipline,
   }));
 }
 
 async function getDisciplineCourseId(courseId: string, disciplineId: string) {
-  const disciplineCourse = await prisma.disciplineCourse.findFirst({
+  const disciplineCourse = await prisma.disciplineCourse.findMany({
     where: {
       courseId,
       disciplineId,
     },
   });
 
-  return disciplineCourse?.id;
+  return disciplineCourse[0].id;
 }
 
 async function getDisciplinesForCourse(
@@ -134,13 +135,14 @@ async function getDisciplinesForCourse(
   semester: string,
   filterParams: FilterParams
 ) {
-  const { days, timeSlots } = filterParams;
+  const { days, timeSlots, includeElective } = filterParams;
 
   const disciplines = await prisma.discipline.findMany({
     where: {
       courses: {
         some: {
           courseId: courseId,
+          mandatory: includeElective ? undefined : true,
         },
       },
       classes: {
@@ -227,11 +229,13 @@ async function getAvailableDisciplines({
       disciplineCourseId
     );
 
-    const prerequisitesMet = prerequisites.every((prerequisite) =>
-      completedDisciplines.includes(prerequisite.discipline_id ?? "")
-    );
+    const prerequisitesMet =
+      filterParams.ignorePrerequisite ||
+      prerequisites.every((prerequisite) =>
+        completedDisciplines.includes(prerequisite.discipline.id ?? "")
+      );
 
-    if (!isCoursed && prerequisitesMet) {
+    if (prerequisitesMet) {
       availableDisciplines.push({
         id: discipline.id,
         code: discipline.code,

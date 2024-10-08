@@ -2,13 +2,15 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { fetchRequest } from "./utils";
 import { AutocompleteOption } from "@/app/components/InputAutocomplete";
 
+export type DayOfWeek = "SEG" | "TER" | "QUA" | "QUI" | "SEX" | "SAB";
+
 export type SelectedDiscipline = {
   code: string;
   name: string;
   classNumber: string;
   professor: string;
   schedule: {
-    dayOfWeek: string;
+    dayOfWeek: DayOfWeek;
     startTime: string;
   }[];
 };

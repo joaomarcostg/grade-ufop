@@ -21,24 +21,33 @@ type FetchGetDisciplinesByCourseResponse = {
   data: FetchedDiscipline[];
 };
 
-export async function getDisciplinesByCourse({ course, mandatoryOnly }: { course?: string | null; mandatoryOnly?: boolean }) {
+export async function getDisciplinesByCourse({
+  course,
+  mandatoryOnly,
+}: {
+  course?: string | null;
+  mandatoryOnly?: boolean;
+}) {
   try {
     if (!course) {
       return [];
     }
 
-    let apiUrl = `${API_BASE_URL}/disciplines?courseId=${course}`;
+    let apiUrl = `${API_BASE_URL}/disciplineCourses?courseId=${course}`;
 
     if (mandatoryOnly) {
       apiUrl += "&mandatory";
     }
 
-    const res = await fetchRequest<FetchGetDisciplinesByCourseResponse>(apiUrl, {
-      method: "GET",
-      next: {
-        revalidate: 3600,
-      },
-    });
+    const res = await fetchRequest<FetchGetDisciplinesByCourseResponse>(
+      apiUrl,
+      {
+        method: "GET",
+        next: {
+          revalidate: 3600,
+        },
+      }
+    );
 
     if (!res.data) {
       throw new Error("Failed to fetch data");
@@ -72,29 +81,37 @@ type FetchGetAvailableDisciplinesResponse = {
   }[];
 };
 
-export async function getAvailableDisciplines(filters: { timeSlots?: string[]; days?: string[]; includeOtherCourses?: boolean }) {
+export async function getAvailableDisciplines(filters: {
+  timeSlots?: string[];
+  days?: string[];
+  includeElective?: boolean;
+}) {
   try {
     const timeSlots = filters.timeSlots?.join(",") || "";
     const days = filters.days?.join(",") || "";
-    const includeOtherCourses = filters.includeOtherCourses ? "true" : "";
+    const includeElective = filters.includeElective ? "true" : "";
 
-    let queryParams = "";
+    const queryParamsArray = [];
     if (timeSlots) {
-      queryParams += `timeSlots=${timeSlots}&`;
+      queryParamsArray.push(`timeSlots=${timeSlots}`);
     }
     if (days) {
-      queryParams += `days=${days}&`;
+      queryParamsArray.push(`days=${days}`);
     }
-    if (includeOtherCourses) {
-      queryParams += `includeOtherCourses=${includeOtherCourses}`;
+    if (includeElective) {
+      queryParamsArray.push(`includeElective=true`);
     }
+    const queryParams = queryParamsArray.join("&");
 
-    const res = await fetchRequest<FetchGetAvailableDisciplinesResponse>(`${API_BASE_URL}/availableDisciplines?${queryParams}`, {
-      method: "GET",
-      next: {
-        revalidate: 3600,
-      },
-    });
+    const res = await fetchRequest<FetchGetAvailableDisciplinesResponse>(
+      `${API_BASE_URL}/availableDisciplines?${queryParams}`,
+      {
+        method: "GET",
+        next: {
+          revalidate: 3600,
+        },
+      }
+    );
 
     if (!res.data) {
       throw new Error("Failed to fetch data");

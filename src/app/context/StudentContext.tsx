@@ -49,16 +49,8 @@ const loadFromLocalStorage = (): AppState | null => {
       return null;
     }
 
-    const appStateObj = JSON.parse(appState) as ObjAppState;
-    const coursedDisciplines = new Map();
-
-    for (const key in appStateObj.coursedDisciplines) {
-      coursedDisciplines.set(key, appStateObj.coursedDisciplines[key]);
-    }
 
     const finalState = JSON.parse(appState) as AppState;
-    finalState.coursedDisciplines = coursedDisciplines;
-
     return finalState;
   } catch (e) {
     console.error("Could not load state", e);
@@ -68,6 +60,7 @@ const loadFromLocalStorage = (): AppState | null => {
 
 const loadFromDatabase = async (): Promise<AppState | null> => {
   try {
+    const storageData = loadFromLocalStorage() || defaultState;
     const dbData = await getUserCourseAndDisciplines();
 
     if (!dbData) return null;
@@ -84,7 +77,7 @@ const loadFromDatabase = async (): Promise<AppState | null> => {
     );
 
     return {
-      ...defaultState,
+      ...storageData,
       course,
       coursedDisciplines,
     };
@@ -99,7 +92,7 @@ function StudentProvider({ children }: React.PropsWithChildren<{}>) {
   const [state, dispatch] = useReducer(globalReducer, defaultState);
 
   const initializeState = async () => {
-    const existingState =  (await loadFromDatabase());
+    const existingState = await loadFromDatabase();
     dispatch({
       type: ActionType.INIT_STATE,
       payload: existingState ?? defaultState,

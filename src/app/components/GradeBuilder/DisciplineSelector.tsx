@@ -29,7 +29,8 @@ import { FilterSection } from "./FilterSection";
 
 function DisciplinesSelectorContent() {
   const { state, dispatch } = useContext(StudentContext);
-  const { timeSlots, days, dayWeight, gapWeight } = useFilter();
+  const { timeSlots, days, includeElective, dayWeight, gapWeight } =
+    useFilter();
 
   const [focused, setFocus] = useState<string>("");
   const [results, setResults] = useState<RequestResponse>(null);
@@ -60,7 +61,11 @@ function DisciplinesSelectorContent() {
   useEffect(() => {
     async function fetchRequest() {
       if (!state.course?.value) return;
-      const disciplines = await getAvailableDisciplines({ timeSlots, days });
+      const disciplines = await getAvailableDisciplines({
+        timeSlots,
+        days,
+        includeElective,
+      });
       const autocompleteOptions = disciplines.reduce<
         NonNullable<AutocompleteOption[]>
       >((acc, discipline) => {
@@ -84,13 +89,7 @@ function DisciplinesSelectorContent() {
       });
     }
     fetchRequest();
-  }, [
-    dispatch,
-    state.course?.value,
-    state.coursedDisciplines,
-    timeSlots,
-    days,
-  ]);
+  }, [dispatch, state.course?.value, state.coursedDisciplines, timeSlots, days, includeElective]);
 
   useEffect(() => {
     const slots = Object.values(state.disciplineSlots);
