@@ -1,4 +1,8 @@
-import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from "next";
+import type {
+  GetServerSidePropsContext,
+  NextApiRequest,
+  NextApiResponse,
+} from "next";
 import type { NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
@@ -34,7 +38,9 @@ export const config: NextAuthOptions = {
       }
 
       if (account.provider !== "google") {
-        console.error("Sign in failed: Only Google authentication is supported");
+        console.error(
+          "Sign in failed: Only Google authentication is supported"
+        );
         return false;
       }
 
@@ -55,7 +61,10 @@ export const config: NextAuthOptions = {
 
 // Use it in server contexts
 export function auth(
-  ...args: [GetServerSidePropsContext["req"], GetServerSidePropsContext["res"]] | [NextApiRequest, NextApiResponse] | []
+  ...args:
+    | [GetServerSidePropsContext["req"], GetServerSidePropsContext["res"]]
+    | [NextApiRequest, NextApiResponse]
+    | []
 ) {
   return getServerSession(...args, config);
 }

@@ -14,7 +14,7 @@ export type AutocompleteOption = {
 
 type InputAutocompleteProps = {
   onChange: (value: AutocompleteOption | null) => void;
-  onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void;
   options: AutocompleteOption[];
   label: string;
   style?: SxProps<Theme>;

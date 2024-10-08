@@ -6,6 +6,7 @@ import { convertDateToMinutes } from "@/app/utils/converters";
 import {
   SelectedDiscipline,
   RequestResponse,
+  DayOfWeek,
 } from "@/lib/fetch-api/fetch-buildGrades";
 
 type SelectedOption = AutocompleteOption & {
@@ -366,7 +367,7 @@ function formatSchedules(rawSchedules: Array<Partial<ScheduleType>>) {
     });
 
     return {
-      dayOfWeek: day,
+      dayOfWeek: day as DayOfWeek,
       startTime: getFormatedTime({
         startTime: lowestStartTime,
         endTime: highestEndTime,

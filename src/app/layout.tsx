@@ -19,7 +19,6 @@ export const metadata = {
 const HeaderWrapper = () => {
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
-      {/* @ts-expect-error Server Component */}
       <Header />
     </React.Suspense>
   );

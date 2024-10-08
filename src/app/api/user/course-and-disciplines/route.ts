@@ -3,13 +3,12 @@ import prisma from "@/lib/prisma";
 import { getSessionEmail } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
+  const email = await getSessionEmail(request);
+  if (!email) {
+    return NextResponse.json({ error: "Email not found in session" }, { status: 400 });
+  }
+  
   try {
-    const email = await getSessionEmail(request);
-    
-    if (!email) {
-      return NextResponse.json({ error: "Email not found in session" }, { status: 400 });
-    }
-
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
@@ -35,6 +34,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching user course and disciplines:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
