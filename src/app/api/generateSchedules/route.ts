@@ -7,7 +7,7 @@ import {
   SelectedDiscipline,
   RequestResponse,
   DayOfWeek,
-} from "@/lib/fetch-api/fetch-buildGrades";
+} from "@/lib/fetch-api/fetch-generateSchedules";
 
 type SelectedOption = AutocompleteOption & {
   professor: string;

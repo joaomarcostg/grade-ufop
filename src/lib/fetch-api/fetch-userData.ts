@@ -1,6 +1,6 @@
 import { Discipline, User } from "@prisma/client";
 import { fetchRequest } from "./utils";
-import { UserProfile } from "@/app/context";
+import { UserData } from "@/app/context";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -29,9 +29,9 @@ export async function getUserCourseAndDisciplines() {
   }
 }
 
-export async function getUserProfile(): Promise<UserProfile | null> {
+export async function getUserData(): Promise<UserData | null> {
   try {
-    const { data } = await fetchRequest<{ data: UserProfile }>(
+    const { data } = await fetchRequest<{ data: UserData }>(
       `${API_BASE_URL}/user`,
       {
         method: "GET",
@@ -75,7 +75,7 @@ export async function setUserCourse(courseId: string) {
 export async function updateCoursedDisciplines(disciplineIds: string[]) {
   try {
     const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
-      `${API_BASE_URL}/user/completed-disciplines`,
+      `${API_BASE_URL}/user/coursedDisciplines`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,7 +97,7 @@ export async function updateCoursedDisciplines(disciplineIds: string[]) {
 export async function addCompletedDiscipline(disciplineId: string) {
   try {
     const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
-      `${API_BASE_URL}/user/completed-disciplines`,
+      `${API_BASE_URL}/user/coursedDisciplines`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,7 +119,7 @@ export async function addCompletedDiscipline(disciplineId: string) {
 export async function removeCompletedDiscipline(disciplineId: string) {
   try {
     const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
-      `${API_BASE_URL}/user/completed-disciplines/${disciplineId}`,
+      `${API_BASE_URL}/user/coursedDisciplines/${disciplineId}`,
       {
         method: "DELETE",
       }

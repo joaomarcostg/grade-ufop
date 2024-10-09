@@ -1,14 +1,19 @@
 import { type AutocompleteOption } from "@/components/InputAutocomplete";
 import { type Discipline } from "@prisma/client";
 
-export type UserProfile = {
+export interface UserProfile {
   id: string;
   name: string;
   email: string;
   image: string;
 };
 
-export type StudentState = {
+export interface UserData extends UserProfile {
+  course: AutocompleteOption | null;
+  coursedDisciplines: Discipline[];
+}
+
+export interface StudentState {
   user: UserProfile | null;
   course: AutocompleteOption | null;
   courses: AutocompleteOption[];
@@ -21,4 +26,4 @@ export type StudentState = {
     [slotId: string]: AutocompleteOption[];
   };
   setupCompleted: boolean;
-};
+}

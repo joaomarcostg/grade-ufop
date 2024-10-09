@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import {
   setUserCourse,
   updateCoursedDisciplines,
-} from "@/lib/fetch-api/fetch-user-data";
+} from "@/lib/fetch-api/fetch-userData";
 import { capitalize } from "@/app/utils/converters";
 
 interface HomeProps {

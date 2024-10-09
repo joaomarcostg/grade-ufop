@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "@mui/material";
 import { SaveOutlined, Edit } from "@mui/icons-material";
-import { updateCoursedDisciplines } from "@/lib/fetch-api/fetch-user-data"; // You'll need to implement this
+import { updateCoursedDisciplines } from "@/lib/fetch-api/fetch-userData"; // You'll need to implement this
 import ManualPicker from "../DisciplinesPicker/ManualPicker";
 import { useStudent } from "@/app/context/student";
 

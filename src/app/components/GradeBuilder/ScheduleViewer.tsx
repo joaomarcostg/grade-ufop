@@ -16,7 +16,7 @@ import {
   useTheme,
   useMediaQuery
 } from "@mui/material";
-import { DayOfWeek, RequestResponse } from "@/lib/fetch-api/fetch-buildGrades";
+import { DayOfWeek, RequestResponse } from "@/lib/fetch-api/fetch-generateSchedules";
 import { capitalize } from "@/app/utils/converters";
 import { HelpOutline, Close } from "@mui/icons-material";
 

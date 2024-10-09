@@ -21,7 +21,7 @@ import { useStudent, useFilter, StudentActionType } from "@/app/context";
 import { getAvailableDisciplines } from "@/lib/fetch-api/fetch-disciplines";
 import DisciplinesSlot from "./DisciplinesSlot";
 import { capitalize } from "@/app/utils/converters";
-import { RequestResponse, getGrades } from "@/lib/fetch-api/fetch-buildGrades";
+import { RequestResponse, getGrades } from "@/lib/fetch-api/fetch-generateSchedules";
 import ScheduleViewer from "./ScheduleViewer";
 import { FilterSection } from "./FilterSection";
 
@@ -138,7 +138,7 @@ export default function DisciplinesSelector() {
     });
   };
 
-  async function buildGrades() {
+  async function generateSchedules() {
     const validSlots = Object.entries(state.disciplineSlots).filter(
       ([_, disciplines]) => disciplines.length > 0
     );
@@ -231,7 +231,7 @@ export default function DisciplinesSelector() {
               disabled={generateDisabled}
               variant="contained"
               onClick={() => {
-                buildGrades();
+                generateSchedules();
               }}
               startIcon={<Create />}
             >

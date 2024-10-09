@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import { setUserCourse } from "@/lib/fetch-api/fetch-user-data";
+import { setUserCourse } from "@/lib/fetch-api/fetch-userData";
 import CoursePicker from "../CoursePicker";
 import { useStudent, StudentActionType } from "@/app/context/student";
 

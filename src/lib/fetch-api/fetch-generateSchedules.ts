@@ -33,7 +33,7 @@ export async function getGrades({
   gapWeight?: number;
 }): Promise<RequestResponse> {
   try {
-    let apiUrl = `${API_BASE_URL}/buildGrades`;
+    let apiUrl = `${API_BASE_URL}/generateSchedules`;
     const body = JSON.stringify({ disciplineSlots, dayWeight, gapWeight });
 
     const res = await fetchRequest<any>(apiUrl, {

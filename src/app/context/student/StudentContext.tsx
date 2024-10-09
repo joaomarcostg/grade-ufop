@@ -11,12 +11,8 @@ import React, {
 } from "react";
 import { studentReducer } from "./reducer";
 import { type StudentAction, StudentActionType } from "./actions";
-import { type StudentState } from "./types";
-import {
-  getUserCourseAndDisciplines,
-  fetchCourses,
-  getUserProfile,
-} from "@/lib/fetch-api";
+import { UserProfile, type StudentState } from "./types";
+import { fetchCourses, getUserData } from "@/lib/fetch-api";
 import {
   saveToLocalStorage,
   loadFromLocalStorage,
@@ -46,30 +42,49 @@ const StudentContext = createContext<StudentContextType>({
 
 // Function to load the initial state from both the database and local storage
 const loadFromDatabase = async (): Promise<StudentState> => {
-  const storageData = loadFromLocalStorage("studentState", defaultState);
-  const dbData = await getUserCourseAndDisciplines();
-  const userData = await getUserProfile();
+  try {
+    const storageData = loadFromLocalStorage("studentState", defaultState);
+    const [userData, coursesData] = await Promise.all([
+      getUserData(),
+      fetchCourses(),
+    ]);
 
-  const coursesData = await fetchCourses();
+    if (!userData) {
+      return defaultState;
+    }
 
-  const course = dbData?.course
-    ? { label: dbData.course.name, value: dbData.course.id }
-    : null;
+    const user: UserProfile = {
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      image: userData.image,
+    };
 
-  const coursedDisciplines = new Map(
-    dbData?.completedDisciplines.map((d) => [d.id, d]) || []
-  );
-  const courses =
-    coursesData?.map((course) => ({ label: course.name, value: course.id })) ||
-    [];
+    const course = userData?.course
+      ? { label: userData.course.name, value: userData.course.id }
+      : null;
 
-  return {
-    ...storageData,
-    user: userData,
-    course,
-    coursedDisciplines,
-    courses,
-  };
+    const coursedDisciplines = new Map(
+      userData?.coursedDisciplines.map((d) => [d.id, d]) || []
+    );
+
+    const courses =
+      coursesData?.map((course) => ({
+        label: course.name,
+        value: course.id,
+      })) || [];
+
+    return {
+      ...storageData,
+      user,
+      course,
+      coursedDisciplines,
+      courses,
+    };
+  } catch (error) {
+    console.error("Error loading data from database:", error);
+    return defaultState; // Fallback to default state in case of an error
+  }
 };
 
 export const StudentProvider: React.FC<{ children: ReactNode }> = ({
