@@ -52,21 +52,21 @@ const SavedScheduleCombinations = () => {
         state.scheduleCombinations[currentSemester]
       )[currentCombination];
 
-      // await removeScheduleCombination(scheduleId);
+      await removeScheduleCombination(scheduleId);
 
-      // // After deleting, update the state
-      // dispatch({
-      //   type: StudentActionType.DELETE_SAVED_SCHEDULE,
-      //   payload: { semester: currentSemester, scheduleId },
-      // });
-      // setDeleteDialogOpen(false);
-      // // If the current combination no longer exists, reset to 0
-      // if (
-      //   currentCombination >=
-      //   Object.keys(state.scheduleCombinations[currentSemester]).length - 1
-      // ) {
-      //   setCurrentCombination(0);
-      // }
+      // After deleting, update the state
+      dispatch({
+        type: StudentActionType.DELETE_SAVED_SCHEDULE,
+        payload: { semester: currentSemester, scheduleId },
+      });
+      setDeleteDialogOpen(false);
+      // If the current combination no longer exists, reset to 0
+      if (
+        currentCombination >=
+        Object.keys(state.scheduleCombinations[currentSemester]).length - 1
+      ) {
+        setCurrentCombination(0);
+      }
       addToast({
         message: "Grade removida com sucesso!",
         severity: "success",

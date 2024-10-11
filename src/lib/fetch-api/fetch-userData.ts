@@ -1,4 +1,4 @@
-import { Discipline, User } from "@prisma/client";
+import { Discipline, Schedule, User } from "@prisma/client";
 import { fetchRequest } from "./utils";
 import { UserData } from "@/app/context";
 
@@ -161,25 +161,20 @@ export async function saveScheduleCombination({
 }: {
   disciplineClassIds: string[];
 }) {
-  try {
-    const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
-      `${API_BASE_URL}/user/scheduleCombinations`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ disciplineClassIds }),
-      }
-    );
-
-    if (!data) {
-      throw new Error("Failed to save combinations");
+  const { data } = await fetchRequest<{ data: Schedule }>(
+    `${API_BASE_URL}/user/scheduleCombinations`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ disciplineClassIds }),
     }
+  );
 
-    return data;
-  } catch (error) {
-    console.error("Error saving combinations:", error);
-    return null;
+  if (!data) {
+    throw new Error("Failed to save combinations");
   }
+
+  return data;
 }
 
 export async function removeScheduleCombination(scheduleId: string) {

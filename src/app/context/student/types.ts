@@ -1,5 +1,5 @@
 import { type AutocompleteOption } from "@/components/InputAutocomplete";
-import { Schedule, type Discipline } from "@prisma/client";
+import { type Discipline } from "@prisma/client";
 
 export type DayOfWeek = "SEG" | "TER" | "QUA" | "QUI" | "SEX" | "SAB";
 
@@ -21,7 +21,7 @@ export interface UserProfile {
   image: string;
 }
 
-type ScheduleCombination = {
+export type ScheduleCombination = {
   [scheduleId: string]: {
     [disciplineClassId: string]: SavedScheduleDiscipline;
   };

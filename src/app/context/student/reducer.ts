@@ -199,6 +199,14 @@ export const studentReducer = (
       return {
         ...state,
       };
+    case StudentActionType.ADD_SAVED_SCHEDULE:
+      state.scheduleCombinations[payload.semester][payload.scheduleId] = {
+        ...payload.schedule,
+      };
+
+      return {
+        ...state,
+      };
 
     default:
       return state;

@@ -1,6 +1,10 @@
 import { type Discipline } from "@prisma/client";
 import { AutocompleteOption } from "@/components/InputAutocomplete";
-import { UserProfile, type StudentState } from "./types";
+import {
+  UserProfile,
+  type SavedScheduleDiscipline,
+  type StudentState,
+} from "./types";
 
 export enum StudentActionType {
   INIT_STATE = "INIT_STATE",
@@ -22,6 +26,7 @@ export enum StudentActionType {
   SET_SETUP_COMPLETED = "SET_SETUP_COMPLETED",
   SET_SETUP_STEP = "SET_SETUP_STEP",
   DELETE_SAVED_SCHEDULE = "DELETE_SAVED_SCHEDULE",
+  ADD_SAVED_SCHEDULE = "ADD_SAVED_SCHEDULE",
 }
 
 // Define the Action type as a discriminated union
@@ -103,5 +108,13 @@ export type StudentAction =
       payload: {
         scheduleId: string;
         semester: string;
+      };
+    }
+  | {
+      type: StudentActionType.ADD_SAVED_SCHEDULE;
+      payload: {
+        semester: string;
+        scheduleId: string;
+        schedule: { [disciplineClassId: string]: SavedScheduleDiscipline };
       };
     };

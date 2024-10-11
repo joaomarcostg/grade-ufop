@@ -12,7 +12,8 @@ import {
 import { RequestResponse } from "@/lib/fetch-api/fetch-generateSchedules";
 import { HelpOutline, Close, SaveOutlined, Check } from "@mui/icons-material";
 import { saveScheduleCombination } from "@/lib/fetch-api/fetch-userData";
-import {useStudent } from "@/app/context/student";
+import { useStudent, StudentActionType } from "@/app/context/student";
+import { useToast } from "@/app/context/ToastContext";
 import ScheduleTable from "./ScheduleTable";
 
 type ScheduleViewerProps = {
@@ -26,19 +27,39 @@ const ScheduleViewer = ({
   open,
   onClose,
 }: ScheduleViewerProps) => {
-  const { state } = useStudent();
+  const { addToast } = useToast();
+  const { state, dispatch } = useStudent();
   const [currentCombination, setCurrentCombination] = useState(0);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleSaveCombination = async (index: number) => {
-    const disciplineClassIds = Object.keys(combinations[index]);
-    await saveScheduleCombination({ disciplineClassIds });
+    try {
+      const disciplineClassIds = Object.keys(combinations[index]);
+      const savedSchedule = await saveScheduleCombination({
+        disciplineClassIds,
+      });
+      dispatch({
+        type: StudentActionType.ADD_SAVED_SCHEDULE,
+        payload: {
+          scheduleId: savedSchedule.id,
+          semester: savedSchedule.semester,
+          schedule: combinations[index],
+        },
+      });
+    } catch (error) {
+      addToast({
+        message: "Erro ao salvar a grade. Por favor, tente novamente.",
+        severity: "error",
+      });
+      console.error("Error saving schedule combination:", error);
+    }
   };
 
   const isCombinationSaved = useCallback(
     (index: number) => {
       const currentSemester = process.env.NEXT_PUBLIC_CURRENT_SEMESTER;
+
       if (!currentSemester || !state.scheduleCombinations) return false;
 
       const semesterSchedules = state.scheduleCombinations[currentSemester];
