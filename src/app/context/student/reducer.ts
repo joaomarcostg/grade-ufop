@@ -178,8 +178,28 @@ export const studentReducer = (
     case StudentActionType.SET_SETUP_COMPLETED:
       return {
         ...state,
-        setupCompleted: payload,
+        setup: {
+          ...state.setup,
+          completed: payload,
+        },
       };
+    case StudentActionType.SET_SETUP_STEP:
+      return {
+        ...state,
+        setup: {
+          ...state.setup,
+          step: payload,
+        },
+      };
+    case StudentActionType.DELETE_SAVED_SCHEDULE:
+      const { scheduleId, semester } = payload;
+
+      delete state.scheduleCombinations[semester][scheduleId];
+
+      return {
+        ...state,
+      };
+
     default:
       return state;
   }

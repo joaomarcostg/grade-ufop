@@ -135,3 +135,62 @@ export async function removeCompletedDiscipline(disciplineId: string) {
     return null;
   }
 }
+
+export async function getUserScheduleCombinations() {
+  try {
+    const res = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
+      `${API_BASE_URL}/user/combinations`,
+      {
+        method: "GET",
+      }
+    );
+
+    if (!res.data) {
+      throw new Error("Failed to get combinations");
+    }
+
+    return res.data;
+  } catch (error) {
+    console.error("Error getting combinations:", error);
+    return null;
+  }
+}
+
+export async function saveScheduleCombination({
+  disciplineClassIds,
+}: {
+  disciplineClassIds: string[];
+}) {
+  try {
+    const { data } = await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
+      `${API_BASE_URL}/user/scheduleCombinations`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disciplineClassIds }),
+      }
+    );
+
+    if (!data) {
+      throw new Error("Failed to save combinations");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error saving combinations:", error);
+    return null;
+  }
+}
+
+export async function removeScheduleCombination(scheduleId: string) {
+  try {
+    await fetchRequest<{ data: UserWithCourseAndDisciplines }>(
+      `${API_BASE_URL}/user/scheduleCombinations/${scheduleId}`,
+      {
+        method: "DELETE",
+      }
+    );
+  } catch (error) {
+    console.error("Error removing schedule combination:", error);
+  }
+}

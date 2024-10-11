@@ -7,6 +7,7 @@ import {
   Add,
   PlaylistAdd,
   Delete,
+  DeleteOutline,
   Edit,
 } from "@mui/icons-material";
 import Autocomplete, {
@@ -137,7 +138,7 @@ function DisciplinesSlot({
       className="relative flex flex-row gap-4 items-center"
     >
       <div
-        className="absolute top-1/2 -translate-y-1/2 -left-8"
+        className="hidden sm:block absolute top-1/2 -translate-y-1/2 -left-8"
         itemRef={slotId}
         {...provided.dragHandleProps}
       >
@@ -147,6 +148,9 @@ function DisciplinesSlot({
         className={`relative min-w-full max-w-[800px] flex flex-col gap-4 p-4 ${
           isFocused ? "border-primary" : "border-gray-100"
         } border-2 rounded-lg ${!isFocused && "group py-6"} `}
+        itemRef={slotId}
+        onClick={changeFocus}
+        {...provided.dragHandleProps}
       >
         <div className="group-hover:flex hidden absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 bg-white border-gray-100  border-2 rounded-[50%]">
           <IconButton size="small" onClick={changeFocus}>
@@ -155,21 +159,25 @@ function DisciplinesSlot({
         </div>
         {isFocused && (
           <>
-            <div className="mt-2 flex w-full flex-row gap-4 justify-start items-center">
-              <Autocomplete
-                options={options}
-                onChange={handleSelection}
-                onKeyDown={handleKeyDown}
-                label="Disciplina"
-                value={selectedDiscipline}
-                style={{
-                  width: "100%",
-                  maxWidth: 400,
-                }}
-              />
-              <div className="flex-1 flex items-center justify-between">
+            <div className="flex-col mt-2 flex w-full md:flex-row gap-4 justify-start items-center">
+              <div className="w-full flex-1">
+                <Autocomplete
+                  options={options}
+                  onChange={handleSelection}
+                  onKeyDown={handleKeyDown}
+                  label="Disciplina"
+                  value={selectedDiscipline}
+                  style={{
+                    flex: 1,
+                  }}
+                />
+              </div>
+              <div className="max-[500px]:text-xs text-sm w-full flex-1 flex items-center justify-between">
                 <Button
                   variant="text"
+                  style={{
+                    fontSize: "inherit",
+                  }}
                   onClick={handleAdd}
                   endIcon={addAllClasses ? <PlaylistAdd /> : <Add />}
                   disabled={!selectedDiscipline}
@@ -185,6 +193,9 @@ function DisciplinesSlot({
                         onChange={(e) => setAddAllClasses(e.target.checked)}
                       />
                     }
+                    classes={{
+                      label: "max-[500px]:!text-xs",
+                    }}
                     label="Todas as turmas"
                   />
                 </Tooltip>
@@ -212,11 +223,18 @@ function DisciplinesSlot({
           <span>Nenhuma disciplina selecionada</span>
         )}
       </div>
-      <div className="absolute top-1/2 -translate-y-1/2 -right-12">
+      <div className="max-sm:hidden absolute top-1/2 -translate-y-1/2 -right-12">
         <IconButton onClick={removeAction}>
           <Delete />
         </IconButton>
       </div>
+      {isFocused && (
+        <div className="sm:hidden text-white absolute right-0 top-0 translate-x-1/2 -translate-y-1/2  bg-red-400 border-red-400 border rounded-[50%]">
+          <IconButton size="small" color="inherit" onClick={removeAction}>
+            <DeleteOutline color="inherit" fontSize="small" />
+          </IconButton>
+        </div>
+      )}
     </div>
   );
 }

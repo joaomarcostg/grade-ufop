@@ -2,6 +2,7 @@
 import React from "react";
 import { StudentProvider } from "./student/StudentContext";
 import { FilterProvider } from "./filter/FilterContext";
+import { ToastProvider } from "./ToastContext";
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -9,8 +10,10 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   return (
-    <StudentProvider>
-      <FilterProvider>{children}</FilterProvider>
-    </StudentProvider>
+    <ToastProvider>
+      <StudentProvider>
+        <FilterProvider>{children}</FilterProvider>
+      </StudentProvider>
+    </ToastProvider>
   );
 };

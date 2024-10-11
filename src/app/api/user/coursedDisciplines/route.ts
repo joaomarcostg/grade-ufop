@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSessionEmail } from "@/lib/auth";
 
+// export const revalidate = 3600;
+
 export async function POST(request: NextRequest) {
   try {
     const email = await getSessionEmail(request);

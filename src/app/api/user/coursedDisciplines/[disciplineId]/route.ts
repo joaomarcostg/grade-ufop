@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
+// export const revalidate = 3600;
+
 export async function DELETE(
   _request: Request,
   { params }: { params: { userId: string; disciplineId: string } }

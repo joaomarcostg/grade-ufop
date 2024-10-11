@@ -1,16 +1,40 @@
 import { type AutocompleteOption } from "@/components/InputAutocomplete";
-import { type Discipline } from "@prisma/client";
+import { Schedule, type Discipline } from "@prisma/client";
+
+export type DayOfWeek = "SEG" | "TER" | "QUA" | "QUI" | "SEX" | "SAB";
+
+export type SavedScheduleDiscipline = {
+  code: string;
+  name: string;
+  classNumber: string;
+  professor: string;
+  schedule: {
+    dayOfWeek: DayOfWeek;
+    startTime: string;
+  }[];
+};
 
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   image: string;
+}
+
+type ScheduleCombination = {
+  [scheduleId: string]: {
+    [disciplineClassId: string]: SavedScheduleDiscipline;
+  };
+};
+
+export type UserScheduleCombinations = {
+  [semester: string]: ScheduleCombination;
 };
 
 export interface UserData extends UserProfile {
   course: AutocompleteOption | null;
   coursedDisciplines: Discipline[];
+  scheduleCombinations: UserScheduleCombinations;
 }
 
 export interface StudentState {
@@ -25,5 +49,9 @@ export interface StudentState {
   disciplineSlots: {
     [slotId: string]: AutocompleteOption[];
   };
-  setupCompleted: boolean;
+  scheduleCombinations: UserScheduleCombinations;
+  setup: {
+    step: number;
+    completed: boolean;
+  };
 }

@@ -22,6 +22,7 @@ import {
   updateCoursedDisciplines,
 } from "@/lib/fetch-api/fetch-userData";
 import { capitalize } from "@/app/utils/converters";
+import { useToast } from "../context/ToastContext";
 
 interface HomeProps {
   session: Session;
@@ -29,13 +30,13 @@ interface HomeProps {
 
 export default function HomeContent({ session }: HomeProps) {
   const router = useRouter();
+  const { addToast } = useToast();
 
   const {
-    state: { course, courses, coursedDisciplines, setupCompleted },
+    state: { course, courses, coursedDisciplines, setup },
     dispatch,
   } = useStudent();
 
-  const [activeStep, setActiveStep] = useState<number>(0);
   const [selectedCourse, setSelectedCourse] =
     useState<AutocompleteOption | null>(course);
 
@@ -47,11 +48,17 @@ export default function HomeContent({ session }: HomeProps) {
   ];
 
   const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    dispatch({
+      type: StudentActionType.SET_SETUP_STEP,
+      payload: setup.step + 1,
+    });
   };
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    dispatch({
+      type: StudentActionType.SET_SETUP_STEP,
+      payload: setup.step - 1,
+    });
   };
 
   const handleCourseSelection = async () => {
@@ -70,6 +77,10 @@ export default function HomeContent({ session }: HomeProps) {
       });
       handleNext();
     } catch (error) {
+      addToast({
+        message: "Erro ao salvar seleção de curso. Por favor, tente novamente.",
+        severity: "error",
+      });
       console.error("Error saving course selection:", error);
     }
   };
@@ -88,24 +99,28 @@ export default function HomeContent({ session }: HomeProps) {
 
       router.push("/montar-grade");
     } catch (error) {
-      console.log(error);
+      addToast({
+        message: "Erro ao salvar dados do usuário. Por favor, tente novamente.",
+        severity: "error",
+      });
+      console.error(error);
     }
   };
 
   useEffect(() => {
-    if (setupCompleted) {
+    if (setup.completed) {
       router.push("/montar-grade");
     }
-  }, [setupCompleted, router]);
+  }, [setup.completed, router]);
 
-  if (setupCompleted) {
+  if (setup.completed) {
     return <></>;
   }
 
   return (
     <Container maxWidth="md">
       <Box sx={{ my: 4 }}>
-        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+        <Stepper activeStep={setup.step} sx={{ mb: 4 }}>
           {steps.map((label) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
@@ -113,12 +128,12 @@ export default function HomeContent({ session }: HomeProps) {
           ))}
         </Stepper>
 
-        {activeStep === 0 && (
+        {setup.step === 0 && (
           <>
             <Typography variant="h4" component="h1" gutterBottom>
               Bem-vindo ao GradeUFOP, {capitalize(session.user?.name)}!
             </Typography>
-            <Typography variant="body1" paragraph>
+            <Typography variant="body1" component={"p"} mb={2}>
               Estamos animados para ajudá-lo a organizar sua jornada acadêmica.
               Vamos começar selecionando seu curso e as disciplinas que você já
               concluiu.
@@ -129,7 +144,7 @@ export default function HomeContent({ session }: HomeProps) {
           </>
         )}
 
-        {activeStep === 1 && (
+        {setup.step === 1 && (
           <>
             <Typography variant="h5" gutterBottom marginBottom={4}>
               Selecione o curso que você está cursando
@@ -150,7 +165,7 @@ export default function HomeContent({ session }: HomeProps) {
           </>
         )}
 
-        {activeStep === 2 && (
+        {setup.step === 2 && (
           <>
             <Typography variant="h5" gutterBottom>
               Selecione as disciplinas que você já cursou
@@ -167,7 +182,7 @@ export default function HomeContent({ session }: HomeProps) {
           </>
         )}
 
-        {activeStep === 3 && (
+        {setup.step === 3 && (
           <>
             <Typography variant="h5" gutterBottom mb={4}>
               Confirme suas seleções
@@ -175,10 +190,10 @@ export default function HomeContent({ session }: HomeProps) {
                 <HelpOutline fontSize="small" className="ml-2 cursor-help" />
               </Tooltip>
             </Typography>
-            <Typography variant="body1" paragraph>
+            <Typography variant="body1" component={"p"} mb={2}>
               <span className="font-bold">Curso:</span> {course?.label}
             </Typography>
-            <Typography variant="body1" paragraph>
+            <Typography variant="body1" component={"p"} mb={2}>
               <span className="font-bold">Disciplinas selecionadas:</span>{" "}
               {coursedDisciplines.size}
             </Typography>

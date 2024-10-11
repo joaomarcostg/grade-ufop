@@ -4,6 +4,7 @@ import { useStudent, StudentActionType } from "@/app/context/student";
 import { getDisciplinesByCourse } from "@/lib/fetch-api/fetch-disciplines";
 import { type Discipline } from "@prisma/client";
 import { Tooltip } from "@mui/material";
+import { useToast } from "@/app/context/ToastContext";
 
 type DisciplinesByPeriod = {
   [key: number]: Discipline[];
@@ -15,6 +16,7 @@ export default function ManualPicker({
   disabled?: boolean;
 }) {
   const { state, dispatch } = useStudent();
+  const { addToast } = useToast();
   const [disciplinesByPeriod, setDisciplinesByPeriod] =
     useState<DisciplinesByPeriod>({});
   const [maxPeriod, setMaxPeriod] = useState(0);
@@ -44,6 +46,10 @@ export default function ManualPicker({
         setDisciplinesByPeriod(groupedDisciplines);
         setMaxPeriod(max);
       } catch (error) {
+        addToast({
+          message: "Erro ao buscar disciplinas",
+          severity: "error",
+        });
         console.error("Error fetching disciplines:", error);
       } finally {
         setIsLoading(false);
@@ -51,7 +57,7 @@ export default function ManualPicker({
     }
 
     fetchData();
-  }, [state.course]);
+  }, [addToast, state.course]);
 
   const handleDisciplineSelection = (discipline: Discipline) => {
     if (!disabled) {

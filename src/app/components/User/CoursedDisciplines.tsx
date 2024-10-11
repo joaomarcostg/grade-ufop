@@ -6,9 +6,12 @@ import { SaveOutlined, Edit } from "@mui/icons-material";
 import { updateCoursedDisciplines } from "@/lib/fetch-api/fetch-userData"; // You'll need to implement this
 import ManualPicker from "../DisciplinesPicker/ManualPicker";
 import { useStudent } from "@/app/context/student";
+import { useToast } from "@/app/context/ToastContext";
 
 function CoursedDisciplines() {
   const [isEditing, setIsEditing] = useState(false);
+
+  const { addToast } = useToast();
   const {
     state: { coursedDisciplines },
   } = useStudent();
@@ -21,6 +24,10 @@ function CoursedDisciplines() {
       await updateCoursedDisciplines(completedDisciplines);
       setIsEditing(false);
     } catch (error) {
+      addToast({
+        message: "Erro ao buscar disciplinas",
+        severity: "error",
+      });
       console.error("Failed to update coursed disciplines:", error);
     }
   };

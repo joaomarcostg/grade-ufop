@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSessionEmail } from "@/lib/auth";
 
+// export const revalidate = 3600;
 
 export async function GET(request: NextRequest) {
   const email = await getSessionEmail(request);
@@ -13,19 +14,18 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
-
   try {
-    // Save the generated combinations
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     const userSavedSchedules = await prisma.schedule.findMany({
       where: {
         userId: user.id,
@@ -59,26 +59,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
-
-  const { semester, disciplineClassIds } = await request.json();
-
   try {
-    // Save the generated combinations
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const { disciplineClassIds } = (await request.json()) as {
+      disciplineClassIds: string[];
+    };
+    const semester = process.env.NEXT_PUBLIC_CURRENT_SEMESTER;
+
+    if (!semester) {
+      return NextResponse.json(
+        { message: "Semester not found" },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    // Save the generated combination
     const savedSchedule = await prisma.schedule.create({
       data: {
         userId: user?.id,
-        semester: semester,
-        name: `Schedule for ${semester}`,
+        semester,
         classes: {
           createMany: {
             data: disciplineClassIds.map((id: string) => ({
@@ -90,7 +101,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { schedule: savedSchedule },
+      { data: savedSchedule },
       {
         status: 200,
       }

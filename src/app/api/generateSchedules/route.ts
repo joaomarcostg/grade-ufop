@@ -3,11 +3,8 @@ import prisma from "@/lib/prisma";
 import { AutocompleteOption } from "@/app/components/InputAutocomplete";
 import type { DisciplineClassSchedule } from "@prisma/client";
 import { convertDateToMinutes } from "@/app/utils/converters";
-import {
-  SelectedDiscipline,
-  RequestResponse,
-  DayOfWeek,
-} from "@/lib/fetch-api/fetch-generateSchedules";
+import { RequestResponse } from "@/lib/fetch-api/fetch-generateSchedules";
+import { SavedScheduleDiscipline, DayOfWeek } from "@/app/context/student";
 
 type SelectedOption = AutocompleteOption & {
   professor: string;
@@ -123,7 +120,13 @@ async function getScheduleForSelectedDisciplines(
     index: number
   ) {
     if (index === slotIds.length) {
-      allCombinations.push({ ...combination });
+      // Check if this combination is unique before adding it
+      const combinationString = JSON.stringify(combination);
+      if (
+        !allCombinations.some((c) => JSON.stringify(c) === combinationString)
+      ) {
+        allCombinations.push({ ...combination });
+      }
       return;
     }
 
@@ -140,7 +143,9 @@ async function getScheduleForSelectedDisciplines(
         )
       ) {
         combination[slotId] = discipline;
+        generateCombinations({ ...combination }, index + 1);
       }
+      // Also consider the case where we don't choose any discipline for this slot
       generateCombinations({ ...combination }, index + 1);
     }
   }
@@ -149,10 +154,15 @@ async function getScheduleForSelectedDisciplines(
 
   // Rank the valid combinations
   const rankedCombinations = allCombinations.map((combination) => {
-    const { slotsUsed, weightedScore } = calculateScore(combination, slotsSchedules, dayWeight, gapWeight);
+    const { slotsUsed, weightedScore } = calculateScore(
+      combination,
+      slotsSchedules,
+      dayWeight,
+      gapWeight
+    );
     return { combination, slotsUsed, weightedScore };
   });
-  
+
   rankedCombinations.sort((a, b) => {
     // First, sort by number of slots used (descending)
     if (b.slotsUsed !== a.slotsUsed) {
@@ -164,14 +174,14 @@ async function getScheduleForSelectedDisciplines(
 
   // Convert objects to arrays (assuming values are arrays)
   const bestCombinations = rankedCombinations
-    .slice(0, 5)
+    .slice(0, 10)
     .map((rc) => rc.combination);
 
   const disciplineIds = new Set(
     bestCombinations.map((obj) => Object.values(obj).flat()).flat()
   );
 
-  const disciplineClasses: { [id: string]: SelectedDiscipline } = {};
+  const disciplineClasses: { [id: string]: SavedScheduleDiscipline } = {};
 
   for (const disciplineClassId of Array.from(disciplineIds)) {
     const disciplineData = await prisma.disciplineClass.findUnique({
@@ -207,7 +217,6 @@ async function getScheduleForSelectedDisciplines(
     }
   }
 
-  // Return first 5 or all if fewer than 5
   const responseObj: RequestResponse = {};
 
   bestCombinations.forEach((combination, index) => {
@@ -231,21 +240,22 @@ function calculateScore(
 ): { slotsUsed: number; weightedScore: number } {
   const allSchedules: ScheduleType[] = [];
   const slotsUsed = Object.keys(combination).length;
-  
+
   for (const [slotId, disciplineClassId] of Object.entries(combination)) {
-    if (disciplineClassId) {  // Only count non-empty slots
+    if (disciplineClassId) {
+      // Only count non-empty slots
       allSchedules.push(...slotsSchedules[slotId][disciplineClassId]);
     }
   }
-  
+
   const daysWithClasses = new Set(allSchedules.map((s) => s.dayOfWeek)).size;
   const dayScore = daysWithClasses * dayWeight;
 
   const gapScore = calculateGapScore(allSchedules) * gapWeight;
-  
+
   return {
     slotsUsed,
-    weightedScore: dayScore + gapScore
+    weightedScore: dayScore + gapScore,
   };
 }
 

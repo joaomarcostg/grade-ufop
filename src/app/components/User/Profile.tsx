@@ -2,6 +2,8 @@
 "use client";
 import UserInfo from "./UserInfo";
 import CoursedDisciplines from "./CoursedDisciplines";
+import SavedSchedules from "./SavedScheduleCombinations";
+
 import { useStudent } from "@/app/context/student";
 
 export default function Profile() {
@@ -12,10 +14,11 @@ export default function Profile() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 mb-12">
       <h1 className="text-2xl font-bold mb-4">Perfil</h1>
       <UserInfo />
       <CoursedDisciplines />
+      <SavedSchedules />
     </div>
   );
 }

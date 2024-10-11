@@ -3,6 +3,8 @@ import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
 import type { TextContent, TextItem } from "pdfjs-dist/types/src/display/api";
 import prisma from "@/lib/prisma";
 
+// export const revalidate = 3600;
+
 async function getPDFContent(file: File) {
   await import("pdfjs-dist/legacy/build/pdf.worker.mjs");
 
@@ -54,7 +56,7 @@ async function findAlreadyCoursedDisciplines(file: File, courseId: string) {
 
   const equivalencyGroups = pending
     .map((pd) => pd.discipline.equivalencyGroupId)
-    .filter((val) => val !== null);
+    .filter((val): val is string => val !== null);
 
   const equivalentDisciplines = await prisma.discipline.findMany({
     where: {

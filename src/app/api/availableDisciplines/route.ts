@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSessionEmail } from "@/lib/auth";
 
+// export const revalidate = 3600;
+
 type UserInfo = {
   courseId: string;
   completedDisciplines: string[];

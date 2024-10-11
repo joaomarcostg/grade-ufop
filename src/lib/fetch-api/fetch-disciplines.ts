@@ -43,9 +43,6 @@ export async function getDisciplinesByCourse({
       apiUrl,
       {
         method: "GET",
-        next: {
-          revalidate: 3600,
-        },
       }
     );
 
@@ -107,9 +104,6 @@ export async function getAvailableDisciplines(filters: {
       `${API_BASE_URL}/availableDisciplines?${queryParams}`,
       {
         method: "GET",
-        next: {
-          revalidate: 3600,
-        },
       }
     );
 

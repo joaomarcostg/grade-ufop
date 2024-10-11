@@ -31,10 +31,10 @@ export default function AuthError() {
           <Typography component="h1" variant="h5" gutterBottom>
             Erro de autenticação
           </Typography>
-          <Typography align="center" paragraph>
+          <Typography align="center" component={"p"}>
             {errorMessage}
           </Typography>
-          <Typography align="center" paragraph color="error">
+          <Typography align="center" component={"p"} color="error">
             Detalhes do erro: {error}
           </Typography>
           <Button component={Link} href="/auth/login" variant="contained">

@@ -20,6 +20,8 @@ export enum StudentActionType {
   REMOVE_FROM_DISCIPLINES_SLOT = "REMOVE_FROM_DISCIPLINES_SLOT",
   SET_DISCIPLINES_SLOT = "SET_DISCIPLINES_SLOT",
   SET_SETUP_COMPLETED = "SET_SETUP_COMPLETED",
+  SET_SETUP_STEP = "SET_SETUP_STEP",
+  DELETE_SAVED_SCHEDULE = "DELETE_SAVED_SCHEDULE",
 }
 
 // Define the Action type as a discriminated union
@@ -31,7 +33,10 @@ export type StudentAction =
       type: StudentActionType.SELECT_COURSE;
       payload: AutocompleteOption;
     }
-  | { type: StudentActionType.SET_MULTIPLE_COURSED_DISCIPLINES; payload: Discipline[] }
+  | {
+      type: StudentActionType.SET_MULTIPLE_COURSED_DISCIPLINES;
+      payload: Discipline[];
+    }
   | { type: StudentActionType.SELECT_COURSED_DISCIPLINE; payload: Discipline }
   | {
       type: StudentActionType.SET_AVAILABLE_OPTIONS;
@@ -91,4 +96,12 @@ export type StudentAction =
         [slotId: string]: AutocompleteOption[];
       };
     }
-  | { type: StudentActionType.SET_SETUP_COMPLETED; payload: boolean };
+  | { type: StudentActionType.SET_SETUP_COMPLETED; payload: boolean }
+  | { type: StudentActionType.SET_SETUP_STEP; payload: number }
+  | {
+      type: StudentActionType.DELETE_SAVED_SCHEDULE;
+      payload: {
+        scheduleId: string;
+        semester: string;
+      };
+    };
