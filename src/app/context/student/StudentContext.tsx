@@ -18,6 +18,7 @@ import {
   loadFromLocalStorage,
 } from "@/app/utils/localStorage";
 import { useToast } from "../ToastContext";
+import FullPageLoader from "@/app/components/FullPageLoader";
 
 // Initial state
 const defaultState: StudentState = {
@@ -127,8 +128,9 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [state, initialized]);
 
-  if (!initialized) return null;
-
+  if (!initialized || isLoading) {
+    return <FullPageLoader />;
+  }
   return (
     <StudentContext.Provider value={{ state, isLoading, dispatch }}>
       {children}
