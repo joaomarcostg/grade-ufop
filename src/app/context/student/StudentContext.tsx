@@ -38,10 +38,12 @@ const defaultState: StudentState = {
 interface StudentContextType {
   state: StudentState;
   dispatch: React.Dispatch<StudentAction>;
+  isLoading: boolean;
 }
 
 const StudentContext = createContext<StudentContextType>({
   state: defaultState,
+  isLoading: false,
   dispatch: () => null,
 });
 
@@ -95,10 +97,12 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const { addToast } = useToast();
   const [initialized, setInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(studentReducer, defaultState);
 
   const initializeState = useCallback(async () => {
     try {
+      setIsLoading(true);
       const existingState = await loadFromDatabase();
       dispatch({ type: StudentActionType.INIT_STATE, payload: existingState });
       setInitialized(true);
@@ -108,6 +112,8 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({
         severity: "error",
       });
       console.error("Error initializing student state:", error);
+    } finally {
+      setIsLoading(false);
     }
   }, [addToast]);
 
@@ -124,7 +130,7 @@ export const StudentProvider: React.FC<{ children: ReactNode }> = ({
   if (!initialized) return null;
 
   return (
-    <StudentContext.Provider value={{ state, dispatch }}>
+    <StudentContext.Provider value={{ state, isLoading, dispatch }}>
       {children}
     </StudentContext.Provider>
   );

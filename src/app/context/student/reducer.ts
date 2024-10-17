@@ -200,6 +200,10 @@ export const studentReducer = (
         ...state,
       };
     case StudentActionType.ADD_SAVED_SCHEDULE:
+      if (!state.scheduleCombinations[payload.semester]) {
+        state.scheduleCombinations[payload.semester] = {};
+      }
+
       state.scheduleCombinations[payload.semester][payload.scheduleId] = {
         ...payload.schedule,
       };

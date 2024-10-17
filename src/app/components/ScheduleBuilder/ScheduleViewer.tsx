@@ -33,6 +33,11 @@ const ScheduleViewer = ({
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
+  const handleClose = () => {
+    onClose();
+    setCurrentCombination(0);
+  };
+
   const handleSaveCombination = async (index: number) => {
     try {
       const disciplineClassIds = Object.keys(combinations[index]);
@@ -47,6 +52,10 @@ const ScheduleViewer = ({
           schedule: combinations[index],
         },
       });
+      addToast({
+        message: "Grade salva com sucesso!",
+        severity: "success",
+      })
     } catch (error) {
       addToast({
         message: "Erro ao salvar a grade. Por favor, tente novamente.",
@@ -94,7 +103,7 @@ const ScheduleViewer = ({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       maxWidth="lg"
       fullWidth
       fullScreen={fullScreen}
@@ -109,7 +118,7 @@ const ScheduleViewer = ({
     >
       <div className="flex justify-between items-center p-4 border-b">
         <h2 className="text-2xl font-bold">Grades Disponíveis</h2>
-        <IconButton onClick={onClose}>
+        <IconButton onClick={handleClose}>
           <Close />
         </IconButton>
       </div>

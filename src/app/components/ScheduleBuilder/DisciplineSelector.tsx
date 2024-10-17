@@ -14,6 +14,7 @@ import {
   Step,
   StepLabel,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import { Add, Create, Visibility, HelpOutline } from "@mui/icons-material";
 import { type AutocompleteOption } from "@/components/InputAutocomplete";
@@ -21,21 +22,27 @@ import { useStudent, useFilter, StudentActionType } from "@/app/context";
 import { getAvailableDisciplines } from "@/lib/fetch-api/fetch-disciplines";
 import DisciplinesSlot from "./DisciplinesSlot";
 import { capitalize } from "@/app/utils/converters";
-import { RequestResponse, getGrades } from "@/lib/fetch-api/fetch-generateSchedules";
+import {
+  RequestResponse,
+  getGrades,
+} from "@/lib/fetch-api/fetch-generateSchedules";
 import ScheduleViewer from "./ScheduleViewer";
 import { FilterSection } from "./FilterSection";
+import { useToast } from "@/app/context/ToastContext";
 
 export default function DisciplinesSelector() {
   const { state, dispatch } = useStudent();
   const {
     state: { timeSlots, days, includeElective, dayWeight, gapWeight },
   } = useFilter();
+  const { addToast } = useToast();
 
   const [focused, setFocus] = useState<string>("");
   const [results, setResults] = useState<RequestResponse>(null);
   const [resultsDialogOpen, setResultsDialogOpen] = useState(false);
   const [generateDisabled, setGenerateDisabled] = useState(true);
   const [slotsAdditionDisabled, setSlotsAdditionDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (Object.keys(state.disciplineSlots).length >= 8) {
@@ -139,23 +146,45 @@ export default function DisciplinesSelector() {
   };
 
   async function generateSchedules() {
-    const validSlots = Object.entries(state.disciplineSlots).filter(
-      ([_, disciplines]) => disciplines.length > 0
-    );
+    try {
+      setIsLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const validSlots = Object.entries(state.disciplineSlots).filter(
+        ([_, disciplines]) => disciplines.length > 0
+      );
 
-    const disciplineSlots = Object.fromEntries(validSlots);
+      const disciplineSlots = Object.fromEntries(validSlots);
 
-    const data = await getGrades({
-      disciplineSlots,
-      dayWeight,
-      gapWeight,
-    });
-    setResults(data);
-    setResultsDialogOpen(true);
+      const data = await getGrades({
+        disciplineSlots,
+        dayWeight,
+        gapWeight,
+      });
+      setResults(data);
+      setResultsDialogOpen(true);
+    } catch (error) {
+      console.error("Error generating schedules:", error);
+      addToast({
+        message: "Erro ao gerar grades. Por favor, tente novamente.",
+        severity: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <div className="flex flex-col w-full max-w-[800px] space-y-6">
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg flex gap-4 flex-col items-center">
+            <CircularProgress size={60} />
+            <Typography variant="h6" className="mt-4">
+              Gerando grades
+            </Typography>
+          </div>
+        </div>
+      )}
       <div className="bg-gray-100 p-4 rounded-lg">
         <Stepper activeStep={-1} alternativeLabel>
           {steps.map((step) => (
@@ -262,4 +291,3 @@ export default function DisciplinesSelector() {
     </div>
   );
 }
-
