@@ -82,11 +82,13 @@ export async function getAvailableDisciplines(filters: {
   timeSlots?: string[];
   days?: string[];
   includeElective?: boolean;
+  ignorePrerequisite?: boolean;
 }) {
   try {
     const timeSlots = filters.timeSlots?.join(",") || "";
     const days = filters.days?.join(",") || "";
     const includeElective = filters.includeElective ? "true" : "";
+    const ignorePrerequisite = filters.ignorePrerequisite ? "true" : "";
 
     const queryParamsArray = [];
     if (timeSlots) {
@@ -96,8 +98,12 @@ export async function getAvailableDisciplines(filters: {
       queryParamsArray.push(`days=${days}`);
     }
     if (includeElective) {
-      queryParamsArray.push(`includeElective=true`);
+      queryParamsArray.push("includeElective=true");
     }
+    if(ignorePrerequisite){
+      queryParamsArray.push("ignorePrerequisite=true")
+    }
+
     const queryParams = queryParamsArray.join("&");
 
     const res = await fetchRequest<FetchGetAvailableDisciplinesResponse>(

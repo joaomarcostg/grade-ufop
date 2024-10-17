@@ -33,7 +33,7 @@ import { useToast } from "@/app/context/ToastContext";
 export default function DisciplinesSelector() {
   const { state, dispatch } = useStudent();
   const {
-    state: { timeSlots, days, includeElective, dayWeight, gapWeight },
+    state: { timeSlots, days, includeElective, ignorePrerequisite, dayWeight, gapWeight },
   } = useFilter();
   const { addToast } = useToast();
 
@@ -71,6 +71,7 @@ export default function DisciplinesSelector() {
         timeSlots,
         days,
         includeElective,
+        ignorePrerequisite
       });
       const autocompleteOptions = disciplines.reduce<
         NonNullable<AutocompleteOption[]>
@@ -102,6 +103,7 @@ export default function DisciplinesSelector() {
     timeSlots,
     days,
     includeElective,
+    ignorePrerequisite
   ]);
 
   useEffect(() => {
