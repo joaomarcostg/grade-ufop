@@ -26,7 +26,7 @@ const SavedScheduleCombinations = () => {
   const { addToast } = useToast();
   const theme = useTheme();
   const [currentSemester, setCurrentSemester] = useState(
-    process.env.NEXT_PUBLIC_CURRENT_SEMESTER
+    process.env.NEXT_PUBLIC_CURRENT_SEMESTER ?? ""
   );
   const [currentCombination, setCurrentCombination] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -118,7 +118,7 @@ const SavedScheduleCombinations = () => {
           <Tab key={semester} label={semester} value={semester} />
         ))}
       </Tabs>
-      {currentSemester &&
+      {state.scheduleCombinations[currentSemester] &&
         Object.values(state.scheduleCombinations[currentSemester])[
           currentCombination
         ] && (
