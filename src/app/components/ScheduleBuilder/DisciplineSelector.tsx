@@ -1,5 +1,11 @@
 "use client";
-import React, { useEffect, useCallback, useState } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useMemo,
+  useRef,
+} from "react";
 import { v4 as uuid } from "uuid";
 import {
   DragDropContext,
@@ -33,7 +39,14 @@ import { useToast } from "@/app/context/ToastContext";
 export default function DisciplinesSelector() {
   const { state, dispatch } = useStudent();
   const {
-    state: { timeSlots, days, includeElective, ignorePrerequisite, dayWeight, gapWeight },
+    state: {
+      timeSlots,
+      days,
+      includeElective,
+      ignorePrerequisite,
+      dayWeight,
+      gapWeight,
+    },
   } = useFilter();
   const { addToast } = useToast();
 
@@ -43,6 +56,9 @@ export default function DisciplinesSelector() {
   const [generateDisabled, setGenerateDisabled] = useState(true);
   const [slotsAdditionDisabled, setSlotsAdditionDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (Object.keys(state.disciplineSlots).length >= 8) {
@@ -64,14 +80,14 @@ export default function DisciplinesSelector() {
     { label: "Gere Grades", description: "Crie combinações de horários" },
   ];
 
-  useEffect(() => {
-    async function fetchRequest() {
-      if (!state.course?.value) return;
+  const fetchAvailableDisciplines = useCallback(async () => {
+    if (!state.course?.value) return;
+    try {
       const disciplines = await getAvailableDisciplines({
         timeSlots,
         days,
         includeElective,
-        ignorePrerequisite
+        ignorePrerequisite,
       });
       const autocompleteOptions = disciplines.reduce<
         NonNullable<AutocompleteOption[]>
@@ -94,17 +110,45 @@ export default function DisciplinesSelector() {
         type: StudentActionType["SET_AVAILABLE_OPTIONS"],
         payload: autocompleteOptions,
       });
+    } catch (error) {
+      console.error("Error fetching available disciplines:", error);
+      addToast({
+        message:
+          "Erro ao carregar disciplinas disponíveis. Por favor, tente novamente.",
+        severity: "error",
+      });
     }
-    fetchRequest();
   }, [
-    dispatch,
     state.course?.value,
-    state.coursedDisciplines,
     timeSlots,
     days,
     includeElective,
-    ignorePrerequisite
+    ignorePrerequisite,
+    dispatch,
+    addToast,
   ]);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      fetchAvailableDisciplines();
+      return;
+    }
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      fetchAvailableDisciplines();
+    }, 1000);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [fetchAvailableDisciplines]);
 
   useEffect(() => {
     const slots = Object.values(state.disciplineSlots);
