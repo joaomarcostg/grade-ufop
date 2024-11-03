@@ -29,6 +29,13 @@ const theme = createTheme({
     },
     MuiButton: {
       styleOverrides: {}
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          fontSize: 14
+        }
+      }
     }
   },
 });

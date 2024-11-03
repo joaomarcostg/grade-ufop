@@ -18,12 +18,21 @@ export default async function LoginPage() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          gap: 2,
         }}
       >
         <Typography component="h1" variant="h5">
           Seja bem-vindo ao GradeUFOP
         </Typography>
-        <Box sx={{ mt: 3 }}>
+        <Typography 
+          variant="body1" 
+          color="text.secondary" 
+          align="center"
+          sx={{ maxWidth: "80%" }}
+        >
+          Para acessar o sistema, faça login com seu email institucional da UFOP (@aluno.ufop.edu.br)
+        </Typography>
+        <Box sx={{ mt: 1 }}>
           <GoogleLoginButton />
         </Box>
       </Box>

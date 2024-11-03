@@ -19,7 +19,7 @@ const FullPageLoader = () => (
   >
     <CircularProgress size={60} />
     <Typography variant="h6" style={{ marginTop: "16px" }}>
-      Carregando dados do usuário...
+      Carregando...
     </Typography>
   </Box>
 );

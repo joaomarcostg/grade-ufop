@@ -1,11 +1,6 @@
 "use client";
-import React, {
-  useEffect,
-  useCallback,
-  useState,
-  useMemo,
-  useRef,
-} from "react";
+import React, { useEffect, useCallback, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import {
   DragDropContext,
@@ -37,6 +32,7 @@ import { FilterSection } from "./FilterSection";
 import { useToast } from "@/app/context/ToastContext";
 
 export default function DisciplinesSelector() {
+  const router = useRouter();
   const { state, dispatch } = useStudent();
   const {
     state: {
@@ -59,6 +55,12 @@ export default function DisciplinesSelector() {
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (!state.setup.completed) {
+      router.push("/");
+    }
+  }, [state.setup.completed, router]);
 
   useEffect(() => {
     if (Object.keys(state.disciplineSlots).length >= 8) {
@@ -217,6 +219,10 @@ export default function DisciplinesSelector() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (!state.setup.completed) {
+    return <></>;
   }
 
   return (

@@ -10,6 +10,7 @@ import {
   StepLabel,
   Stepper,
   Tooltip,
+  CircularProgress,
 } from "@mui/material";
 import { HelpOutline } from "@mui/icons-material";
 import { AutocompleteOption } from "./InputAutocomplete";
@@ -31,6 +32,7 @@ interface HomeProps {
 export default function HomeContent({ session }: HomeProps) {
   const router = useRouter();
   const { addToast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     state: { course, courses, coursedDisciplines, setup },
@@ -47,23 +49,34 @@ export default function HomeContent({ session }: HomeProps) {
     "Confirmação",
   ];
 
-  const handleNext = () => {
-    dispatch({
-      type: StudentActionType.SET_SETUP_STEP,
-      payload: setup.step + 1,
-    });
+  const handleNext = async () => {
+    setIsLoading(true);
+    try {
+      dispatch({
+        type: StudentActionType.SET_SETUP_STEP,
+        payload: setup.step + 1,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleBack = () => {
-    dispatch({
-      type: StudentActionType.SET_SETUP_STEP,
-      payload: setup.step - 1,
-    });
+  const handleBack = async () => {
+    setIsLoading(true);
+    try {
+      dispatch({
+        type: StudentActionType.SET_SETUP_STEP,
+        payload: setup.step - 1,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCourseSelection = async () => {
     if (!selectedCourse) return;
 
+    setIsLoading(true);
     try {
       const updatedUser = await setUserCourse(selectedCourse.value);
 
@@ -82,10 +95,13 @@ export default function HomeContent({ session }: HomeProps) {
         severity: "error",
       });
       console.error("Error saving course selection:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSave = async () => {
+    setIsLoading(true);
     try {
       dispatch({
         type: StudentActionType.SET_SETUP_COMPLETED,
@@ -104,6 +120,8 @@ export default function HomeContent({ session }: HomeProps) {
         severity: "error",
       });
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -114,11 +132,26 @@ export default function HomeContent({ session }: HomeProps) {
   }, [setup.completed, router]);
 
   if (setup.completed) {
-    return <></>;
+    return <LoadingOverlay fullpage />;
+  }
+
+  function LoadingOverlay({ fullpage = false }: { fullpage?: boolean }) {
+    return (
+      <div
+        className={`${
+          fullpage ? "bg-white" : "bg-black/30"
+        } fixed inset-0 flex items-center justify-center z-50`}
+      >
+        <div className="p-6 rounded-lg flex items-center gap-3">
+          <CircularProgress size={48} />
+        </div>
+      </div>
+    );
   }
 
   return (
     <Container maxWidth="md">
+      {isLoading && <LoadingOverlay />}
       <Box sx={{ my: 4 }}>
         <Stepper activeStep={setup.step} sx={{ mb: 4 }}>
           {steps.map((label) => (
@@ -138,7 +171,11 @@ export default function HomeContent({ session }: HomeProps) {
               Vamos começar selecionando seu curso e as disciplinas que você já
               concluiu.
             </Typography>
-            <Button variant="contained" onClick={handleNext}>
+            <Button
+              variant="contained"
+              onClick={handleNext}
+              disabled={isLoading}
+            >
               Começar
             </Button>
           </>
@@ -155,10 +192,14 @@ export default function HomeContent({ session }: HomeProps) {
               handleCourseChange={setSelectedCourse}
             />
             <div className="w-full flex justify-between items-center">
-              <Button onClick={handleBack} sx={{ mr: 1 }}>
+              <Button onClick={handleBack} sx={{ mr: 1 }} disabled={isLoading}>
                 Voltar
               </Button>
-              <Button variant="contained" onClick={handleCourseSelection}>
+              <Button
+                variant="contained"
+                onClick={handleCourseSelection}
+                disabled={isLoading || !selectedCourse}
+              >
                 Próximo
               </Button>
             </div>
@@ -172,10 +213,14 @@ export default function HomeContent({ session }: HomeProps) {
             </Typography>
             <DisciplinesPicker />
             <div className="w-full flex justify-between items-center">
-              <Button onClick={handleBack} sx={{ mr: 1 }}>
+              <Button onClick={handleBack} sx={{ mr: 1 }} disabled={isLoading}>
                 Voltar
               </Button>
-              <Button variant="contained" onClick={handleNext}>
+              <Button
+                variant="contained"
+                onClick={handleNext}
+                disabled={isLoading}
+              >
                 Próximo
               </Button>
             </div>
@@ -205,10 +250,14 @@ export default function HomeContent({ session }: HomeProps) {
               ))}
             </div>
             <div className="w-full mt-8 flex justify-between items-center">
-              <Button onClick={handleBack} sx={{ mr: 1 }}>
+              <Button onClick={handleBack} sx={{ mr: 1 }} disabled={isLoading}>
                 Voltar
               </Button>
-              <Button variant="contained" onClick={handleSave}>
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={isLoading}
+              >
                 Salvar e Continuar
               </Button>
             </div>
