@@ -19,9 +19,14 @@ const Header = async () => {
         </div>
 
         {session?.user && (
-          <Button color="inherit" component={Link} href="/profile">
+          <Button
+            color="inherit"
+            component={Link}
+            href="/profile"
+            sx={{ gap: 1 }}
+          >
             <Avatar
-              sx={{ width: 32, height: 32, mr: 1 }}
+              sx={{ width: 32, height: 32 }}
               alt={session.user.name || ""}
               src={session.user.image || ""}
             />

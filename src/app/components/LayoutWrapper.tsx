@@ -24,7 +24,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </Alert>
         </Snackbar>
       ))}
-      <main className="pt-16 pb-8 px-4">{children}</main>
+      <main className="mt-14 py-4 px-2 sm:py-8 sm:px-4 sm:mt-16 ">
+        {children}
+      </main>
     </>
   );
 };

@@ -24,6 +24,8 @@ import {
 } from "@/lib/fetch-api/fetch-userData";
 import { capitalize } from "@/app/utils/converters";
 import { useToast } from "../context/ToastContext";
+import { useSmallScreen } from "../hooks/useSmallScreen";
+import { StepperNavigation } from "./StepperNavigation";
 
 interface HomeProps {
   session: Session;
@@ -32,6 +34,7 @@ interface HomeProps {
 export default function HomeContent({ session }: HomeProps) {
   const router = useRouter();
   const { addToast } = useToast();
+  const { isSmallScreen } = useSmallScreen();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -153,7 +156,11 @@ export default function HomeContent({ session }: HomeProps) {
     <Container maxWidth="md">
       {isLoading && <LoadingOverlay />}
       <Box sx={{ my: 4 }}>
-        <Stepper activeStep={setup.step} sx={{ mb: 4 }}>
+        <Stepper
+          activeStep={setup.step}
+          orientation={isSmallScreen ? "vertical" : "horizontal"}
+          sx={{ mb: 4 }}
+        >
           {steps.map((label) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
@@ -171,13 +178,12 @@ export default function HomeContent({ session }: HomeProps) {
               Vamos começar selecionando seu curso e as disciplinas que você já
               concluiu.
             </Typography>
-            <Button
-              variant="contained"
-              onClick={handleNext}
-              disabled={isLoading}
-            >
-              Começar
-            </Button>
+            <StepperNavigation
+              onNext={handleNext}
+              isLoading={isLoading}
+              nextLabel="Começar"
+              showBack={false}
+            />
           </>
         )}
 
@@ -191,18 +197,12 @@ export default function HomeContent({ session }: HomeProps) {
               selectedCourse={selectedCourse}
               handleCourseChange={setSelectedCourse}
             />
-            <div className="w-full flex justify-between items-center">
-              <Button onClick={handleBack} sx={{ mr: 1 }} disabled={isLoading}>
-                Voltar
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleCourseSelection}
-                disabled={isLoading || !selectedCourse}
-              >
-                Próximo
-              </Button>
-            </div>
+            <StepperNavigation
+              onNext={handleCourseSelection}
+              onBack={handleBack}
+              isLoading={isLoading}
+              nextDisabled={!selectedCourse}
+            />
           </>
         )}
 
@@ -212,18 +212,11 @@ export default function HomeContent({ session }: HomeProps) {
               Selecione as disciplinas que você já cursou
             </Typography>
             <DisciplinesPicker />
-            <div className="w-full flex justify-between items-center">
-              <Button onClick={handleBack} sx={{ mr: 1 }} disabled={isLoading}>
-                Voltar
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleNext}
-                disabled={isLoading}
-              >
-                Próximo
-              </Button>
-            </div>
+            <StepperNavigation
+              onNext={handleNext}
+              onBack={handleBack}
+              isLoading={isLoading}
+            />
           </>
         )}
 
@@ -249,18 +242,12 @@ export default function HomeContent({ session }: HomeProps) {
                 </Typography>
               ))}
             </div>
-            <div className="w-full mt-8 flex justify-between items-center">
-              <Button onClick={handleBack} sx={{ mr: 1 }} disabled={isLoading}>
-                Voltar
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleSave}
-                disabled={isLoading}
-              >
-                Salvar e Continuar
-              </Button>
-            </div>
+            <StepperNavigation
+              onNext={handleSave}
+              onBack={handleBack}
+              isLoading={isLoading}
+              nextLabel="Salvar e Continuar"
+            />
           </>
         )}
       </Box>

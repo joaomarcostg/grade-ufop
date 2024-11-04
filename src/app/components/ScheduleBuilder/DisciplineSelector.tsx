@@ -30,6 +30,7 @@ import {
 import ScheduleViewer from "./ScheduleViewer";
 import { FilterSection } from "./FilterSection";
 import { useToast } from "@/app/context/ToastContext";
+import { useSmallScreen } from "@/app/hooks/useSmallScreen";
 
 export default function DisciplinesSelector() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function DisciplinesSelector() {
     },
   } = useFilter();
   const { addToast } = useToast();
-
+  const { isSmallScreen } = useSmallScreen();
   const [focused, setFocus] = useState<string>("");
   const [results, setResults] = useState<RequestResponse>(null);
   const [resultsDialogOpen, setResultsDialogOpen] = useState(false);
@@ -226,24 +227,44 @@ export default function DisciplinesSelector() {
   }
 
   return (
-    <div className="flex flex-col w-full max-w-[800px] space-y-6">
+    <div className="flex flex-col w-full max-w-[800px] space-y-4 sm:space-y-6">
       {isLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex gap-4 flex-col items-center">
-            <CircularProgress size={60} />
-            <Typography variant="h6" className="mt-4">
+          <div className="bg-white p-6 sm:p-8 rounded-lg flex gap-3 sm:gap-4 flex-col items-center">
+            <CircularProgress size={isSmallScreen ? 48 : 60} />
+            <Typography
+              variant={isSmallScreen ? "subtitle1" : "h6"}
+              className="mt-2 sm:mt-4"
+            >
               Gerando grades
             </Typography>
           </div>
         </div>
       )}
-      <div className="bg-gray-100 p-4 rounded-lg">
-        <Stepper activeStep={-1} alternativeLabel>
+
+      <div className="bg-gray-100 p-3 sm:p-4 rounded-lg">
+        <Stepper
+          activeStep={-1}
+          orientation={isSmallScreen ? "vertical" : "horizontal"}
+          alternativeLabel={!isSmallScreen}
+          connector={isSmallScreen ? <></> : undefined}
+          className={isSmallScreen ? "gap-2" : ""}
+        >
           {steps.map((step) => (
             <Step key={step.label}>
               <StepLabel>
-                <Typography variant="body2">{step.label}</Typography>
-                <Typography variant="caption" className="text-gray-600">
+                <Typography
+                  variant="body2"
+                  className={`${isSmallScreen ? "text-sm font-medium" : ""}`}
+                >
+                  {step.label}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  className={`text-gray-600 ${
+                    isSmallScreen ? "text-xs block mt-0.5" : ""
+                  }`}
+                >
                   {step.description}
                 </Typography>
               </StepLabel>
@@ -254,20 +275,21 @@ export default function DisciplinesSelector() {
 
       <FilterSection />
 
-      <div className="py-6">
-        <div className="flex items-center mb-4">
-          <h2 className="text-xl font-bold">Slots de Disciplinas</h2>
+      <div className="py-3 sm:py-6">
+        <div className="flex items-center mb-3 sm:mb-4">
+          <h2 className="text-lg sm:text-xl font-bold">Slots de Disciplinas</h2>
           <Tooltip title="Os slots representam diferentes opções de disciplinas para o mesmo horário. Arraste os slots para reordená-los por prioridade e adicione múltiplas disciplinas em cada slot para criar combinações.">
-            <HelpOutline className="ml-2 cursor-help" />
+            <HelpOutline className="ml-2 cursor-help text-base sm:text-xl" />
           </Tooltip>
         </div>
+
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="options">
             {(provided) => (
               <ul
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="space-y-8"
+                className="space-y-4 sm:space-y-8"
               >
                 {Object.entries(state.disciplineSlots).map(
                   ([key, _], index) => (
@@ -289,43 +311,51 @@ export default function DisciplinesSelector() {
             )}
           </Droppable>
         </DragDropContext>
-        <div className="mt-4 flex items-center gap-4 justify-center">
+
+        <div className="mt-3 sm:mt-4 flex items-center gap-2 sm:gap-4 justify-center">
           <div className="flex-1 border" />
           <Tooltip title="Adicione um novo slot para incluir mais opções de disciplinas">
-            <Button
-              variant="text"
-              onClick={addDisciplinesSlot}
-              startIcon={<Add />}
-              disabled={slotsAdditionDisabled}
-            >
-              Adicionar Slot
-            </Button>
+            <span>
+              <Button
+                variant="text"
+                onClick={addDisciplinesSlot}
+                startIcon={<Add className="text-base sm:text-xl" />}
+                disabled={slotsAdditionDisabled}
+                size={isSmallScreen ? "small" : "medium"}
+                className="text-sm sm:text-base"
+              >
+                Adicionar Slot
+              </Button>
+            </span>
           </Tooltip>
           <div className="flex-1 border" />
         </div>
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
         <Tooltip title="Gerar novas combinações de grade com base nas seleções atuais">
           <span>
             <Button
               disabled={generateDisabled}
               variant="contained"
-              onClick={() => {
-                generateSchedules();
-              }}
-              startIcon={<Create />}
+              onClick={generateSchedules}
+              startIcon={<Create className="text-base sm:text-xl" />}
+              size={isSmallScreen ? "small" : "medium"}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               Gerar Grades
             </Button>
           </span>
         </Tooltip>
+
         {results && (
           <Tooltip title="Visualizar as combinações de grade geradas">
             <Button
               variant="outlined"
               onClick={() => setResultsDialogOpen(true)}
-              startIcon={<Visibility />}
+              startIcon={<Visibility className="text-base sm:text-xl" />}
+              size={isSmallScreen ? "small" : "medium"}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               Exibir Resultados
             </Button>

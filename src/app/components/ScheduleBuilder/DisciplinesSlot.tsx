@@ -13,6 +13,7 @@ import {
 import Autocomplete, {
   type AutocompleteOption,
 } from "@/components/InputAutocomplete";
+import { useSmallScreen } from "@/app/hooks/useSmallScreen";
 import { useStudent, StudentActionType } from "@/app/context/student";
 import Chip from "./Chip";
 import {
@@ -39,6 +40,7 @@ function DisciplinesSlot({
   removeAction,
 }: DisciplinesSlotProps) {
   const { state, dispatch } = useStudent();
+  const { isSmallScreen } = useSmallScreen();
 
   const [selectedDiscipline, setSelectedDiscipline] =
     useState<AutocompleteOption | null>(null);
@@ -135,7 +137,7 @@ function DisciplinesSlot({
     <div
       ref={provided.innerRef}
       {...provided.draggableProps}
-      className="relative flex flex-row gap-4 items-center"
+      className="relative flex flex-row gap-2 sm:gap-4 items-center"
     >
       <div
         className="hidden sm:block absolute top-1/2 -translate-y-1/2 -left-8"
@@ -145,21 +147,21 @@ function DisciplinesSlot({
         <DragIndicator />
       </div>
       <div
-        className={`relative min-w-full max-w-[800px] flex flex-col gap-4 p-4 ${
+        className={`relative min-w-full max-w-[800px] flex flex-col gap-2 sm:gap-4 p-4 py-2 ${
           isFocused ? "border-primary" : "border-gray-100"
-        } border-2 rounded-lg ${!isFocused && "group py-6"} `}
+        } border-2 rounded-lg ${!isFocused && "group sm:py-6"}`}
         itemRef={slotId}
         onClick={changeFocus}
         {...provided.dragHandleProps}
       >
-        <div className="group-hover:flex hidden absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 bg-white border-gray-100  border-2 rounded-[50%]">
+        <div className="group-hover:flex hidden absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 bg-white border-gray-100 border-2 rounded-[50%]">
           <IconButton size="small" onClick={changeFocus}>
             <Edit fontSize="small" color="primary" />
           </IconButton>
         </div>
         {isFocused && (
           <>
-            <div className="flex-col mt-2 flex w-full md:flex-row gap-4 justify-start items-center">
+            <div className="flex-col mt-2 flex w-full md:flex-row gap-2 sm:gap-4 justify-start items-center">
               <div className="w-full flex-1">
                 <Autocomplete
                   options={options}
@@ -178,6 +180,7 @@ function DisciplinesSlot({
                   style={{
                     fontSize: "inherit",
                   }}
+                  size={!isSmallScreen ? "large" : "medium"}
                   onClick={handleAdd}
                   endIcon={addAllClasses ? <PlaylistAdd /> : <Add />}
                   disabled={!selectedDiscipline}
@@ -213,6 +216,7 @@ function DisciplinesSlot({
                   key={index}
                   {...chip}
                   handleDelete={() => handleRemove(chip)}
+                  size={!isSmallScreen ? "medium" : "small"}
                 />
               ) : (
                 <></>
@@ -220,7 +224,9 @@ function DisciplinesSlot({
             )}
           </div>
         ) : (
-          <span>Nenhuma disciplina selecionada</span>
+          <span className="text-sm sm:text-base text-gray-500 mb-2">
+            Nenhuma disciplina selecionada
+          </span>
         )}
       </div>
       <div className="max-sm:hidden absolute top-1/2 -translate-y-1/2 -right-12">
@@ -229,7 +235,7 @@ function DisciplinesSlot({
         </IconButton>
       </div>
       {isFocused && (
-        <div className="sm:hidden text-white absolute right-0 top-0 translate-x-1/2 -translate-y-1/2  bg-red-400 border-red-400 border rounded-[50%]">
+        <div className="sm:hidden text-white absolute right-0 top-0 translate-x-1/3 -translate-y-1/3 bg-red-400 border-red-400 border rounded-[50%]">
           <IconButton size="small" color="inherit" onClick={removeAction}>
             <DeleteOutline color="inherit" fontSize="small" />
           </IconButton>

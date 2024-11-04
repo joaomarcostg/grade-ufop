@@ -33,10 +33,10 @@ function InputAutocomplete({
     <Autocomplete
       sx={{
         ...style,
-        "& + .MuiAutocomplete-popper .MuiAutocomplete-option": {
-          borderBottom: "1px solid #DDD",
-          padding: "8px 16px",
-        },
+      }}
+      classes={{
+        input: "sm:!text-base !text-sm",
+        option: "sm:!text-base !text-sm border-b border-gray-200 py-2 px-4",
       }}
       noOptionsText="Nenhuma opção encontrada"
       options={options}
@@ -45,9 +45,7 @@ function InputAutocomplete({
       onChange={(_, selected: AutocompleteOption | null) => {
         onChange(selected);
       }}
-      onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-        onKeyDown(event);
-      }}
+      onKeyDown={onKeyDown}
       isOptionEqualToValue={(option, value) => option?.value === value?.value}
       filterSelectedOptions
       renderInput={(params) => <TextField {...params} label={label} />}

@@ -12,16 +12,16 @@ type CustomChipProps = NonNullable<AutocompleteOption> & {
 };
 function Chip({ label, handleDelete }: CustomChipProps) {
   return (
-    // <Tooltip title={label}>
+    <Tooltip title={label}>
       <div className="w-full gap-2 flex flex-row items-center">
-        <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+        <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm sm:text-base">
           {label}
         </span>
         <IconButton onClick={handleDelete}>
           <Close color="primary" />
         </IconButton>
       </div>
-    // </Tooltip>
+    </Tooltip>
   );
 }
 
