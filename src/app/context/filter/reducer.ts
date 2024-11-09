@@ -6,10 +6,10 @@ export function filterReducer(
   action: FilterAction
 ): FilterState {
   switch (action.type) {
-    case "SET_TIME_SLOTS":
-      return { ...state, timeSlots: action.payload };
+    case "SET_TIME_RANGES":
+      return { ...state, timeRanges: action.payload };
     case "SET_DAYS":
-      return { ...state, days: action.payload };
+      return { ...state, selectedDays: action.payload };
     case "SET_INCLUDE_ELECTIVE":
       return { ...state, includeElective: action.payload };
     case "SET_IGNORE_PREREQUISITE":

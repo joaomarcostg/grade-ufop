@@ -4,7 +4,8 @@ import { AutocompleteOption } from "@/app/components/InputAutocomplete";
 import type { DisciplineClassSchedule } from "@prisma/client";
 import { convertDateToMinutes } from "@/app/utils/converters";
 import { RequestResponse } from "@/lib/fetch-api/fetch-generateSchedules";
-import { SavedScheduleDiscipline, DayOfWeek } from "@/app/context/student";
+import { SavedScheduleDiscipline } from "@/app/context/student";
+import { DayOfWeek } from "@/app/context/filter/types";
 
 type SelectedOption = AutocompleteOption & {
   professor: string;

@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  DayOfWeek,
-  SavedScheduleDiscipline,
-} from "@/app/context/student/types";
+import { DaysOfWeek } from "@/app/context";
+import { SavedScheduleDiscipline } from "@/app/context/student/types";
 import { HelpOutline } from "@mui/icons-material";
 import {
   Table,
@@ -31,16 +29,7 @@ const choosedDisciplinesMap: Record<string, string> = {
   professor: "Professor",
 };
 
-const daysOfWeekMap: Record<DayOfWeek, string> = {
-  SEG: "Segunda",
-  TER: "Terça",
-  QUA: "Quarta",
-  QUI: "Quinta",
-  SEX: "Sexta",
-  SAB: "Sábado",
-};
-
-const daysOfWeek = [
+const daysOfWeekHeader = [
   "Horário",
   "Segunda",
   "Terça",
@@ -62,7 +51,7 @@ function ScheduleTable({
     currentData.forEach((course) => {
       course.schedule.forEach((sched) => {
         const time = sched.startTime;
-        const day = daysOfWeekMap[sched.dayOfWeek];
+        const day = DaysOfWeek[sched.dayOfWeek];
 
         if (!map[time]) map[time] = {};
         map[time][day] = course.code;
@@ -80,7 +69,7 @@ function ScheduleTable({
         <Table size="small" className="mb-4">
           <TableHead>
             <TableRow>
-              {daysOfWeek.map((day, index) => (
+              {daysOfWeekHeader.map((day, index) => (
                 <TableCell key={index} align="center" className="font-bold">
                   {day}
                 </TableCell>
@@ -93,7 +82,7 @@ function ScheduleTable({
                 <TableCell align="center" className="font-bold">
                   {time}
                 </TableCell>
-                {daysOfWeek.slice(1).map((day, i) => (
+                {daysOfWeekHeader.slice(1).map((day, i) => (
                   <TableCell
                     key={i}
                     align="center"
@@ -122,20 +111,18 @@ function ScheduleTable({
             }`}
           >
             <span className="font-semibold">{choosedDisciplinesMap[col]}</span>
-            {Object.values(scheduleCombination).map(
-              (value, idx) => (
-                <span
-                  key={idx}
-                  className={`overflow-hidden whitespace-nowrap ${
-                    col === "name" || col === "professor" ? "truncate" : ""
-                  }`}
-                >
-                  {col === "name" || col === "professor"
-                    ? capitalize(value[col])
-                    : value[col]}
-                </span>
-              )
-            )}
+            {Object.values(scheduleCombination).map((value, idx) => (
+              <span
+                key={idx}
+                className={`overflow-hidden whitespace-nowrap ${
+                  col === "name" || col === "professor" ? "truncate" : ""
+                }`}
+              >
+                {col === "name" || col === "professor"
+                  ? capitalize(value[col])
+                  : value[col]}
+              </span>
+            ))}
           </div>
         ))}
       </div>

@@ -1,7 +1,6 @@
 import { type AutocompleteOption } from "@/components/InputAutocomplete";
 import { type Discipline } from "@prisma/client";
-
-export type DayOfWeek = "SEG" | "TER" | "QUA" | "QUI" | "SEX" | "SAB";
+import { DayOfWeek } from "../filter/types";
 
 export type SavedScheduleDiscipline = {
   code: string;

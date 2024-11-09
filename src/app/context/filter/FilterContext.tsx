@@ -12,15 +12,15 @@ import {
   saveToLocalStorage,
   loadFromLocalStorage,
 } from "@/app/utils/localStorage";
-import { FilterState } from "./types";
+import { DayOfWeek, FilterState } from "./types";
 import { filterReducer } from "./reducer";
 import { FilterAction } from "./actions";
-import { DAYS_OF_WEEK, TIME_SLOTS } from "./constants";
+import { DaysOfWeek } from "./constants";
 
 // Initial state
 const initialState: FilterState = {
-  timeSlots: TIME_SLOTS,
-  days: DAYS_OF_WEEK.map((day) => day.value),
+  timeRanges: [],
+  selectedDays: Object.keys(DaysOfWeek) as DayOfWeek[],
   includeElective: true,
   ignorePrerequisite: false,
   dayWeight: 1,

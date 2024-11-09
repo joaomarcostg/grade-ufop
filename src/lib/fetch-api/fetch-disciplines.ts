@@ -1,6 +1,7 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { type Discipline } from "@prisma/client";
 import { fetchRequest } from "./utils";
+import { TimeRange } from "@/app/context/filter/types";
 
 interface FetchedDiscipline extends Discipline {
   period: number | null;
@@ -78,15 +79,17 @@ type FetchGetAvailableDisciplinesResponse = {
   }[];
 };
 
-export async function getAvailableDisciplines(filters: {
-  timeSlots?: string[];
-  days?: string[];
-  includeElective?: boolean;
-  ignorePrerequisite?: boolean;
-}) {
+export type DisciplineFilters = {
+  timeRanges?: TimeRange[];
+  selectedDays?: string[];
+  includeElective: boolean;
+  ignorePrerequisite: boolean;
+};
+
+export async function getAvailableDisciplines(filters: DisciplineFilters) {
   try {
-    const timeSlots = filters.timeSlots?.join(",") || "";
-    const days = filters.days?.join(",") || "";
+    const timeSlots = filters.timeRanges?.map((range) => `${range.start}-${range.end}`).join(",") || "";
+    const days = filters.selectedDays?.join(",") || "";
     const includeElective = filters.includeElective ? "true" : "";
     const ignorePrerequisite = filters.ignorePrerequisite ? "true" : "";
 
@@ -100,8 +103,8 @@ export async function getAvailableDisciplines(filters: {
     if (includeElective) {
       queryParamsArray.push("includeElective=true");
     }
-    if(ignorePrerequisite){
-      queryParamsArray.push("ignorePrerequisite=true")
+    if (ignorePrerequisite) {
+      queryParamsArray.push("ignorePrerequisite=true");
     }
 
     const queryParams = queryParamsArray.join("&");

@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSessionEmail } from "@/lib/auth";
-import {
-  DayOfWeek,
-  UserScheduleCombinations,
-} from "@/app/context/student/types";
+import { UserScheduleCombinations } from "@/app/context/student/types";
+import { DayOfWeek } from "@/app/context/filter/types";
 
 // export const revalidate = 3600;
 
 const formatTime = (time: Date): string => {
-  const hours = time.getUTCHours().toString().padStart(2, '0');
-  const minutes = time.getUTCMinutes().toString().padStart(2, '0');
+  const hours = time.getUTCHours().toString().padStart(2, "0");
+  const minutes = time.getUTCMinutes().toString().padStart(2, "0");
   return `${hours}:${minutes}`;
 };
 

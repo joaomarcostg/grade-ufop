@@ -1,46 +1,302 @@
 import React, { useState } from "react";
 import {
-  Chip,
-  Popover,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Checkbox,
-  ListItemText,
-  OutlinedInput,
-  SelectChangeEvent,
-  Slider,
-  Typography,
-  Tooltip,
   Box,
   IconButton,
-  FormControlLabel,
+  Typography,
+  TextField,
+  Popover,
+  Chip,
   Switch,
+  Slider,
+  Tooltip,
+  Button,
+  FormControlLabel,
+  styled,
 } from "@mui/material";
 import {
-  LibraryAdd,
-  VisibilityOff,
-  Visibility,
   AccessTime,
-  DateRange,
+  Add,
+  Settings,
   FilterList,
   HelpOutline,
+  VisibilityOff,
+  Visibility,
+  LibraryAdd,
+  DateRange,
   TuneRounded,
-  Settings,
 } from "@mui/icons-material";
 import {
+  TimeRange,
   useFilter,
+  DayOfWeek,
   FilterActionType,
-  TIME_SLOTS,
-  DAYS_OF_WEEK,
+  DaysOfWeek,
 } from "@/app/context/filter";
 
+// Common academic time slots in Brazil
+const ACADEMIC_PRESETS = [
+  {
+    label: "Manhã",
+    range: { start: "07:00", end: "13:00" },
+  },
+  {
+    label: "Tarde",
+    range: { start: "13:00", end: "19:00" },
+  },
+  {
+    label: "Noite",
+    range: { start: "19:00", end: "23:00" },
+  },
+];
+
+const TimeSelector = ({
+  selectedRanges,
+  onChange,
+}: {
+  selectedRanges: TimeRange[];
+  onChange: (ranges: TimeRange[]) => void;
+}) => {
+  const [startTime, setStartTime] = useState("07:30");
+  const [endTime, setEndTime] = useState("09:10");
+
+  const handleAddRange = () => {
+    if (startTime && endTime && startTime < endTime) {
+      const newRange = {
+        start: startTime,
+        end: endTime,
+      };
+
+      // Check if range already exists
+      const rangeExists = selectedRanges.some(
+        (range) => range.start === newRange.start && range.end === newRange.end
+      );
+
+      if (!rangeExists) {
+        onChange(
+          [...selectedRanges, newRange].sort((a, b) =>
+            a.start.localeCompare(b.start)
+          )
+        );
+      }
+    }
+  };
+
+  const handleRemoveRange = (index: number) => {
+    const newRanges = selectedRanges.filter((_, i) => i !== index);
+    onChange(newRanges);
+  };
+
+  const handleAddPreset = (preset: { label: string; range: TimeRange }) => {
+    const newRanges = [...selectedRanges];
+
+    const rangeExists = selectedRanges.some(
+      (existing) =>
+        existing.start === preset.range.start &&
+        existing.end === preset.range.end
+    );
+
+    if (!rangeExists) {
+      newRanges.push(preset.range);
+    }
+
+    onChange(newRanges.sort((a, b) => a.start.localeCompare(b.start)));
+  };
+
+  const isValidTimeRange = () => {
+    return startTime < endTime;
+  };
+
+  return (
+    <Box className="space-y-4">
+      <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TextField
+          label="Início"
+          type="time"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+          inputProps={{
+            step: 600, // 10 minutes
+          }}
+          size="small"
+          fullWidth
+        />
+        <TextField
+          label="Fim"
+          type="time"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+          inputProps={{
+            step: 600, // 10 minutes
+          }}
+          size="small"
+          fullWidth
+        />
+      </Box>
+
+      <Button
+        variant="outlined"
+        fullWidth
+        onClick={handleAddRange}
+        disabled={!isValidTimeRange()}
+      >
+        Adicionar Horário
+      </Button>
+
+      <Box className="space-y-2">
+        <Typography variant="subtitle2" color="textSecondary">
+          Adicionar período completo:
+        </Typography>
+        <Box className="flex flex-wrap gap-2">
+          {ACADEMIC_PRESETS.map((preset) => (
+            <Button
+              key={preset.label}
+              variant="outlined"
+              size="small"
+              onClick={() => handleAddPreset(preset)}
+              startIcon={<Add />}
+              title={`Adicionar horários: ${preset.range.start}-${preset.range.end}`}
+              disabled={selectedRanges.some(
+                (range) =>
+                  range.start === preset.range.start &&
+                  range.end === preset.range.end
+              )}
+            >
+              {preset.label}
+            </Button>
+          ))}
+        </Box>
+      </Box>
+
+      {selectedRanges.length > 0 && (
+        <Box className="space-y-2">
+          <Typography variant="subtitle2" color="textSecondary">
+            Horários selecionados:
+          </Typography>
+          <Box className="flex flex-wrap gap-2">
+            {selectedRanges.map((range, index) => (
+              <Chip
+                key={`${range.start}-${range.end}`}
+                label={`${range.start}-${range.end}`}
+                onDelete={() => handleRemoveRange(index)}
+                icon={<AccessTime fontSize="small" />}
+                size="medium"
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+// Styled compact button for days
+const DayButton = styled(Button)(({ theme }) => ({
+  padding: "0px",
+  borderRadius: "50%",
+  "&.MuiButton-containedPrimary": {
+    backgroundColor: theme.palette.primary.light,
+    "&:hover": {
+      backgroundColor: theme.palette.primary.dark,
+    },
+  },
+  "&.MuiButton-outlined": {
+    borderColor: theme.palette.grey[300],
+    color: theme.palette.text.secondary,
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+      borderColor: theme.palette.grey[400],
+    },
+  },
+}));
+
+interface DaySelectorProps {
+  selectedDays: DayOfWeek[];
+  onChange: (days: DayOfWeek[]) => void;
+}
+
+const DaySelector = ({ selectedDays, onChange }: DaySelectorProps) => {
+  const days: {
+    value: DayOfWeek;
+    label: string;
+    shortLabel: string;
+  }[] = [
+    { value: "SEG", label: "Segunda", shortLabel: "S" },
+    { value: "TER", label: "Terça", shortLabel: "T" },
+    { value: "QUA", label: "Quarta", shortLabel: "Q" },
+    { value: "QUI", label: "Quinta", shortLabel: "Q" },
+    { value: "SEX", label: "Sexta", shortLabel: "S" },
+    { value: "SAB", label: "Sábado", shortLabel: "S" },
+  ];
+
+  const toggleDay = (dayValue: DayOfWeek) => {
+    const newDays = selectedDays.includes(dayValue)
+      ? selectedDays.filter((d) => d !== dayValue)
+      : [...selectedDays, dayValue];
+    onChange(newDays);
+  };
+
+  return (
+    <Box className="flex flex-wrap gap-2">
+      {days.map((day) => (
+        <DayButton
+          key={day.value}
+          variant={selectedDays.includes(day.value) ? "contained" : "outlined"}
+          onClick={() => toggleDay(day.value)}
+          title={day.label} // Adds tooltip with full day name
+          classes={{
+            root: "!min-w-8 w-8 h-8 md:w-10 md:h-10",
+          }}
+        >
+          <span className="text-xs md:text-sm">{day.value}</span>
+        </DayButton>
+      ))}
+    </Box>
+  );
+};
+
+// PreferenceSlider Component
+const PreferenceSlider = ({
+  value,
+  onChange,
+  title,
+  tooltip,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  title: string;
+  tooltip: string;
+}) => {
+  return (
+    <Box className="space-y-4">
+      <Box className="flex items-center justify-between">
+        <Typography variant="subtitle1" fontWeight={"bold"}>
+          {title}
+        </Typography>
+        <Tooltip title={tooltip}>
+          <HelpOutline fontSize="small" className="text-gray-500 cursor-help" />
+        </Tooltip>
+      </Box>
+      <Box className="px-2">
+        <Slider
+          value={value}
+          onChange={(_, newValue) => onChange(newValue as number)}
+          min={1}
+          max={5}
+          step={1}
+          marks
+          valueLabelDisplay="auto"
+        />
+      </Box>
+    </Box>
+  );
+};
+
+// FilterSummary Component
 const FilterSummary: React.FC = () => {
   const {
     state: {
-      timeSlots,
-      days,
+      timeRanges,
+      selectedDays,
       includeElective,
       ignorePrerequisite,
       dayWeight,
@@ -50,8 +306,8 @@ const FilterSummary: React.FC = () => {
   } = useFilter();
 
   if (
-    timeSlots.length === 0 &&
-    days.length === 0 &&
+    timeRanges.length === 0 &&
+    selectedDays.length === 0 &&
     dayWeight === 1 &&
     gapWeight === 1 &&
     includeElective === false &&
@@ -78,32 +334,29 @@ const FilterSummary: React.FC = () => {
           Incluir Eletivas: {includeElective ? "Sim" : "Não"}
         </span>
       </Box>
-      {timeSlots.length > 0 && (
+      {timeRanges.length > 0 && (
         <Box>
           <span className="flex items-center mb-2">
             <AccessTime fontSize="small" style={{ marginRight: 8 }} />
             Horários:
           </span>
           <Box display="flex" flexWrap="wrap" gap={1} mt={0.5}>
-            {timeSlots.map((slot) => (
-              <Chip key={slot} label={slot} size="small" />
-            ))}
+            {timeRanges.map((range) => {
+              const label = `${range.start}-${range.end}`;
+              return <Chip key={label} label={label} size="small" />;
+            })}
           </Box>
         </Box>
       )}
-      {days.length > 0 && (
+      {selectedDays.length > 0 && (
         <Box>
           <span className="flex items-center mb-2">
             <DateRange fontSize="small" style={{ marginRight: 8 }} />
             Dias da semana:
           </span>
           <Box display="flex" flexWrap="wrap" gap={1} mt={0.5}>
-            {days.map((day) => (
-              <Chip
-                key={day}
-                label={DAYS_OF_WEEK.find((d) => d.value === day)?.label}
-                size="small"
-              />
+            {selectedDays.map((day) => (
+              <Chip key={day} label={DaysOfWeek[day]} size="small" />
             ))}
           </Box>
         </Box>
@@ -128,11 +381,12 @@ const FilterSummary: React.FC = () => {
   );
 };
 
-export const FilterSection: React.FC = () => {
+// Main FilterSection Component
+export const FilterSection = () => {
   const {
     state: {
-      timeSlots,
-      days,
+      timeRanges,
+      selectedDays,
       includeElective,
       ignorePrerequisite,
       dayWeight,
@@ -140,307 +394,156 @@ export const FilterSection: React.FC = () => {
     },
     dispatch,
   } = useFilter();
-  const [filterAnchorEl, setFilterAnchorEl] =
-    useState<HTMLButtonElement | null>(null);
-  const [settingsAnchorEl, setSettingsAnchorEl] =
-    useState<HTMLButtonElement | null>(null);
 
-  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setFilterAnchorEl(event.currentTarget);
-  };
-
-  const handleFilterClose = () => {
-    setFilterAnchorEl(null);
-  };
-
-  const handleSettingsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setSettingsAnchorEl(event.currentTarget);
-  };
-
-  const handleSettingsClose = () => {
-    setSettingsAnchorEl(null);
-  };
-
-  const filterOpen = Boolean(filterAnchorEl);
-  const filterId = filterOpen ? "filter-popover" : undefined;
-
-  const settingsOpen = Boolean(settingsAnchorEl);
-  const settingsId = settingsOpen ? "settings-popover" : undefined;
-
-  const allTimesSelected =
-    timeSlots.length > 0 && timeSlots.length === TIME_SLOTS.length;
-  const allDaysSelected =
-    days.length > 0 && days.length === DAYS_OF_WEEK.length;
-
-  const handleTimeSlotChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    dispatch({
-      type: FilterActionType.SET_TIME_SLOTS,
-      payload: value.includes("all")
-        ? allTimesSelected
-          ? []
-          : TIME_SLOTS
-        : typeof value === "string"
-        ? value.split(",")
-        : value,
-    });
-  };
-
-  const handleDaysChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    dispatch({
-      type: FilterActionType.SET_DAYS,
-      payload: value.includes("all")
-        ? allDaysSelected
-          ? []
-          : DAYS_OF_WEEK.map((day) => day.value)
-        : typeof value === "string"
-        ? value.split(",")
-        : value,
-    });
-  };
-
-  const handleIgnorePrerequisiteChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    dispatch({
-      type: FilterActionType.SET_IGNORE_PREREQUISITE,
-      payload: event.target.checked,
-    });
-  };
-
-  const handleIncludeElectiveChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    dispatch({
-      type: FilterActionType.SET_INCLUDE_ELECTIVE,
-      payload: event.target.checked,
-    });
-  };
-
-  const handleGapWeightChange = (_: Event, newValue: number | number[]) => {
-    dispatch({
-      type: FilterActionType.SET_GAP_WEIGHT,
-      payload: newValue as number,
-    });
-  };
-
-  const handleDayWeightChange = (_: Event, newValue: number | number[]) => {
-    dispatch({
-      type: FilterActionType.SET_DAY_WEIGHT,
-      payload: newValue as number,
-    });
-  };
+  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
+    null
+  );
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState<HTMLElement | null>(
+    null
+  );
 
   return (
-    <div>
-      <div className="flex justify-between">
-        <span className="font-bold text-lg">Filtrando por:</span>
-        <Box className="mb-4">
-          <div className="flex gap-4">
-            <div>
-              <Tooltip title="Filtros">
-                <IconButton onClick={handleFilterClick}>
-                  <FilterList />
-                </IconButton>
-              </Tooltip>
-              <Popover
-                id={filterId}
-                open={filterOpen}
-                anchorEl={filterAnchorEl}
-                onClose={handleFilterClose}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                slotProps={{
-                  paper: {
-                    style: { width: "400px" },
-                  },
-                }}
-              >
-                <Box className="p-4 space-y-4">
-                  <FormControlLabel
-                    labelPlacement="start"
-                    style={{
-                      justifyContent: "space-between",
-                      width: "100%",
-                      marginLeft: "4px",
-                    }}
-                    control={
-                      <Switch
-                        checked={ignorePrerequisite}
-                        onChange={handleIgnorePrerequisiteChange}
-                        color="primary"
-                      />
-                    }
-                    label={
-                      <Typography variant="body2" color="textPrimary">
-                        Ignorar Pré-Requisitos
-                      </Typography>
-                    }
-                  />
-
-                  <FormControlLabel
-                    labelPlacement="start"
-                    style={{
-                      justifyContent: "space-between",
-                      width: "100%",
-                      marginLeft: "4px",
-                    }}
-                    control={
-                      <Switch
-                        checked={includeElective}
-                        onChange={handleIncludeElectiveChange}
-                        color="primary"
-                      />
-                    }
-                    label={
-                      <Typography variant="body2" color="textPrimary">
-                        Incluir Disciplinas Eletivas
-                      </Typography>
-                    }
-                  />
-
-                  <FormControl fullWidth>
-                    <InputLabel>Horário</InputLabel>
-                    <Select
-                      multiple
-                      value={timeSlots}
-                      onChange={handleTimeSlotChange}
-                      input={<OutlinedInput label="Horário" />}
-                      renderValue={(selected) =>
-                        `${selected.length} selecionado${
-                          selected.length !== 1 ? "s" : ""
-                        }`
-                      }
-                    >
-                      <MenuItem key="all" value="all">
-                        <Checkbox checked={allTimesSelected} />
-                        <ListItemText primary="Selecionar Todos" />
-                      </MenuItem>
-                      {TIME_SLOTS.map((slot) => (
-                        <MenuItem key={slot} value={slot}>
-                          <Checkbox checked={timeSlots.indexOf(slot) > -1} />
-                          <ListItemText primary={slot} />
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth>
-                    <InputLabel>Dia da semana</InputLabel>
-                    <Select
-                      multiple
-                      value={days}
-                      onChange={handleDaysChange}
-                      input={<OutlinedInput label="Dia da semana" />}
-                      renderValue={(selected) =>
-                        `${selected.length} selecionado${
-                          selected.length !== 1 ? "s" : ""
-                        }`
-                      }
-                    >
-                      <MenuItem key="all" value="all">
-                        <Checkbox checked={allDaysSelected} />
-                        <ListItemText primary="Selecionar Todos" />
-                      </MenuItem>
-                      {DAYS_OF_WEEK.map((day) => (
-                        <MenuItem key={day.value} value={day.value}>
-                          <Checkbox checked={days.indexOf(day.value) > -1} />
-                          <ListItemText primary={day.label} />
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-              </Popover>
-            </div>
-            <div>
-              <Tooltip title="Preferências">
-                <IconButton onClick={handleSettingsClick}>
-                  <Settings />
-                </IconButton>
-              </Tooltip>
-              <Popover
-                id={settingsId}
-                open={settingsOpen}
-                anchorEl={settingsAnchorEl}
-                onClose={handleSettingsClose}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                slotProps={{
-                  paper: {
-                    style: { width: "400px", padding: "16px" },
-                  },
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    <div className="flex items-center">
-                      Peso dos dias com aulas
-                      <Tooltip title="Um valor mais alto prioriza grades com menos dias de aula na semana.">
-                        <HelpOutline
-                          fontSize="small"
-                          className="ml-2 cursor-help"
-                        />
-                      </Tooltip>
-                    </div>
-                  </Typography>
-                  <div className="px-2">
-                    <Slider
-                      value={dayWeight}
-                      onChange={handleDayWeightChange}
-                      valueLabelDisplay="auto"
-                      step={1}
-                      marks
-                      min={1}
-                      max={5}
-                    />
-                  </div>
-                </Box>
-
-                <Box>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    <div className="flex items-center">
-                      Peso dos intervalos entre aulas
-                      <Tooltip title="Um valor mais alto prioriza grades com menos intervalos vazios entre as aulas.">
-                        <HelpOutline
-                          fontSize="small"
-                          className="ml-2 cursor-help"
-                        />
-                      </Tooltip>
-                    </div>
-                  </Typography>
-                  <div className="px-2">
-                    <Slider
-                      value={gapWeight}
-                      onChange={handleGapWeightChange}
-                      valueLabelDisplay="auto"
-                      step={1}
-                      marks
-                      min={1}
-                      max={5}
-                    />
-                  </div>
-                </Box>
-              </Popover>
-            </div>
-          </div>
+    <Box className="space-y-6">
+      <Box className="flex items-center justify-between">
+        <Typography variant="h6">Filtrando por:</Typography>
+        <Box className="flex gap-2">
+          <Tooltip title="Filtros">
+            <IconButton onClick={(e) => setFilterAnchorEl(e.currentTarget)}>
+              <FilterList />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Preferências">
+            <IconButton onClick={(e) => setSettingsAnchorEl(e.currentTarget)}>
+              <Settings />
+            </IconButton>
+          </Tooltip>
         </Box>
-      </div>
+      </Box>
+
+      <Popover
+        open={Boolean(filterAnchorEl)}
+        anchorEl={filterAnchorEl}
+        onClose={() => setFilterAnchorEl(null)}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <Box className="p-4 w-80 md:w-96 space-y-4">
+          <Typography variant="subtitle1" className="mb-4">
+            Horários
+          </Typography>
+          <TimeSelector
+            selectedRanges={timeRanges}
+            onChange={(ranges) =>
+              dispatch({
+                type: FilterActionType.SET_TIME_RANGES,
+                payload: ranges,
+              })
+            }
+          />
+
+          <Typography variant="subtitle1" className="mb-4">
+            Dias da Semana
+          </Typography>
+          <DaySelector
+            selectedDays={selectedDays}
+            onChange={(days: DayOfWeek[]) =>
+              dispatch({
+                type: FilterActionType.SET_DAYS,
+                payload: days,
+              })
+            }
+          />
+
+          <FormControlLabel
+            labelPlacement="start"
+            style={{
+              justifyContent: "space-between",
+              width: "100%",
+              marginLeft: "4px",
+            }}
+            control={
+              <Switch
+                checked={includeElective}
+                onChange={(e) =>
+                  dispatch({
+                    type: FilterActionType.SET_INCLUDE_ELECTIVE,
+                    payload: e.target.checked,
+                  })
+                }
+              />
+            }
+            label="Incluir Eletivas"
+          />
+
+          <FormControlLabel
+            labelPlacement="start"
+            style={{
+              justifyContent: "space-between",
+              width: "100%",
+              marginLeft: "4px",
+            }}
+            control={
+              <Switch
+                checked={ignorePrerequisite}
+                onChange={(e) =>
+                  dispatch({
+                    type: FilterActionType.SET_IGNORE_PREREQUISITE,
+                    payload: e.target.checked,
+                  })
+                }
+              />
+            }
+            label="Ignorar Pré-Requisitos"
+          />
+        </Box>
+      </Popover>
+
+      <Popover
+        open={Boolean(settingsAnchorEl)}
+        anchorEl={settingsAnchorEl}
+        onClose={() => setSettingsAnchorEl(null)}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <Box className="p-4 w-80 md:w-96 space-y-6">
+          <PreferenceSlider
+            value={dayWeight}
+            onChange={(value) =>
+              dispatch({
+                type: FilterActionType.SET_DAY_WEIGHT,
+                payload: value,
+              })
+            }
+            title="Peso dos dias com aulas"
+            tooltip="Um valor mais alto prioriza grades com menos dias de aula na semana."
+          />
+          <PreferenceSlider
+            value={gapWeight}
+            onChange={(value) =>
+              dispatch({
+                type: FilterActionType.SET_GAP_WEIGHT,
+                payload: value,
+              })
+            }
+            title="Peso dos intervalos entre aulas"
+            tooltip="Um valor mais alto prioriza grades com menos intervalos vazios entre as aulas."
+          />
+        </Box>
+      </Popover>
 
       <FilterSummary />
-    </div>
+    </Box>
   );
 };

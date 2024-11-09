@@ -37,8 +37,8 @@ export default function DisciplinesSelector() {
   const { state, dispatch } = useStudent();
   const {
     state: {
-      timeSlots,
-      days,
+      timeRanges,
+      selectedDays,
       includeElective,
       ignorePrerequisite,
       dayWeight,
@@ -87,8 +87,8 @@ export default function DisciplinesSelector() {
     if (!state.course?.value) return;
     try {
       const disciplines = await getAvailableDisciplines({
-        timeSlots,
-        days,
+        timeRanges,
+        selectedDays,
         includeElective,
         ignorePrerequisite,
       });
@@ -123,8 +123,8 @@ export default function DisciplinesSelector() {
     }
   }, [
     state.course?.value,
-    timeSlots,
-    days,
+    timeRanges,
+    selectedDays,
     includeElective,
     ignorePrerequisite,
     dispatch,
