@@ -1,11 +1,34 @@
 # Grade UFOP
 
-Helps university students plan their semester: pick the subjects they can take
-(given their program and what they already passed) and find timetables without
-clashes.
+**Live at [grade-ufop-puce.vercel.app](https://grade-ufop-puce.vercel.app)**
 
-Started as a TCC (final undergraduate project) for UFOP; the data layer is built
-so other universities can be added as adapters.
+Helps UFOP students plan their semester: mark what they already passed, see how
+far they are from graduating, and build timetables without clashes and within
+the university's weekly class-hour limit.
+
+## About
+
+This is my TCC (*Trabalho de Conclusão de Curso*, the final undergraduate
+project) at the Universidade Federal de Ouro Preto (UFOP), by
+[João Marcos](https://github.com/joaomarcostg).
+
+It started in 2023 as a Next.js app fed by a Selenium scraper
+([grade-ufop-scrapper](https://github.com/joaomarcostg/grade-ufop-scrapper)),
+and was rebuilt in 2026 as this monorepo: a deterministic data pipeline that
+covers every UFOP program, and a planner that runs in the browser, with no
+account needed.
+
+- **Progress:** mark passed subjects one by one, by period, or by importing the
+  transcript PDF from minhaUFOP (read in the browser, never uploaded). Shows the
+  hours left in each category and which subjects unlock the most.
+- **Planner:** pick subjects and get up to three clash-free timetables that fit
+  the weekly limit (32 class hours in most programs, editable), dropping the
+  lowest-priority subjects first; then save them to compare.
+- **"Como funciona":** a guided tour of each page for first-time users.
+
+It is not an official UFOP service. The data comes from UFOP's public timetable
+and curriculum pages; always check the academic system before enrolling. The
+data layer is built so other universities can be added as adapters.
 
 ## Repository layout
 
