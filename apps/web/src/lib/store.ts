@@ -37,6 +37,8 @@ export interface ProgramState {
   planned: string[];
   locked: Record<string, string>;
   preferences: Preferences;
+  /** Most weekly class hours to enroll in; null = the program's default. */
+  weeklyLimit: number | null;
   saved: SavedPlan[];
   history: ImportedHistory | null;
   /** Replaying the start of this term from the imported history; null = today. */
@@ -49,6 +51,7 @@ export const EMPTY_PROGRAM: ProgramState = {
   planned: [],
   locked: {},
   preferences: DEFAULT_PREFERENCES,
+  weeklyLimit: null,
   saved: [],
   history: null,
   simulateAt: null,

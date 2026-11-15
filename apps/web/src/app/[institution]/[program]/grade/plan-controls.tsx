@@ -36,7 +36,7 @@ export function PlanControls({
         <h2 id="options" className="text-lg font-medium">
           {program.state.planned.length === 0 ? "Opções" : count === 1 ? "1 grade possível" : `${count} grades possíveis`}
         </h2>
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Preferências">
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Preferências" data-tour="prefs">
           <ToggleGroup
             type="multiple"
             variant="outline"
@@ -82,10 +82,11 @@ export function PlanControls({
       </div>
 
       {count > 0 && (
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3" data-tour="options">
           {result.options.map((option, i) => {
             const fitted = Object.keys(option.sections).length;
             const pressed = i === optionIndex;
+            const clashed = option.left.filter((code) => !option.overLimit.includes(code));
             return (
               <button
                 key={i}
@@ -101,7 +102,8 @@ export function PlanControls({
                   Opção {LETTERS[i]}
                 </span>
                 <span className="text-sm font-medium">
-                  {fitted} {fitted === 1 ? "disciplina" : "disciplinas"} · {option.days} {option.days === 1 ? "dia" : "dias"}
+                  {fitted} {fitted === 1 ? "disciplina" : "disciplinas"} · {option.load} h/semana · {option.days}{" "}
+                  {option.days === 1 ? "dia" : "dias"}
                 </span>
                 <span className="text-xs text-ink-2">
                   {option.gapMinutes === 0 ? "sem janelas" : `${formatGap(option.gapMinutes)} de janela por semana`}
@@ -111,8 +113,11 @@ export function PlanControls({
                     {option.fullSections === 1 ? "1 turma sem vagas" : `${option.fullSections} turmas sem vagas`}
                   </WarnBadge>
                 )}
-                {option.left.length > 0 && (
-                  <span className="text-xs text-muted-foreground">Fica de fora: {option.left.join(", ")}</span>
+                {option.overLimit.length > 0 && (
+                  <span className="text-xs text-muted-foreground">Fora pelo limite: {option.overLimit.join(", ")}</span>
+                )}
+                {clashed.length > 0 && (
+                  <span className="text-xs text-muted-foreground">Fora por choque: {clashed.join(", ")}</span>
                 )}
               </button>
             );

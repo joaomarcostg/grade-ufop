@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "driver.js/dist/driver.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -111,5 +112,116 @@
   /* Inline text links. Navigation and buttons style themselves. */
   .link {
     @apply text-primary underline-offset-4 hover:text-brand-dark hover:underline;
+  }
+}
+
+/* "Como funciona" tour (driver.js), dressed like the app's popovers. */
+.driver-popover.grade-tour {
+  --driver-instruction-background: var(--brand-tint);
+  --driver-instruction-color: var(--foreground);
+  --driver-instruction-indicator-color: var(--primary);
+  --driver-instruction-radius: 8px;
+  --driver-instruction-done-background: var(--done-bg);
+  --driver-instruction-done-color: var(--done);
+  --driver-nudge-color: var(--primary);
+  --driver-feedback-color: var(--warn);
+  max-width: 340px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 1.4);
+  background: var(--card);
+  color: var(--foreground);
+  padding: 18px 18px 14px;
+  font-family: inherit;
+  box-shadow: 0 12px 32px rgb(15 23 32 / 0.18);
+}
+
+.driver-popover.grade-tour .driver-popover-title {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.driver-popover.grade-tour .driver-popover-description {
+  margin-top: 6px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.driver-popover.grade-tour .driver-popover-footer {
+  margin-top: 16px;
+  align-items: center;
+}
+
+.driver-popover.grade-tour .driver-popover-progress-text {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.driver-popover.grade-tour .driver-popover-navigation-btns {
+  gap: 8px;
+}
+
+.driver-popover.grade-tour .driver-popover-footer button {
+  margin: 0;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 0.8);
+  background: var(--card);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-shadow: none;
+}
+
+.driver-popover.grade-tour .driver-popover-footer button:hover {
+  background: var(--secondary);
+}
+
+.driver-popover.grade-tour .driver-popover-footer .driver-popover-next-btn {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.driver-popover.grade-tour .driver-popover-footer .driver-popover-next-btn:hover {
+  background: var(--brand-dark);
+}
+
+.driver-popover.grade-tour .driver-popover-footer button:focus-visible,
+.driver-popover.grade-tour .driver-popover-close-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.driver-popover.grade-tour .driver-popover-close-btn {
+  color: var(--muted-foreground);
+}
+
+.driver-popover.grade-tour .driver-popover-close-btn:hover {
+  color: var(--foreground);
+}
+
+.driver-popover.grade-tour .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: var(--card);
+}
+.driver-popover.grade-tour .driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: var(--card);
+}
+.driver-popover.grade-tour .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: var(--card);
+}
+.driver-popover.grade-tour .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: var(--card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .driver-fade .driver-overlay,
+  .driver-fade .driver-popover {
+    animation: none;
   }
 }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo } from "react";
 
 import type { ProgramBundle } from "./catalog-types";
 import { computeEligibility } from "./eligibility";
+import { insertByPriority } from "./limits";
 import { type ProgramState, programKey, useHydrated, useProgramState, useStudentStore } from "./store";
 import { passedBefore } from "./transcript/match";
 
@@ -51,20 +52,37 @@ export function useProgram(bundle: ProgramBundle) {
     [change],
   );
 
+  // The plan is kept in priority order: new subjects go where they rank.
   const setPlanned = useCallback(
     (code: string, planned: boolean) =>
       change((s) => {
-        if (planned) return { planned: s.planned.includes(code) ? s.planned : [...s.planned, code] };
+        if (planned) {
+          return { planned: s.planned.includes(code) ? s.planned : insertByPriority(s.planned, code, eligibility.states) };
+        }
         const locked = { ...s.locked };
         delete locked[code];
         return { planned: s.planned.filter((c) => c !== code), locked };
+      }),
+    [change, eligibility.states],
+  );
+
+  /** Moves a planned subject up (-1) or down (+1) in priority. */
+  const movePlanned = useCallback(
+    (code: string, delta: -1 | 1) =>
+      change((s) => {
+        const from = s.planned.indexOf(code);
+        const to = from + delta;
+        if (from < 0 || to < 0 || to >= s.planned.length) return {};
+        const planned = [...s.planned];
+        [planned[from], planned[to]] = [planned[to], planned[from]];
+        return { planned };
       }),
     [change],
   );
 
   const name = useCallback((code: string) => bundle.subjects[code]?.name ?? code, [bundle.subjects]);
 
-  return { key, hydrated, state, simulating, completed, eligibility, change, setCompleted, setPlanned, name };
+  return { key, hydrated, state, simulating, completed, eligibility, change, setCompleted, setPlanned, movePlanned, name };
 }
 
 export type Program = ReturnType<typeof useProgram>;

@@ -117,6 +117,69 @@ describe("plan", () => {
     expect(result.options).toEqual([]);
   });
 
+  it("stays under the load limit, dropping the last subjects of the list", () => {
+    const sections = [
+      section("A", "1", ["MON 08:00-10:00"]),
+      section("B", "1", ["TUE 08:00-10:00"]),
+      section("C", "1", ["WED 08:00-10:00"]),
+    ];
+    const result = plan({
+      subjects: ["A", "B", "C"],
+      sections,
+      locked: {},
+      preferences: prefs(),
+      load: { A: 4, B: 4, C: 4 },
+      maxLoad: 8,
+    });
+    const best = result.options[0];
+    expect(Object.keys(best.sections).sort()).toEqual(["A", "B"]);
+    expect(best.load).toBe(8);
+    expect(best.left).toEqual(["C"]);
+    expect(best.overLimit).toEqual(["C"]);
+    for (const option of result.options) expect(option.load).toBeLessThanOrEqual(8);
+  });
+
+  it("keeps the subject listed first when two clash", () => {
+    const sections = [section("A", "1", ["MON 08:00-10:00"]), section("B", "1", ["MON 09:00-11:00"])];
+    const result = plan({ subjects: ["B", "A"], sections, locked: {}, preferences: prefs(), load: { A: 4, B: 4 } });
+    expect(Object.keys(result.options[0].sections)).toEqual(["B"]);
+    expect(result.options[0].overLimit).toEqual([]);
+  });
+
+  it("keeps the subjects listed first even when a later one would fit more load", () => {
+    const sections = [
+      section("A", "1", ["MON 08:00-12:00"]),
+      section("B", "1", ["MON 08:00-10:00"]),
+      section("C", "1", ["MON 10:00-12:00"]),
+    ];
+    const result = plan({
+      subjects: ["B", "C", "A"],
+      sections,
+      locked: {},
+      preferences: prefs(),
+      load: { A: 6, B: 2, C: 2 },
+    });
+    expect(Object.keys(result.options[0].sections).sort()).toEqual(["B", "C"]);
+  });
+
+  it("uses the room left by a subject over the limit for a later one that fits", () => {
+    const sections = [
+      section("A", "1", ["MON 08:00-10:00"]),
+      section("B", "1", ["TUE 08:00-10:00"]),
+      section("C", "1", ["WED 08:00-10:00"]),
+    ];
+    const result = plan({
+      subjects: ["A", "B", "C"],
+      sections,
+      locked: {},
+      preferences: prefs(),
+      load: { A: 4, B: 4, C: 2 },
+      maxLoad: 6,
+    });
+    expect(Object.keys(result.options[0].sections).sort()).toEqual(["A", "C"]);
+    expect(result.options[0].overLimit).toEqual(["B"]);
+  });
+
   it("stops at the search budget", () => {
     const many = Array.from({ length: 14 }, (_, i) =>
       Array.from({ length: 4 }, (_, j) => section(`S${i}`, `${j}`, [`MON ${7 + j}:00-${7 + j}:50`])),
@@ -126,7 +189,7 @@ describe("plan", () => {
       sections: many,
       locked: {},
       preferences: prefs(),
-      maxNodes: 1000,
+      maxNodes: 10, // fewer nodes than one full descent through 14 subjects
     });
     expect(result.truncated).toBe(true);
     for (const option of result.options) noConflicts(Object.values(option.sections));

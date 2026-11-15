@@ -10,6 +10,7 @@ function entry(subjectCode: string, overrides: Partial<Entry> = {}): Entry {
     track: null,
     period: 1,
     workloadHours: 60,
+    weeklyClasses: 4,
     extensionHours: 0,
     requirements: [],
     ...overrides,

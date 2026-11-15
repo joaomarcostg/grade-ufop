@@ -7,7 +7,9 @@ import { SimulationBanner, SimulationSelect } from "@/components/simulation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DayAgenda, WeekCalendar } from "@/components/week-calendar";
 import type { ProgramBundle } from "@/lib/catalog-types";
+import { byPriority, defaultWeeklyLimit, weeklyClassesOf } from "@/lib/limits";
 import { type PlanOption, plan } from "@/lib/scheduler";
+import { useFirstVisitTour } from "@/lib/tour";
 import { useProgram } from "@/lib/use-program";
 
 import { PlanControls } from "./plan-controls";
@@ -16,8 +18,20 @@ import { SubjectPanel } from "./subject-panel";
 
 export function PlannerView({ bundle }: { bundle: ProgramBundle }) {
   const program = useProgram(bundle);
-  const { state, hydrated } = program;
+  const { state, hydrated, eligibility } = program;
   const [chosen, setChosen] = useState(0);
+  useFirstVisitTour("planner", hydrated);
+
+  const defaultLimit = defaultWeeklyLimit(bundle.program.code);
+  const weeklyLimit = state.weeklyLimit ?? defaultLimit;
+  // The plan is in priority order; colours follow the codes so reordering keeps them.
+  const colorOrder = useMemo(() => [...state.planned].sort(), [state.planned]);
+  // UFOP counts the limit in weekly class hours.
+  const load = useMemo(
+    () => Object.fromEntries(state.planned.map((code) => [code, weeklyClassesOf(eligibility.states.get(code)?.entry)])),
+    [state.planned, eligibility.states],
+  );
+  const requestedLoad = Object.values(load).reduce((sum, n) => sum + n, 0);
 
   const result = useMemo(
     () =>
@@ -26,9 +40,11 @@ export function PlannerView({ bundle }: { bundle: ProgramBundle }) {
         sections: bundle.sections,
         locked: state.locked,
         preferences: state.preferences,
+        load,
+        maxLoad: weeklyLimit,
         limit: 3,
       }),
-    [bundle.sections, state.planned, state.locked, state.preferences],
+    [bundle.sections, state.planned, state.locked, state.preferences, load, weeklyLimit],
   );
   const names = useMemo(
     () => Object.fromEntries(Object.values(bundle.subjects).map((s) => [s.code, s.name])),
@@ -62,11 +78,21 @@ export function PlannerView({ bundle }: { bundle: ProgramBundle }) {
       <SimulationBanner
         program={program}
         term={bundle.term.code}
-        onLoadTerm={(codes) => program.change(() => ({ planned: codes, locked: {} }))}
+        onLoadTerm={(codes) => program.change(() => ({ planned: byPriority(codes, eligibility.states), locked: {} }))}
       />
 
       <div className="flex flex-wrap items-start gap-6">
-        <SubjectPanel bundle={bundle} program={program} result={result} option={option} />
+        <SubjectPanel
+          bundle={bundle}
+          program={program}
+          result={result}
+          option={option}
+          colorOrder={colorOrder}
+          load={load}
+          requestedLoad={requestedLoad}
+          weeklyLimit={weeklyLimit}
+          defaultLimit={defaultLimit}
+        />
 
         <main className="flex min-w-0 flex-[999_1_640px] flex-col gap-4">
           <PlanControls program={program} result={result} optionIndex={optionIndex} onChoose={setChosen} />
@@ -74,18 +100,23 @@ export function PlannerView({ bundle }: { bundle: ProgramBundle }) {
           {state.planned.length === 0 ? (
             <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed bg-card px-6 py-16 text-center">
               <h2 className="text-lg font-medium">Sua grade está vazia</h2>
-              <p className="text-sm text-muted-foreground">
-                Adicione disciplinas ao lado. As combinações sem choque aparecem aqui.
+              <p className="max-w-md text-sm text-muted-foreground">
+                Escolha ao lado as disciplinas que quer cursar. Aqui aparecem as combinações de turmas sem choque de
+                horário e dentro do limite de {weeklyLimit} horas-aula por semana.
               </p>
             </div>
           ) : option ? (
             <>
-              <WeekCalendar option={option} order={state.planned} names={names} className="hidden md:block" />
-              <div className="md:hidden">
-                <DayAgenda option={option} order={state.planned} names={names} />
+              <div data-tour="calendar" className="flex flex-col gap-4">
+                <WeekCalendar option={option} order={colorOrder} names={names} className="hidden md:block" />
+                <div className="md:hidden">
+                  <DayAgenda option={option} order={colorOrder} names={names} />
+                </div>
+                <NoFixedTime option={option} names={names} />
               </div>
-              <NoFixedTime option={option} names={names} />
-              <SavedPlans bundle={bundle} program={program} option={option} optionIndex={optionIndex} />
+              <div data-tour="save">
+                <SavedPlans bundle={bundle} program={program} option={option} optionIndex={optionIndex} />
+              </div>
             </>
           ) : (
             <div className="flex flex-col gap-2 rounded-xl border bg-card p-6">

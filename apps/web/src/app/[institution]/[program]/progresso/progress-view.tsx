@@ -4,12 +4,13 @@ import { FileUp } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { Code } from "@/components/brand";
+import { CheckGlyph, Code } from "@/components/brand";
 import { SimulationBanner, SimulationSelect } from "@/components/simulation";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ProgramBundle } from "@/lib/catalog-types";
+import { useFirstVisitTour } from "@/lib/tour";
 import { formatHours, type Program, useProgram } from "@/lib/use-program";
 
 import { CurriculumMap, MarkUntil, usePeriods } from "./curriculum-map";
@@ -20,6 +21,7 @@ export function ProgressView({ bundle }: { bundle: ProgramBundle }) {
   const program = useProgram(bundle);
   const periods = usePeriods(program);
   const [open, setOpen] = useState<string | null>(null);
+  useFirstVisitTour("progress", program.hydrated);
   const base = `/${bundle.institution.code}/${bundle.program.code.toLowerCase()}`;
   const p = bundle.program;
   const meta = [p.degree, p.campus ? `Campus ${p.campus}` : null, p.curriculumVersion ? `currículo ${p.curriculumVersion}` : null]
@@ -38,7 +40,7 @@ export function ProgressView({ bundle }: { bundle: ProgramBundle }) {
             {p.tracks.length > 0 && <TrackSelect bundle={bundle} program={program} />}
             <SimulationSelect program={program} />
             <MarkUntil program={program} periods={periods} />
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild data-tour="import">
               <Link href={`${base}/importar`}>
                 <FileUp strokeWidth={1.5} />
                 Importar histórico
@@ -59,19 +61,25 @@ export function ProgressView({ bundle }: { bundle: ProgramBundle }) {
             <NextSteps program={program} base={base} onOpen={setOpen} />
           </div>
 
-          <section aria-labelledby="map" className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-              <h2 id="map" className="text-xl font-medium">
-                Obrigatórias por período
-              </h2>
+          <section aria-labelledby="map" data-tour="map" className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+              <div className="flex flex-col gap-1">
+                <h2 id="map" className="text-xl font-medium">
+                  Obrigatórias por período
+                </h2>
+                <p className="max-w-2xl text-sm text-ink-2">
+                  {program.simulating ? (
+                    "Na simulação as marcações vêm do seu histórico. Saia da simulação para editar."
+                  ) : (
+                    <>
+                      Marque <CheckGlyph /> as disciplinas que você já cursou e foi aprovado. O quadrado ao lado do
+                      período marca todas dele; clicar no nome mostra ementa e pré-requisitos.
+                    </>
+                  )}
+                </p>
+              </div>
               <Legend term={bundle.term.code} />
             </div>
-            {program.completed.size === 0 && !program.simulating && (
-              <p className="text-sm text-ink-2">
-                Marque as disciplinas em que você já foi aprovado. O quadrado ao lado de cada período marca todas de
-                uma vez.
-              </p>
-            )}
             <CurriculumMap program={program} periods={periods} term={bundle.term.code} onOpen={setOpen} openCode={open} />
           </section>
 
@@ -118,7 +126,7 @@ function HoursSummary({ program }: { program: Program }) {
   ].filter((r) => r.required);
 
   return (
-    <section aria-labelledby="hours" className="flex flex-wrap gap-x-10 gap-y-6 rounded-xl border bg-card p-6">
+    <section aria-labelledby="hours" data-tour="hours" className="flex flex-wrap gap-x-10 gap-y-6 rounded-xl border bg-card p-6">
       <div className="flex min-w-56 flex-1 flex-col gap-3">
         <h2 id="hours" className="text-sm text-muted-foreground">
           Carga horária para se formar
@@ -173,7 +181,7 @@ function NextSteps({ program, base, onOpen }: { program: Program; base: string; 
     .slice(0, 4);
 
   return (
-    <section aria-labelledby="next" className="flex flex-col gap-3 rounded-xl border bg-card p-6">
+    <section aria-labelledby="next" data-tour="next" className="flex flex-col gap-3 rounded-xl border bg-card p-6">
       <h2 id="next" className="text-sm text-muted-foreground">
         O que destrava mais
       </h2>
@@ -223,7 +231,7 @@ function Legend({ term }: { term: string }) {
     <ul aria-label="Legenda" className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
       {items.map((i) => (
         <li key={i.label} className="inline-flex items-center gap-1.5">
-          <span aria-hidden="true" className={`size-3 rounded-[3px] border ${i.swatch}`} />
+          <span aria-hidden="true" className={`h-3 w-5 rounded-[4px] border ${i.swatch}`} />
           {i.label}
         </li>
       ))}

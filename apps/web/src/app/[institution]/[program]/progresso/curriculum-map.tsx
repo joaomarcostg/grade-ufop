@@ -44,7 +44,7 @@ export function MarkUntil({ program, periods }: { program: Program; periods: Per
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" disabled={program.simulating}>
+        <Button variant="outline" disabled={program.simulating} data-tour="mark-until">
           Já cursei até…
         </Button>
       </PopoverTrigger>

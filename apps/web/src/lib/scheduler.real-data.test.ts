@@ -13,7 +13,16 @@ import { DEFAULT_PREFERENCES, plan, sectionsConflict } from "./scheduler";
 const DATASET = fileURLToPath(new URL("../../../../pipeline/out/ufop-2026-2.json", import.meta.url));
 
 interface RawDataset {
-  programs: { code: string; entries: { subject_code: string; category: string; period: number | null }[] }[];
+  programs: {
+    code: string;
+    entries: {
+      subject_code: string;
+      category: string;
+      period: number | null;
+      weekly_theory: number | null;
+      weekly_practice: number | null;
+    }[];
+  }[];
   sections: {
     subject_code: string;
     code: string;
@@ -53,16 +62,24 @@ describe.skipIf(!existsSync(DATASET))("planner on real 2026/2 data", () => {
       [1, 2],
       [3, 4],
     ]) {
-      const subjects = program.entries
-        .filter((e) => e.category === "mandatory" && e.period !== null && periods.includes(e.period))
-        .map((e) => e.subject_code);
-      const started = performance.now();
-      const result = plan({ subjects, sections, locked: {}, preferences: DEFAULT_PREFERENCES, limit: 3 });
-      expect(performance.now() - started).toBeLessThan(1500);
-      for (const option of result.options) {
-        const chosen = Object.values(option.sections);
-        for (let i = 0; i < chosen.length; i++)
-          for (let j = i + 1; j < chosen.length; j++) expect(sectionsConflict(chosen[i], chosen[j])).toBe(false);
+      const picked = program.entries.filter(
+        (e) => e.category === "mandatory" && e.period !== null && periods.includes(e.period),
+      );
+      const subjects = picked.map((e) => e.subject_code);
+      const load = Object.fromEntries(
+        picked.map((e) => [e.subject_code, (e.weekly_theory ?? 0) + (e.weekly_practice ?? 0)]),
+      );
+      // Two periods usually pass UFOP's 32 weekly class hours, so this also exercises the limit.
+      for (const maxLoad of [null, 32]) {
+        const started = performance.now();
+        const result = plan({ subjects, sections, locked: {}, preferences: DEFAULT_PREFERENCES, limit: 3, load, maxLoad });
+        expect(performance.now() - started).toBeLessThan(1500);
+        for (const option of result.options) {
+          if (maxLoad) expect(option.load).toBeLessThanOrEqual(maxLoad);
+          const chosen = Object.values(option.sections);
+          for (let i = 0; i < chosen.length; i++)
+            for (let j = i + 1; j < chosen.length; j++) expect(sectionsConflict(chosen[i], chosen[j])).toBe(false);
+        }
       }
     }
   });

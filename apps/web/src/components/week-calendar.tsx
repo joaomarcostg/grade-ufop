@@ -81,10 +81,15 @@ export function WeekCalendar({
                 const top = ((meeting.start - startHour * 60) / 60) * PX_PER_HOUR;
                 const blockHeight = ((meeting.end - meeting.start) / 60) * PX_PER_HOUR - 2;
                 const color = colorFor(code, order);
+                // A 50-minute class only has room for two tight lines.
+                const short = blockHeight < 44;
                 return (
                   <div
                     key={`${code}-${meeting.day}-${meeting.start}`}
-                    className="absolute inset-x-1 flex flex-col gap-0.5 overflow-hidden rounded-md border px-2 py-1"
+                    className={cn(
+                      "absolute inset-x-1 flex flex-col overflow-hidden rounded-md border px-2",
+                      short ? "py-0.5 leading-[15px]" : "gap-0.5 py-1",
+                    )}
                     style={{ top: top + 1, height: blockHeight, background: color.bg, borderColor: color.border, color: color.text }}
                   >
                     <span className="font-mono text-[11px] font-medium">

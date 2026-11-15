@@ -107,6 +107,7 @@ export async function getProgramBundle(
     period: e.period,
     workloadHours: e.workloadHours,
     extensionHours: e.extensionHours,
+    weeklyClasses: (e.weeklyTheory ?? 0) + (e.weeklyPractice ?? 0) || null,
     requirements: e.requirements.map(
       (r): Requirement =>
         r.subject ? { type: "subject", code: r.subject.code } : { type: "hours", hours: r.hours ?? 0 },

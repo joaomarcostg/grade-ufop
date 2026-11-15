@@ -5,9 +5,11 @@ import { MAX_BREAK_MINUTES, type Shift, shiftOf } from "./time";
  * Builds conflict-free timetables from the subjects a student wants.
  *
  * A depth-first search picks one section per subject (or leaves the subject
- * out), never placing two meetings at the same time. Options are ranked by how
- * many subjects they fit, then by a cost made of days on campus, idle gaps
- * between classes and full sections, weighted by the student's preferences.
+ * out), never placing two meetings at the same time nor going over the
+ * student's load limit (weekly class hours at UFOP). Options are ranked by the student's priority (an
+ * option keeping an earlier subject of the list beats one keeping any number of
+ * later ones), then by a cost made of days on campus, idle gaps between classes
+ * and full sections, weighted by the student's preferences.
  *
  * To stay fast on real timetables (first-year engineering subjects have up to
  * 14 sections each), the search:
@@ -16,7 +18,8 @@ import { MAX_BREAK_MINUTES, type Shift, shiftOf } from "./time";
  * - always branches on the open subject with the fewest sections still
  *   possible, and counts subjects that can no longer fit at all;
  * - keeps the best few options and drops branches that cannot beat the worst
- *   of them (days on campus and full sections only grow, so they bound cost).
+ *   of them (the score of the subjects still open bounds the score; days on
+ *   campus and full sections only grow, so they bound cost).
  */
 
 export interface Preferences {
@@ -34,12 +37,16 @@ export const DEFAULT_PREFERENCES: Preferences = {
 };
 
 export interface PlanRequest {
-  /** Subject codes in the order the student added them. */
+  /** Subject codes, most important first: when not all fit, earlier ones stay. */
   subjects: string[];
   sections: Section[];
   /** Subject code -> section code the student fixed. */
   locked: Record<string, string>;
   preferences: Preferences;
+  /** Load of each subject (weekly class hours at UFOP), counted against ``maxLoad``. */
+  load?: Record<string, number>;
+  /** Most load the student may enroll in; no limit when absent. */
+  maxLoad?: number | null;
   /** How many options to return. */
   limit?: number;
   /** Search budget, so huge requests still answer quickly. */
@@ -51,6 +58,12 @@ export interface PlanOption {
   sections: Record<string, Section>;
   /** Requested subjects that did not fit in this option. */
   left: string[];
+  /** Of ``left``, the subjects that would take the option over the load limit. */
+  overLimit: string[];
+  /** Load of the subjects that fit. */
+  load: number;
+  /** Priority of the subjects that fit; higher is better. */
+  score: number;
   days: number;
   gapMinutes: number;
   fullSections: number;
@@ -70,6 +83,8 @@ export interface PlanResult {
 const DAY_COST = { normal: 60, fewerDays: 240 };
 const GAP_COST_PER_MINUTE = { normal: 0.5, avoidGaps: 2 };
 const FULL_SECTION_COST = 600;
+/** Subjects past this position in the list all weigh the same. */
+const PRIORITY_BITS = 30;
 
 export function conflicts(a: Meeting, b: Meeting): boolean {
   return a.day === b.day && a.start < b.end && b.start < a.end;
@@ -125,10 +140,9 @@ function cost(stats: ReturnType<typeof scheduleStats>, preferences: Preferences)
   return stats.days * dayCost + stats.gapMinutes * gapCost + stats.fullSections * FULL_SECTION_COST;
 }
 
-/** Better first: more subjects, then lower cost, then a stable tie-break. */
+/** Better first: higher score, then lower cost, then a stable tie-break. */
 function compare(a: PlanOption, b: PlanOption) {
-  const fitted = Object.keys(b.sections).length - Object.keys(a.sections).length;
-  return fitted || a.cost - b.cost || key(a).localeCompare(key(b));
+  return b.score - a.score || a.cost - b.cost || key(a).localeCompare(key(b));
 }
 
 function key(option: PlanOption) {
@@ -141,14 +155,20 @@ function key(option: PlanOption) {
 export function plan(request: PlanRequest): PlanResult {
   const limit = request.limit ?? 3;
   const maxNodes = request.maxNodes ?? 200_000;
+  const maxLoad = request.maxLoad ?? Infinity;
   const unavailable: PlanResult["unavailable"] = [];
-  const subjects: { code: string; candidates: Section[] }[] = [];
+  const subjects: { code: string; candidates: Section[]; load: number; score: number }[] = [];
 
-  for (const code of request.subjects) {
+  request.subjects.forEach((code, rank) => {
     const { candidates, reason } = candidateSections(code, request.sections, request.locked, request.preferences);
-    if (reason) unavailable.push({ code, reason });
-    else subjects.push({ code, candidates: interchangeable(candidates) });
-  }
+    if (reason) {
+      unavailable.push({ code, reason });
+      return;
+    }
+    // One bit per position: keeping an earlier subject outweighs keeping all later ones.
+    const score = rank < PRIORITY_BITS ? 2 ** (PRIORITY_BITS - rank) : 1;
+    subjects.push({ code, candidates: interchangeable(candidates), load: request.load?.[code] ?? 0, score });
+  });
 
   // Every candidate section, with the candidates it clashes with precomputed.
   const all: { subject: number; section: Section; full: boolean; days: number }[] = [];
@@ -175,6 +195,8 @@ export function plan(request: PlanRequest): PlanResult {
   // assigned[s]: chosen candidate index, -1 left out, undefined still open.
   const assigned: (number | undefined)[] = new Array(subjects.length);
   let fitted = 0;
+  let load = 0;
+  let score = 0;
   let days = 0;
   let fullCount = 0;
 
@@ -192,9 +214,13 @@ export function plan(request: PlanRequest): PlanResult {
       if (c !== undefined && c >= 0) sections[subjects[subject].code] = all[c].section;
     });
     const stats = scheduleStats(Object.values(sections));
+    const left = subjects.filter((s) => !(s.code in sections));
     const option: PlanOption = {
       sections,
-      left: subjects.map((s) => s.code).filter((code) => !(code in sections)),
+      left: left.map((s) => s.code),
+      overLimit: left.filter((s) => load + s.load > maxLoad).map((s) => s.code),
+      load,
+      score,
       ...stats,
       cost: cost(stats, request.preferences),
     };
@@ -216,15 +242,17 @@ export function plan(request: PlanRequest): PlanResult {
       truncated = true;
       return;
     }
-    // Most constrained open subject first; count the ones that can still fit.
+    // Most constrained open subject first; add up the score of the ones that can still fit.
     let next = -1;
     let nextOpen = Infinity;
-    let canFit = 0;
+    let reachable = score;
     for (let subject = 0; subject < subjects.length; subject++) {
       if (assigned[subject] !== undefined) continue;
       let open = 0;
-      for (const c of bySubject[subject]) if (blocked[c] === 0) open++;
-      if (open > 0) canFit++;
+      if (load + subjects[subject].load <= maxLoad) {
+        for (const c of bySubject[subject]) if (blocked[c] === 0) open++;
+      }
+      if (open > 0) reachable += subjects[subject].score;
       if (open < nextOpen) {
         next = subject;
         nextOpen = open;
@@ -237,21 +265,23 @@ export function plan(request: PlanRequest): PlanResult {
 
     const worst = worstKept();
     if (worst) {
-      const worstFitted = Object.keys(worst.sections).length;
-      if (fitted + canFit < worstFitted) return;
+      if (reachable < worst.score) return;
       // Days on campus and full sections only grow, so this is a lower bound.
       const floor = popcount(days) * dayCost + fullCount * FULL_SECTION_COST;
-      if (fitted + canFit === worstFitted && floor >= worst.cost) return;
+      if (reachable === worst.score && floor >= worst.cost) return;
     }
 
     // Try sections that add no new day (and have seats) first: good options early prune more.
+    const fits = load + subjects[next].load <= maxLoad;
     const options = bySubject[next]
-      .filter((c) => blocked[c] === 0)
+      .filter((c) => fits && blocked[c] === 0)
       .sort((a, b) => popcount(all[a].days & ~days) - popcount(all[b].days & ~days) || +all[a].full - +all[b].full);
     for (const c of options) {
       const previousDays = days;
       assigned[next] = c;
       fitted++;
+      load += subjects[next].load;
+      score += subjects[next].score;
       days |= all[c].days;
       if (all[c].full) fullCount++;
       choose(c, 1);
@@ -259,6 +289,8 @@ export function plan(request: PlanRequest): PlanResult {
       choose(c, -1);
       if (all[c].full) fullCount--;
       days = previousDays;
+      score -= subjects[next].score;
+      load -= subjects[next].load;
       fitted--;
       assigned[next] = undefined;
       if (truncated) return;

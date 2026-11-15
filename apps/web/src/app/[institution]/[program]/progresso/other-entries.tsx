@@ -3,7 +3,7 @@
 import { Lock, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Code, WarnBadge } from "@/components/brand";
+import { CheckGlyph, Code, WarnBadge } from "@/components/brand";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,9 +57,16 @@ export function OtherEntries({ program, term, onOpen }: { program: Program; term
 
   return (
     <section aria-labelledby="others" className="flex flex-col gap-4">
-      <h2 id="others" className="text-xl font-medium">
-        Eletivas e atividades
-      </h2>
+      <div className="flex flex-col gap-1">
+        <h2 id="others" className="text-xl font-medium">
+          Eletivas e atividades
+        </h2>
+        {!program.simulating && (
+          <p className="text-sm text-ink-2">
+            Marque <CheckGlyph /> também as eletivas, optativas e atividades que você já concluiu.
+          </p>
+        )}
+      </div>
       <Tabs defaultValue={groups[0].category} className="gap-0 rounded-xl border bg-card">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b p-3">
           <TabsList>

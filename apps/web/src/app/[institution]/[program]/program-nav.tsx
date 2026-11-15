@@ -23,6 +23,7 @@ export function ProgramNav({ base }: { base: string }) {
             key={path}
             href={href}
             aria-current={current ? "page" : undefined}
+            data-tour={`nav-${path}`}
             className={cn(
               "inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm transition-colors",
               current ? "bg-secondary font-medium text-foreground" : "text-ink-2 hover:bg-secondary/70 hover:text-foreground",

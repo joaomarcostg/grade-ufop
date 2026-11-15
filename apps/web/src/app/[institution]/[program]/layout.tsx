@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { SiteHeader } from "@/components/site-header";
+import { TourButton } from "@/components/tour-button";
 import { getProgramBundle } from "@/server/catalog";
 
 import { ProgramNav } from "./program-nav";
@@ -26,7 +27,7 @@ async function Header({ params }: Pick<LayoutProps<"/[institution]/[program]">, 
   const { institution, program } = await params;
   const bundle = await getProgramBundle(institution, program);
   return (
-    <SiteHeader term={bundle?.term.code}>
+    <SiteHeader term={bundle?.term.code} aside={<TourButton />}>
       <ProgramNav base={`/${institution}/${program}`} />
     </SiteHeader>
   );

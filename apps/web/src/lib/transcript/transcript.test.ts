@@ -65,7 +65,16 @@ describe("nameKey", () => {
 });
 
 function entry(subjectCode: string): Entry {
-  return { subjectCode, category: "mandatory", track: null, period: 1, workloadHours: 60, extensionHours: 0, requirements: [] };
+  return {
+    subjectCode,
+    category: "mandatory",
+    track: null,
+    period: 1,
+    workloadHours: 60,
+    extensionHours: 0,
+    weeklyClasses: 4,
+    requirements: [],
+  };
 }
 
 function bundleOf(subjects: Record<string, string>): ProgramBundle {

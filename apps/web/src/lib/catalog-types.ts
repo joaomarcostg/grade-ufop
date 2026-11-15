@@ -34,6 +34,8 @@ export interface Entry {
   period: number | null;
   workloadHours: number | null;
   extensionHours: number | null;
+  /** Weekly 50-minute classes (theory + practice), as the curriculum lists them. */
+  weeklyClasses: number | null;
   requirements: Requirement[];
 }
 

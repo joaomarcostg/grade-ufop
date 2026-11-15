@@ -1,4 +1,4 @@
-import { TriangleAlert } from "lucide-react";
+import { Check, TriangleAlert } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -34,4 +34,16 @@ export function WarnBadge({ children, className }: { children: ReactNode; classN
 /** A subject code, set in mono like on the university's documents. */
 export function Code({ children, className }: { children: ReactNode; className?: string }) {
   return <span className={cn("font-mono text-xs text-muted-foreground", className)}>{children}</span>;
+}
+
+/** A drawing of a ticked checkbox, for copy that tells people what ticking does. */
+export function CheckGlyph() {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-flex size-3.5 translate-y-0.5 items-center justify-center rounded-[4px] bg-done align-baseline text-white"
+    >
+      <Check className="size-2.5" strokeWidth={3} />
+    </span>
+  );
 }
