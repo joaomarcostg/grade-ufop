@@ -35,7 +35,7 @@ jobs:
     outputs:
       mode: ${{ steps.mode.outputs.mode }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: pipeline/enrollment-windows.txt
           sparse-checkout-cone-mode: false
@@ -72,8 +72,8 @@ jobs:
       run:
         working-directory: pipeline
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -82,7 +82,7 @@ jobs:
 
       # Curriculum PDFs rarely change: keep the raw snapshots between runs, so
       # a seats refresh only downloads the timetable.
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v6
         with:
           path: pipeline/.cache/raw
           key: raw-ufop-${{ github.run_id }}
@@ -100,7 +100,7 @@ jobs:
             *) echo "unknown mode $MODE"; exit 1 ;;
           esac
 
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@v6
         with:
           path: pipeline/.cache/raw
           key: raw-ufop-${{ github.run_id }}
