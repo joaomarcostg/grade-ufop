@@ -1,0 +1,8 @@
+# Matrícula and ajuste windows from UFOP's academic calendar (PROGRAD,
+# prograd.ufop.br/calendario-academico), inclusive, in Brasília dates.
+# Inside a window the sync workflow refreshes seats every two hours; outside,
+# once a week. Add the next year's windows when PROGRAD publishes its calendar.
+#
+# start      end         term    source
+2027-02-12  2027-03-02  2027/1  Calendário 2027 presencial, Res. Congrad 309/2026
+2027-07-23  2027-08-09  2027/2  Calendário 2027 presencial, Res. Congrad 309/2026

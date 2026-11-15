@@ -48,3 +48,17 @@ export function colorFor(code: string, order: string[]) {
   const index = order.indexOf(code);
   return SUBJECT_COLORS[(index < 0 ? 0 : index) % SUBJECT_COLORS.length];
 }
+
+const SYNC_TIME = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  day: "2-digit",
+  month: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+/** "15/11 às 14:30", in UFOP's time zone whatever the visitor's clock says. */
+export function formatSyncedAt(iso: string): string {
+  const parts = Object.fromEntries(SYNC_TIME.formatToParts(new Date(iso)).map((p) => [p.type, p.value]));
+  return `${parts.day}/${parts.month} às ${parts.hour}:${parts.minute}`;
+}

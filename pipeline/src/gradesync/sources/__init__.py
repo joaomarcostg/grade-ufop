@@ -1,8 +1,8 @@
 """Institution adapters.
 
-Each adapter module exposes ``fetch(store, term, refresh=...)`` and
-``build(store, term) -> Dataset``; ``discover(store)`` is optional. Register new
-institutions here.
+Each adapter module exposes ``fetch(store, term, refresh=..., refresh_sections=...)``,
+``build(store, term) -> Dataset`` and ``offered_terms()`` (newest first);
+``discover(store)`` is optional. Register new institutions here.
 """
 
 from __future__ import annotations
@@ -15,9 +15,13 @@ from gradesync.net import RawStore
 
 
 class Adapter(Protocol):
-    def fetch(self, store: RawStore, term: str, *, refresh: bool = False) -> list[str]: ...
+    def fetch(
+        self, store: RawStore, term: str, *, refresh: bool = False, refresh_sections: bool = False
+    ) -> list[str]: ...
 
     def build(self, store: RawStore, term: str) -> Dataset: ...
+
+    def offered_terms(self) -> list[str]: ...
 
 
 def get_adapter(institution: str) -> Adapter:

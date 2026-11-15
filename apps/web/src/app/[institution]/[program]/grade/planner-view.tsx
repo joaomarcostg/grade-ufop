@@ -7,6 +7,7 @@ import { SimulationBanner, SimulationSelect } from "@/components/simulation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DayAgenda, WeekCalendar } from "@/components/week-calendar";
 import type { ProgramBundle } from "@/lib/catalog-types";
+import { formatSyncedAt } from "@/lib/format";
 import { byPriority, defaultWeeklyLimit, weeklyClassesOf } from "@/lib/limits";
 import { type PlanOption, plan } from "@/lib/scheduler";
 import { useFirstVisitTour } from "@/lib/tour";
@@ -70,6 +71,7 @@ export function PlannerView({ bundle }: { bundle: ProgramBundle }) {
           <h1 className="text-3xl font-medium tracking-tight">Montar grade</h1>
           <p className="text-sm text-muted-foreground">
             {bundle.program.name} · turmas de {bundle.term.code}
+            {bundle.term.syncedAt && ` · vagas atualizadas em ${formatSyncedAt(bundle.term.syncedAt)}`}
           </p>
         </div>
         <SimulationSelect program={program} />

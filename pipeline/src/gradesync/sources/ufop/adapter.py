@@ -52,11 +52,18 @@ def curriculum_key(code: str) -> str:
 # --- Fetch ------------------------------------------------------------------
 
 
-def fetch(store: RawStore, term: str, *, refresh: bool = False) -> list[str]:
-    """Fetch the timetable for ``term`` and every registered curriculum."""
+def fetch(
+    store: RawStore, term: str, *, refresh: bool = False, refresh_sections: bool = False
+) -> list[str]:
+    """Fetch the timetable for ``term`` and every registered curriculum.
+
+    ``refresh`` downloads everything again; ``refresh_sections`` only the
+    timetable (sections and seats), keeping the curricula already stored.
+    """
     keys: list[str] = []
     with Fetcher(delays=DELAYS) as fetcher:
-        if refresh or not store.has(f"{timetable.snapshot_prefix(term)}index.html"):
+        stored = store.has(f"{timetable.snapshot_prefix(term)}index.html")
+        if refresh or refresh_sections or not stored:
             keys += timetable.fetch_timetable(fetcher, store, term)
         for ref in PROGRAMS:
             key = curriculum_key(ref.code)
@@ -69,6 +76,12 @@ def fetch(store: RawStore, term: str, *, refresh: bool = False) -> list[str]:
                 raise RuntimeError(f"{ref.code}: the academic system returned no curriculum")
             keys.append(store.put(key, url, response.content).key)
     return keys
+
+
+def offered_terms() -> list[str]:
+    """Terms the public timetable offers, newest first."""
+    with Fetcher(delays=DELAYS) as fetcher:
+        return timetable.fetch_terms(fetcher)
 
 
 @dataclass

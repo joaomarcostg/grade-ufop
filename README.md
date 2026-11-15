@@ -76,4 +76,32 @@ cd pipeline && .venv/bin/ruff check . && .venv/bin/pytest     # pipeline (set DA
    because the home page and one program page are prerendered.
 
 Catalog reads are cached for an hour; after loading a new term, pages pick it
-up within that time.
+up within that time, or at once through `POST /api/revalidate` (below).
+
+## Keeping the data fresh
+
+`.github/workflows/sync.yml` runs `gradesync refresh`, which loads whatever
+term the site shows and switches to a newer one as soon as UFOP publishes its
+timetable (once it has at least 1000 sections):
+
+| When | What |
+| --- | --- |
+| Daily | Looks for a newly published term (one request to UFOP). |
+| Mondays | Full sync: timetable and curricula. |
+| Every two hours inside a matrícula/ajuste window | Timetable only (`--sections-only`, about 50 requests), so seats follow the atestados. |
+
+The windows come from PROGRAD's academic calendar and live in
+[`pipeline/enrollment-windows.txt`](pipeline/enrollment-windows.txt): add the
+next year's when the calendar comes out. Raw snapshots are kept in the Actions
+cache, so a seats refresh does not download the curricula again. It can also be
+run by hand from the Actions tab (*Run workflow*).
+
+Setup:
+
+- GitHub secret `DATABASE_URL`: the database's direct (non-pooled) connection string.
+- `REVALIDATE_TOKEN`, a random string, both as a GitHub secret and as a Vercel
+  environment variable. After loading, the workflow calls `POST /api/revalidate`
+  with it, so the site drops its cached catalog and shows the new seats on the
+  next visit. Without it, the site still catches up within an hour.
+- GitHub pauses scheduled workflows after 60 days without commits; push
+  something (or re-enable the workflow) before each matrícula.

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { formatSyncedAt } from "@/lib/format";
+
 import { Logo } from "./brand";
 
 const AUTHOR_URL = "https://github.com/joaomarcostg";
@@ -45,9 +47,7 @@ export function SiteHeader({ children, term, aside }: { children?: ReactNode; te
 }
 
 export function SiteFooter({ syncedAt }: { syncedAt?: string | null }) {
-  const date = syncedAt
-    ? new Date(syncedAt).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })
-    : null;
+  const updated = syncedAt ? formatSyncedAt(syncedAt) : null;
   return (
     <footer className="mt-auto border-t">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-2 px-4 py-6 text-sm leading-relaxed sm:px-8">
@@ -67,7 +67,7 @@ export function SiteFooter({ syncedAt }: { syncedAt?: string | null }) {
         </p>
         <p className="text-muted-foreground">
           Dados públicos do Horário de Aulas e das matrizes curriculares da UFOP
-          {date ? `, atualizados em ${date}` : ""}. Não é um serviço oficial da universidade: confira sempre no sistema
+          {updated ? `, atualizados em ${updated}` : ""}. Não é um serviço oficial da universidade: confira sempre no sistema
           acadêmico antes de se matricular.
         </p>
       </div>

@@ -1,0 +1,124 @@
+name: Sync UFOP data
+
+# Keeps the site's data fresh without anyone running the pipeline by hand:
+# - daily, a quick look for a newly published term, which the site switches to;
+# - every Monday, a full sync (timetable and curricula);
+# - every two hours inside a matrícula/ajuste window
+#   (pipeline/enrollment-windows.txt), the timetable only, so seats follow the
+#   atestados.
+# After loading, it asks the site to drop its cached catalog.
+
+on:
+  schedule:
+    - cron: "40 9 * * *" # daily, 06:40 in Brasília: newer term?
+    - cron: "0 9 * * 1" # Mondays, 06:00: full sync
+    - cron: "17 */2 * * *" # every two hours: seats, only inside a window
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "sections: timetable only; full: curricula too; new-term: only look for a newer term"
+        type: choice
+        options: [sections, full, new-term]
+        default: sections
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-ufop
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.mode.outputs.mode }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: pipeline/enrollment-windows.txt
+          sparse-checkout-cone-mode: false
+      - id: mode
+        env:
+          EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+          INPUT_MODE: ${{ inputs.mode }}
+        run: |
+          if [ "$EVENT" = workflow_dispatch ]; then
+            mode="$INPUT_MODE"
+          elif [ "$SCHEDULE" = "40 9 * * *" ]; then
+            mode=new-term
+          elif [ "$SCHEDULE" = "0 9 * * 1" ]; then
+            mode=full
+          else
+            mode=skip
+            today=$(TZ=America/Sao_Paulo date +%F)
+            while read -r start end _; do
+              case "$start" in "" | \#*) continue ;; esac
+              if [[ ! "$today" < "$start" && ! "$today" > "$end" ]]; then mode=sections; fi
+            done < pipeline/enrollment-windows.txt
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "Mode: $mode"
+
+  sync:
+    needs: plan
+    if: needs.plan.outputs.mode != 'skip'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pipeline/pyproject.toml
+      - run: pip install -e '.[db]'
+
+      # Curriculum PDFs rarely change: keep the raw snapshots between runs, so
+      # a seats refresh only downloads the timetable.
+      - uses: actions/cache/restore@v4
+        with:
+          path: pipeline/.cache/raw
+          key: raw-ufop-${{ github.run_id }}
+          restore-keys: raw-ufop-
+
+      - name: Refresh the database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          MODE: ${{ needs.plan.outputs.mode }}
+        run: |
+          case "$MODE" in
+            sections) gradesync refresh ufop --sections-only ;;
+            full) gradesync refresh ufop ;;
+            new-term) gradesync refresh ufop --sections-only --new-term-only ;;
+            *) echo "unknown mode $MODE"; exit 1 ;;
+          esac
+
+      - uses: actions/cache/save@v4
+        with:
+          path: pipeline/.cache/raw
+          key: raw-ufop-${{ github.run_id }}
+
+      - name: Drop the site's cached catalog
+        env:
+          REVALIDATE_TOKEN: ${{ secrets.REVALIDATE_TOKEN }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://grade-ufop-puce.vercel.app' }}
+        run: |
+          if [ -z "$REVALIDATE_TOKEN" ]; then
+            echo "::warning::REVALIDATE_TOKEN is not set; the site picks the new data up within an hour"
+            exit 0
+          fi
+          status=$(curl -sS -o response.json -w '%{http_code}' -X POST "$SITE_URL/api/revalidate" \
+            -H "Authorization: Bearer $REVALIDATE_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"institution":"ufop"}')
+          cat response.json; echo
+          case "$status" in
+            200) ;;
+            503) echo "::warning::REVALIDATE_TOKEN is not set on Vercel; the site picks the new data up within an hour" ;;
+            *) echo "::error::revalidate answered $status"; exit 1 ;;
+          esac

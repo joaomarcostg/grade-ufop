@@ -10,6 +10,7 @@ from gradesync.sources.ufop.timetable import (
     parse_departments,
     parse_instructors,
     parse_meetings,
+    parse_terms,
 )
 
 FIXTURES = Path(__file__).parent / "fixtures" / "ufop" / "timetable"
@@ -20,6 +21,12 @@ def test_departments():
     assert len(departments) == 48
     decsi = next(d for d in departments if d.code == "DECSI")
     assert "SISTEMAS" in decsi.name
+
+
+def test_terms_newest_first():
+    terms = parse_terms((FIXTURES / "index.html").read_text())
+    assert terms[:3] == ["2026/2", "2026/1", "2025/2"]
+    assert terms == sorted(terms, reverse=True)
 
 
 def test_department_page():

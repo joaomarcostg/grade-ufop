@@ -58,6 +58,16 @@ def snapshot_prefix(term: str) -> str:
     return f"ufop/timetable/{term.replace('/', '-')}/"
 
 
+def parse_terms(page_html: str) -> list[str]:
+    """Terms the timetable offers, newest first."""
+    terms = set(re.findall(r'<option[^>]*value="(\d{4}/[12])"', page_html))
+    return sorted(terms, key=lambda t: (int(t[:4]), int(t[5])), reverse=True)
+
+
+def fetch_terms(fetcher: Fetcher) -> list[str]:
+    return parse_terms(fetcher.get(BASE_URL).text)
+
+
 # --- Fetching ---------------------------------------------------------------
 
 
@@ -69,7 +79,7 @@ def fetch_timetable(
     Returns the snapshot keys written.
     """
     first = fetcher.get(BASE_URL).text
-    terms = re.findall(r'<option[^>]*value="(\d{4}/\d)"', first)
+    terms = parse_terms(first)
     if term not in terms:
         raise TimetableParseError(f"term {term} is not offered (available: {', '.join(terms)})")
 

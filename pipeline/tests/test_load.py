@@ -161,6 +161,16 @@ def test_load_writes_every_table(conn):
     )
 
 
+def test_current_term(conn):
+    from gradesync.load import current_term, load_dataset
+
+    assert current_term(conn, "test") is None
+    load_dataset(conn, make_dataset())
+    assert current_term(conn, "test") is None
+    load_dataset(conn, make_dataset(), make_current=True)
+    assert current_term(conn, "test") == make_dataset().term
+
+
 def test_same_dataset_twice_is_a_no_op(conn):
     from gradesync.load import load_dataset
 

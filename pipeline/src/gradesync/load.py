@@ -40,6 +40,18 @@ class LoadStats:
     withdrawn: int = 0
 
 
+def current_term(conn: psycopg.Connection, institution: str) -> str | None:
+    """Code of the term the site shows for ``institution``, if any."""
+    row = conn.execute(
+        """
+        SELECT t.code FROM term t JOIN institution i ON i.id = t.institution_id
+        WHERE i.code = %s AND t.is_current
+        """,
+        (institution,),
+    ).fetchone()
+    return row[0] if row else None
+
+
 def dataset_sha256(dataset: Dataset) -> str:
     return hashlib.sha256(dataset.model_dump_json().encode()).hexdigest()
 

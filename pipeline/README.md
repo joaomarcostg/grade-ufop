@@ -25,6 +25,12 @@ python -m venv .venv && .venv/bin/pip install -e '.[dev,db]'
 .venv/bin/gradesync build ufop --term 2026/2   # writes out/ufop-2026-2.json
 .venv/bin/gradesync discover ufop              # compare the registry with the public catalog
 
+# What the scheduled workflow runs (DATABASE_URL set): refresh the term the
+# site shows, or switch to a newer one once UFOP publishes it.
+.venv/bin/gradesync refresh ufop                  # timetable and curricula
+.venv/bin/gradesync refresh ufop --sections-only  # timetable only (~1.5 minutes)
+.venv/bin/gradesync refresh ufop --sections-only --new-term-only  # one request
+
 .venv/bin/pytest
 .venv/bin/ruff check . && .venv/bin/ruff format --check .
 ```
@@ -41,6 +47,7 @@ The program registry lives in `src/gradesync/sources/ufop/programs.py`.
 
 ## Adding another institution
 
-Write `gradesync/sources/<code>/adapter.py` with `fetch(store, term, refresh=...)`
-and `build(store, term) -> Dataset`, register it in `gradesync/sources/__init__.py`,
+Write `gradesync/sources/<code>/adapter.py` with
+`fetch(store, term, refresh=..., refresh_sections=...)`, `build(store, term) -> Dataset`
+and `offered_terms()`, register it in `gradesync/sources/__init__.py`,
 and add fixtures and tests for its parsers. Nothing downstream changes.
