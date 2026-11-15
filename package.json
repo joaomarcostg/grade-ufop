@@ -2,9 +2,16 @@
   "name": "grade",
   "private": true,
   "workspaces": [
+    "apps/*",
     "packages/*"
   ],
   "engines": {
     "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @grade/web",
+    "build": "npm run build -w @grade/web",
+    "test": "npm test --workspaces --if-present",
+    "lint": "npm run lint -w @grade/web"
   }
 }

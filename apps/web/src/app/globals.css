@@ -1,22 +1,57 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-color-rgb: 255, 255, 255;
+/*
+ * Design tokens. Brand wine comes from UFOP's own site (#962038); it marks the
+ * brand and actions only. States use shape and icons as well as colour, and
+ * warnings are amber so they never look like a link or button.
+ */
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, sans-serif;
+
+  --color-ground: #f6f5f1;
+  --color-surface: #ffffff;
+  --color-soft: #efede7;
+  --color-line: #e3e1da;
+  --color-line-strong: #c9c6bc;
+  --color-ink: #14202b;
+  --color-ink-2: #3a4651;
+  --color-muted: #5a6672;
+
+  --color-brand: #962038;
+  --color-brand-dark: #6e1628;
+  --color-brand-tint: #f8ecee;
+
+  --color-done: #14532d;
+  --color-done-bg: #e3f1e8;
+  --color-done-line: #a7d3b5;
+
+  --color-warn: #6b4500;
+  --color-warn-bg: #fff1d6;
+  --color-warn-line: #f2d08a;
+
+  --color-error: #b42318;
+  --color-error-bg: #fef3f2;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-color-rgb: 0, 0, 0;
-
+@layer base {
+  html {
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+    -webkit-tap-highlight-color: transparent;
   }
-}
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background:  rgb(var(--background-color-rgb));
-   
+  :focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+
+  a {
+    color: var(--color-brand);
+  }
+
+  a:hover {
+    color: var(--color-brand-dark);
+  }
 }
