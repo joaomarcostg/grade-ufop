@@ -1,68 +1,88 @@
 "use client";
 
-import { WarnBadge } from "@/components/ui";
+import { Check } from "lucide-react";
+
+import { WarnBadge } from "@/components/brand";
+import { Toggle } from "@/components/ui/toggle";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { PlanResult, Preferences } from "@/lib/scheduler";
 import { SHIFT_LABEL, type Shift } from "@/lib/time";
-
 import type { Program } from "@/lib/use-program";
+import { cn } from "@/lib/utils";
 
 const SHIFTS: Shift[] = ["morning", "afternoon", "night"];
 const LETTERS = ["A", "B", "C", "D", "E"];
+const PRESSED = "data-[state=on]:border-foreground/40 data-[state=on]:bg-secondary data-[state=on]:text-foreground";
 
 export function PlanControls({
   program,
   result,
   optionIndex,
   onChoose,
-  name,
 }: {
   program: Program;
   result: PlanResult;
   optionIndex: number;
   onChoose: (index: number) => void;
-  name: (code: string) => string;
 }) {
   const prefs = program.state.preferences;
   const setPrefs = (change: Partial<Preferences>) =>
     program.change((s) => ({ preferences: { ...s.preferences, ...change } }));
-
-  const toggleShift = (shift: Shift) => {
-    const shifts = prefs.shifts.includes(shift) ? prefs.shifts.filter((s) => s !== shift) : [...prefs.shifts, shift];
-    if (shifts.length) setPrefs({ shifts });
-  };
-
   const count = result.options.length;
+
   return (
     <section aria-labelledby="options" className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="options" className="font-display text-[22px] font-semibold">
-          {program.state.planned.length === 0
-            ? "Monte sua grade"
-            : count === 1
-              ? "1 grade possível"
-              : `${count} grades possíveis`}
+        <h2 id="options" className="text-lg font-medium">
+          {program.state.planned.length === 0 ? "Opções" : count === 1 ? "1 grade possível" : `${count} grades possíveis`}
         </h2>
-        <div role="group" aria-label="Preferências" className="flex flex-wrap items-center gap-2">
-          {SHIFTS.map((shift) => (
-            <Toggle key={shift} pressed={prefs.shifts.includes(shift)} onClick={() => toggleShift(shift)}>
-              {SHIFT_LABEL[shift]}
-            </Toggle>
-          ))}
-          <span aria-hidden="true" className="mx-1 h-6 w-px bg-line" />
-          <Toggle pressed={prefs.avoidGaps} onClick={() => setPrefs({ avoidGaps: !prefs.avoidGaps })}>
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Preferências">
+          <ToggleGroup
+            type="multiple"
+            variant="outline"
+            value={prefs.shifts}
+            onValueChange={(shifts) => shifts.length && setPrefs({ shifts: shifts as Shift[] })}
+            aria-label="Turnos"
+          >
+            {SHIFTS.map((shift) => (
+              <ToggleGroupItem key={shift} value={shift} className={cn("h-9 px-3", PRESSED)}>
+                {prefs.shifts.includes(shift) && <Check strokeWidth={2} aria-hidden="true" />}
+                {SHIFT_LABEL[shift]}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          <Toggle
+            variant="outline"
+            pressed={prefs.avoidGaps}
+            onPressedChange={(avoidGaps) => setPrefs({ avoidGaps })}
+            className={cn("h-9 px-3", PRESSED)}
+          >
+            {prefs.avoidGaps && <Check strokeWidth={2} aria-hidden="true" />}
             Sem janelas
           </Toggle>
-          <Toggle pressed={prefs.fewerDays} onClick={() => setPrefs({ fewerDays: !prefs.fewerDays })}>
+          <Toggle
+            variant="outline"
+            pressed={prefs.fewerDays}
+            onPressedChange={(fewerDays) => setPrefs({ fewerDays })}
+            className={cn("h-9 px-3", PRESSED)}
+          >
+            {prefs.fewerDays && <Check strokeWidth={2} aria-hidden="true" />}
             Menos dias
           </Toggle>
-          <Toggle pressed={prefs.onlyWithSeats} onClick={() => setPrefs({ onlyWithSeats: !prefs.onlyWithSeats })}>
+          <Toggle
+            variant="outline"
+            pressed={prefs.onlyWithSeats}
+            onPressedChange={(onlyWithSeats) => setPrefs({ onlyWithSeats })}
+            className={cn("h-9 px-3", PRESSED)}
+          >
+            {prefs.onlyWithSeats && <Check strokeWidth={2} aria-hidden="true" />}
             Só com vaga
           </Toggle>
         </div>
       </div>
 
       {count > 0 && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           {result.options.map((option, i) => {
             const fitted = Object.keys(option.sections).length;
             const pressed = i === optionIndex;
@@ -72,29 +92,27 @@ export function PlanControls({
                 type="button"
                 aria-pressed={pressed}
                 onClick={() => onChoose(i)}
-                className={`flex flex-col gap-1.5 rounded-2xl bg-surface p-4 text-left ${
-                  pressed ? "border-2 border-brand" : "border border-line p-[17px] hover:border-line-strong"
-                }`}
+                className={cn(
+                  "flex flex-col gap-1 rounded-xl border bg-card p-4 text-left transition-colors",
+                  pressed ? "border-primary ring-1 ring-primary" : "hover:border-foreground/25",
+                )}
               >
-                <span className={`text-[13px] font-bold ${pressed ? "text-brand" : "text-ink-2"}`}>
+                <span className={cn("text-xs font-medium", pressed ? "text-primary" : "text-muted-foreground")}>
                   Opção {LETTERS[i]}
                 </span>
-                <span className="text-[15px] font-semibold">
-                  {fitted} {fitted === 1 ? "disciplina" : "disciplinas"} · {option.days}{" "}
-                  {option.days === 1 ? "dia" : "dias"}
+                <span className="text-sm font-medium">
+                  {fitted} {fitted === 1 ? "disciplina" : "disciplinas"} · {option.days} {option.days === 1 ? "dia" : "dias"}
                 </span>
-                <span className="text-[13px] text-ink-2">
+                <span className="text-xs text-ink-2">
                   {option.gapMinutes === 0 ? "sem janelas" : `${formatGap(option.gapMinutes)} de janela por semana`}
                 </span>
                 {option.fullSections > 0 && (
-                  <WarnBadge className="!text-xs">
+                  <WarnBadge className="mt-1">
                     {option.fullSections === 1 ? "1 turma sem vagas" : `${option.fullSections} turmas sem vagas`}
                   </WarnBadge>
                 )}
                 {option.left.length > 0 && (
-                  <span className="text-[13px] text-muted">
-                    Fica de fora: {option.left.map((c) => `${c} ${name(c)}`).join(", ")}
-                  </span>
+                  <span className="text-xs text-muted-foreground">Fica de fora: {option.left.join(", ")}</span>
                 )}
               </button>
             );
@@ -102,26 +120,11 @@ export function PlanControls({
         </div>
       )}
       {result.truncated && (
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted-foreground">
           Muitas combinações: mostrando as melhores encontradas. Fixe turmas ou tire disciplinas para refinar.
         </p>
       )}
     </section>
-  );
-}
-
-function Toggle({ pressed, onClick, children }: { pressed: boolean; onClick: () => void; children: string }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      onClick={onClick}
-      className={`min-h-10 rounded-full border px-3.5 text-sm font-semibold ${
-        pressed ? "border-ink bg-ink text-white" : "border-line-strong bg-surface text-ink-2 hover:bg-soft"
-      }`}
-    >
-      {children}
-    </button>
   );
 }
 

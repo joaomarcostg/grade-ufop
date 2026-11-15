@@ -2,16 +2,17 @@
 
 import { useMemo, useState } from "react";
 
-import { Skeleton, WarnBadge } from "@/components/ui";
+import { WarnBadge } from "@/components/brand";
+import { SimulationBanner, SimulationSelect } from "@/components/simulation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DayAgenda, WeekCalendar } from "@/components/week-calendar";
 import type { ProgramBundle } from "@/lib/catalog-types";
-import { SUBJECT_COLORS } from "@/lib/format";
 import { type PlanOption, plan } from "@/lib/scheduler";
 import { useProgram } from "@/lib/use-program";
 
 import { PlanControls } from "./plan-controls";
 import { SavedPlans } from "./saved-plans";
 import { SubjectPanel } from "./subject-panel";
-import { DayAgenda, WeekCalendar } from "./week-calendar";
 
 export function PlannerView({ bundle }: { bundle: ProgramBundle }) {
   const program = useProgram(bundle);
@@ -29,83 +30,84 @@ export function PlannerView({ bundle }: { bundle: ProgramBundle }) {
       }),
     [bundle.sections, state.planned, state.locked, state.preferences],
   );
-
-  const colors = useMemo(() => {
-    const map: Record<string, (typeof SUBJECT_COLORS)[number]> = {};
-    state.planned.forEach((code, i) => (map[code] = SUBJECT_COLORS[i % SUBJECT_COLORS.length]));
-    return map;
-  }, [state.planned]);
+  const names = useMemo(
+    () => Object.fromEntries(Object.values(bundle.subjects).map((s) => [s.code, s.name])),
+    [bundle.subjects],
+  );
 
   const optionIndex = Math.min(chosen, Math.max(0, result.options.length - 1));
   const option: PlanOption | undefined = result.options[optionIndex];
 
   if (!hydrated) {
     return (
-      <div className="mx-auto flex w-full max-w-[1400px] flex-wrap gap-6 px-4 py-6 sm:px-6">
-        <Skeleton className="h-[600px] flex-[1_1_320px]" />
-        <Skeleton className="h-[600px] flex-[999_1_640px]" />
+      <div className="mx-auto flex w-full max-w-[1440px] flex-wrap gap-6 px-4 py-8 sm:px-8">
+        <Skeleton className="h-[560px] flex-[1_1_320px]" />
+        <Skeleton className="h-[560px] flex-[999_1_640px]" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-start gap-6 px-4 pb-10 pt-6 sm:px-6">
-      <SubjectPanel bundle={bundle} program={program} result={result} option={option} colors={colors} />
+    <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 pt-8 pb-12 sm:px-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-medium tracking-tight">Montar grade</h1>
+          <p className="text-sm text-muted-foreground">
+            {bundle.program.name} · turmas de {bundle.term.code}
+          </p>
+        </div>
+        <SimulationSelect program={program} />
+      </div>
 
-      <main className="flex min-w-0 flex-[999_1_640px] flex-col gap-4">
-        <h1 className="sr-only">Montar grade de {bundle.program.name}</h1>
-        <PlanControls
-          program={program}
-          result={result}
-          optionIndex={optionIndex}
-          onChoose={setChosen}
-          name={program.name}
-        />
+      <SimulationBanner
+        program={program}
+        term={bundle.term.code}
+        onLoadTerm={(codes) => program.change(() => ({ planned: codes, locked: {} }))}
+      />
 
-        {state.planned.length === 0 ? (
-          <EmptyState />
-        ) : option ? (
-          <>
-            <div className="hidden md:block">
-              <WeekCalendar option={option} colors={colors} name={program.name} />
+      <div className="flex flex-wrap items-start gap-6">
+        <SubjectPanel bundle={bundle} program={program} result={result} option={option} />
+
+        <main className="flex min-w-0 flex-[999_1_640px] flex-col gap-4">
+          <PlanControls program={program} result={result} optionIndex={optionIndex} onChoose={setChosen} />
+
+          {state.planned.length === 0 ? (
+            <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed bg-card px-6 py-16 text-center">
+              <h2 className="text-lg font-medium">Sua grade está vazia</h2>
+              <p className="text-sm text-muted-foreground">
+                Adicione disciplinas ao lado. As combinações sem choque aparecem aqui.
+              </p>
             </div>
-            <div className="md:hidden">
-              <DayAgenda option={option} colors={colors} name={program.name} />
+          ) : option ? (
+            <>
+              <WeekCalendar option={option} order={state.planned} names={names} className="hidden md:block" />
+              <div className="md:hidden">
+                <DayAgenda option={option} order={state.planned} names={names} />
+              </div>
+              <NoFixedTime option={option} names={names} />
+              <SavedPlans bundle={bundle} program={program} option={option} optionIndex={optionIndex} />
+            </>
+          ) : (
+            <div className="flex flex-col gap-2 rounded-xl border bg-card p-6">
+              <WarnBadge>Nenhuma combinação possível</WarnBadge>
+              <p className="text-sm text-ink-2">
+                As disciplinas escolhidas não têm turmas com essas preferências. Libere outro turno ou desmarque “Só
+                com vaga”.
+              </p>
             </div>
-            <NoFixedTime option={option} name={program.name} />
-            <SavedPlans bundle={bundle} program={program} option={option} optionIndex={optionIndex} />
-          </>
-        ) : (
-          <div className="rounded-2xl border border-line bg-surface p-6">
-            <WarnBadge>Nenhuma combinação possível</WarnBadge>
-            <p className="mt-3 text-[15px] text-ink-2">
-              As disciplinas escolhidas não têm turmas com essas preferências. Tente liberar outro turno ou desmarcar
-              “Só com vaga”.
-            </p>
-          </div>
-        )}
-      </main>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-line-strong bg-surface p-8 text-center">
-      <h2 className="font-display text-xl font-semibold">Sua grade está vazia</h2>
-      <p className="text-[15px] text-muted">
-        Adicione disciplinas na lista ao lado. As combinações de turmas sem choque aparecem aqui.
-      </p>
-    </div>
-  );
-}
-
-function NoFixedTime({ option, name }: { option: PlanOption; name: (code: string) => string }) {
+function NoFixedTime({ option, names }: { option: PlanOption; names: Record<string, string> }) {
   const loose = Object.entries(option.sections).filter(([, s]) => s.meetings.length === 0);
   if (loose.length === 0) return null;
   return (
     <p className="text-sm text-ink-2">
-      Sem horário fixo: {loose.map(([code, s]) => `${code} ${name(code)} (turma ${s.code})`).join(", ")}
+      Sem horário fixo: {loose.map(([code, s]) => `${code} ${names[code] ?? ""} (turma ${s.code})`).join(", ")}
     </p>
   );
 }

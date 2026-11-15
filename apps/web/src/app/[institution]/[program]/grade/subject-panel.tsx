@@ -1,42 +1,41 @@
 "use client";
 
+import { Plus, X } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
-import { CloseIcon, SearchIcon } from "@/components/icons";
-import { buttonClass, WarnBadge } from "@/components/ui";
+import { Code, WarnBadge } from "@/components/brand";
+import { SubjectCombobox } from "@/components/subject-combobox";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ProgramBundle, Section } from "@/lib/catalog-types";
 import type { EntryState } from "@/lib/eligibility";
-import { seatsLabel, sectionSummary, sectionTimes, type SUBJECT_COLORS, UNAVAILABLE_TEXT } from "@/lib/format";
+import { colorFor, seatsLabel, sectionSummary, sectionTimes, UNAVAILABLE_TEXT } from "@/lib/format";
 import { type PlanOption, type PlanResult, sectionsConflict } from "@/lib/scheduler";
 import type { Program } from "@/lib/use-program";
 
-
-type Color = (typeof SUBJECT_COLORS)[number];
-
-function fold(text: string) {
-  return text.normalize("NFD").replace(/\p{Mn}/gu, "").toLowerCase();
-}
+const AUTO = "auto";
 
 export function SubjectPanel({
   bundle,
   program,
   result,
   option,
-  colors,
 }: {
   bundle: ProgramBundle;
   program: Program;
   result: PlanResult;
   option: PlanOption | undefined;
-  colors: Record<string, Color>;
 }) {
   const { state, eligibility, name } = program;
+  const base = `/${bundle.institution.code}/${bundle.program.code.toLowerCase()}`;
+
   const sectionsBySubject = useMemo(() => {
     const map = new Map<string, Section[]>();
     for (const s of bundle.sections) {
-      if (s.withdrawn) continue;
-      map.set(s.subjectCode, [...(map.get(s.subjectCode) ?? []), s]);
+      if (!s.withdrawn) map.set(s.subjectCode, [...(map.get(s.subjectCode) ?? []), s]);
     }
     return map;
   }, [bundle.sections]);
@@ -47,77 +46,100 @@ export function SubjectPanel({
         .filter((s) => s.status === "available" && !state.planned.includes(s.entry.subjectCode))
         .sort(
           (a, b) =>
-            categoryRank(a) - categoryRank(b) ||
-            (a.entry.period ?? 99) - (b.entry.period ?? 99) ||
-            a.entry.subjectCode.localeCompare(b.entry.subjectCode),
+            (a.entry.period ?? 99) - (b.entry.period ?? 99) || a.entry.subjectCode.localeCompare(b.entry.subjectCode),
         ),
     [eligibility, state.planned],
   );
-  const offeredMandatory = available.filter((s) => s.offered && s.entry.category === "mandatory");
-  const notOffered = available.filter((s) => !s.offered && s.entry.category === "mandatory");
+  const mandatory = available.filter((s) => s.entry.category === "mandatory");
+  const offeredMandatory = mandatory.filter((s) => s.offered);
+  const notOffered = mandatory.filter((s) => !s.offered);
+  const searchable = available
+    .filter((s) => s.offered && s.entry.category !== "activity")
+    .map((s) => ({
+      code: s.entry.subjectCode,
+      name: name(s.entry.subjectCode),
+      hint: s.entry.category === "mandatory" ? `${s.entry.period}º` : "eletiva",
+    }));
 
   const suggest = () => {
-    const firstPeriod = offeredMandatory[0]?.entry.period;
+    const first = offeredMandatory[0]?.entry.period ?? 0;
     offeredMandatory
-      .filter((s) => s.entry.period === firstPeriod || s.entry.period === (firstPeriod ?? 0) + 1)
+      .filter((s) => (s.entry.period ?? 0) <= first + 1)
       .slice(0, 5)
       .forEach((s) => program.setPlanned(s.entry.subjectCode, true));
   };
 
-  const plannedHours = state.planned.reduce((sum, code) => {
-    const hours = eligibility.states.get(code)?.entry.workloadHours ?? 0;
-    return sum + (option && code in option.sections ? hours : 0);
-  }, 0);
+  const plannedHours = Object.keys(option?.sections ?? {}).reduce(
+    (sum, code) => sum + (eligibility.states.get(code)?.entry.workloadHours ?? 0),
+    0,
+  );
 
   return (
-    <aside aria-label="Disciplinas" className="flex min-w-0 flex-[1_1_320px] flex-col gap-5 md:max-w-[400px]">
-      <SubjectSearch states={available} name={name} onAdd={(code) => program.setPlanned(code, true)} />
+    <aside aria-label="Disciplinas" className="order-2 flex min-w-0 flex-[1_1_320px] flex-col gap-6 md:order-none md:max-w-[380px]">
+      <SubjectCombobox
+        options={searchable}
+        value={null}
+        onChange={(code) => code && program.setPlanned(code, true)}
+        placeholder="Adicionar disciplina"
+        emptyLabel="Nenhuma disciplina liberada e ofertada com esse nome"
+        className="h-10 w-full"
+      />
 
       <section aria-labelledby="in-plan" className="flex flex-col gap-2">
-        <h2 id="in-plan" className="text-sm font-semibold text-ink-2">
-          Na grade · {state.planned.length} {state.planned.length === 1 ? "disciplina" : "disciplinas"}
-          {plannedHours ? ` · ${plannedHours} h` : ""}
+        <h2 id="in-plan" className="flex items-baseline justify-between text-sm font-medium">
+          Na grade
+          <span className="font-normal text-muted-foreground">
+            {state.planned.length} {state.planned.length === 1 ? "disciplina" : "disciplinas"}
+            {plannedHours ? ` · ${plannedHours} h` : ""}
+          </span>
         </h2>
         {state.planned.length === 0 && offeredMandatory.length > 0 && (
-          <button type="button" onClick={suggest} className={`${buttonClass.secondary} justify-start`}>
+          <Button variant="outline" onClick={suggest} className="justify-start">
+            <Plus strokeWidth={1.5} />
             Sugerir as do próximo período
-          </button>
+          </Button>
         )}
-        {state.planned.map((code) => (
-          <PlannedRow
-            key={code}
-            code={code}
-            name={name(code)}
-            color={colors[code]}
-            sections={sectionsBySubject.get(code) ?? []}
-            chosen={option?.sections[code]}
-            unavailable={result.unavailable.find((u) => u.code === code)?.reason}
-            left={option?.left.includes(code) ?? false}
-            locked={state.locked[code]}
-            onLock={(section) =>
-              program.change((s) => {
-                const locked = { ...s.locked };
-                if (section) locked[code] = section;
-                else delete locked[code];
-                return { locked };
-              })
-            }
-            onRemove={() => program.setPlanned(code, false)}
-          />
-        ))}
+        <ul className="flex flex-col gap-2">
+          {state.planned.map((code) => (
+            <PlannedRow
+              key={code}
+              code={code}
+              name={name(code)}
+              color={colorFor(code, state.planned)}
+              sections={sectionsBySubject.get(code) ?? []}
+              chosen={option?.sections[code]}
+              unavailable={result.unavailable.find((u) => u.code === code)?.reason}
+              left={option?.left.includes(code) ?? false}
+              locked={state.locked[code]}
+              onLock={(section) =>
+                program.change((s) => {
+                  const locked = { ...s.locked };
+                  if (section) locked[code] = section;
+                  else delete locked[code];
+                  return { locked };
+                })
+              }
+              onRemove={() => program.setPlanned(code, false)}
+            />
+          ))}
+        </ul>
       </section>
 
       <section aria-labelledby="can-take" className="flex flex-col gap-2">
-        <h2 id="can-take" className="text-sm font-semibold text-ink-2">
-          Obrigatórias que você pode cursar · {offeredMandatory.length}
+        <h2 id="can-take" className="flex items-baseline justify-between text-sm font-medium">
+          Obrigatórias liberadas
+          <span className="font-normal text-muted-foreground">{offeredMandatory.length}</span>
         </h2>
         {offeredMandatory.length === 0 ? (
-          <p className="text-sm text-muted">
-            Nenhuma obrigatória liberada e ofertada agora. Use a busca para eletivas ou marque o que já cursou em{" "}
-            <Link href={`/${bundle.institution.code}/${bundle.program.code.toLowerCase()}/progresso`}>Progresso</Link>.
+          <p className="text-sm text-muted-foreground">
+            Nenhuma obrigatória liberada e ofertada agora. Busque eletivas acima ou marque o que já cursou em{" "}
+            <Link href={`${base}/progresso`} className="link">
+              Progresso
+            </Link>
+            .
           </p>
         ) : (
-          <ul className="overflow-hidden rounded-xl border border-line bg-surface">
+          <ul className="flex flex-col divide-y rounded-xl border bg-card">
             {offeredMandatory.map((s) => (
               <AvailableRow
                 key={s.entry.subjectCode}
@@ -131,96 +153,27 @@ export function SubjectPanel({
           </ul>
         )}
         {notOffered.length > 0 && (
-          <details className="text-sm">
-            <summary className="cursor-pointer py-1 font-semibold text-ink-2">
-              Liberadas mas não ofertadas em {bundle.term.code} · {notOffered.length}
-            </summary>
-            <ul className="mt-1 flex flex-col gap-1 text-ink-2">
-              {notOffered.map((s) => (
-                <li key={s.entry.subjectCode}>
-                  <strong>{s.entry.subjectCode}</strong> {name(s.entry.subjectCode)}
-                </li>
-              ))}
-            </ul>
-          </details>
+          <Collapsible>
+            <CollapsibleTrigger className="py-1 text-sm text-ink-2 hover:text-foreground">
+              {notOffered.length} liberadas mas não ofertadas em {bundle.term.code}
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <ul className="flex flex-col gap-1 pt-1 text-sm text-ink-2">
+                {notOffered.map((s) => (
+                  <li key={s.entry.subjectCode}>
+                    <Code className="mr-2">{s.entry.subjectCode}</Code>
+                    {name(s.entry.subjectCode)}
+                  </li>
+                ))}
+              </ul>
+            </CollapsibleContent>
+          </Collapsible>
         )}
-        <Link
-          href={`/${bundle.institution.code}/${bundle.program.code.toLowerCase()}/progresso`}
-          className="text-sm font-semibold"
-        >
+        <Link href={`${base}/progresso`} className="link self-start text-sm">
           Por que outras disciplinas não aparecem?
         </Link>
       </section>
     </aside>
-  );
-}
-
-function categoryRank(s: EntryState) {
-  return { mandatory: 0, elective: 1, optional: 2, activity: 3 }[s.entry.category];
-}
-
-function SubjectSearch({
-  states,
-  name,
-  onAdd,
-}: {
-  states: EntryState[];
-  name: (code: string) => string;
-  onAdd: (code: string) => void;
-}) {
-  const [query, setQuery] = useState("");
-  const q = fold(query.trim());
-  const matches = q
-    ? states
-        .filter((s) => s.offered && s.entry.category !== "activity")
-        .filter((s) => fold(`${s.entry.subjectCode} ${name(s.entry.subjectCode)}`).includes(q))
-        .slice(0, 8)
-    : [];
-  return (
-    <div className="relative">
-      <div className="flex min-h-12 items-center gap-2.5 rounded-xl border border-line-strong bg-surface px-3.5 focus-within:border-brand">
-        <SearchIcon size={18} className="flex-none text-muted" />
-        <label htmlFor="subject-search" className="sr-only">
-          Buscar disciplina para adicionar
-        </label>
-        <input
-          id="subject-search"
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Adicionar disciplina (nome ou código)"
-          className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted"
-        />
-      </div>
-      {q && (
-        <ul className="absolute inset-x-0 top-full z-20 mt-1 max-h-80 overflow-y-auto rounded-xl border border-line bg-surface py-1 shadow-lg">
-          {matches.length === 0 && (
-            <li className="px-4 py-3 text-sm text-muted">
-              Nenhuma disciplina liberada e ofertada com esse nome.
-            </li>
-          )}
-          {matches.map((s) => (
-            <li key={s.entry.subjectCode}>
-              <button
-                type="button"
-                onClick={() => {
-                  onAdd(s.entry.subjectCode);
-                  setQuery("");
-                }}
-                className="flex w-full flex-col px-4 py-2.5 text-left hover:bg-brand-tint"
-              >
-                <span className="text-[15px] font-semibold">
-                  {s.entry.subjectCode} {name(s.entry.subjectCode)}
-                </span>
-                <span className="text-sm text-muted">
-                  {s.entry.category === "mandatory" ? `${s.entry.period}º período` : "eletiva"}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
   );
 }
 
@@ -238,7 +191,7 @@ function PlannedRow({
 }: {
   code: string;
   name: string;
-  color: Color | undefined;
+  color: { bg: string; border: string };
   sections: Section[];
   chosen: Section | undefined;
   unavailable: keyof typeof UNAVAILABLE_TEXT | undefined;
@@ -248,54 +201,53 @@ function PlannedRow({
   onRemove: () => void;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-line bg-surface p-3">
+    <li className="flex gap-3 rounded-xl border bg-card p-3">
       <span
         aria-hidden="true"
-        className="mt-1 size-3 flex-none rounded"
-        style={{ background: color?.bg, border: `1px solid ${color?.border}` }}
+        className="mt-1 size-3 flex-none rounded-[3px] border"
+        style={{ background: color.bg, borderColor: color.border }}
       />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="text-[15px] font-semibold">
-          {code} {name}
+        <span className="text-sm">
+          <Code className="mr-1.5">{code}</Code>
+          {name}
         </span>
         {unavailable ? (
           <WarnBadge>{UNAVAILABLE_TEXT[unavailable]}</WarnBadge>
         ) : left ? (
           <WarnBadge>não coube nesta opção</WarnBadge>
         ) : chosen ? (
-          <span className="text-[13px] text-muted">
+          <span className="text-xs text-muted-foreground">
             Turma {chosen.code} · {sectionSummary(chosen)}
             {seatsLabel(chosen) ? ` · ${seatsLabel(chosen)}` : ""}
           </span>
         ) : null}
         {sections.length > 1 && (
-          <label className="mt-1 flex flex-col gap-1 text-[13px] text-ink-2">
-            <span className="sr-only">Turma de {code}</span>
-            <select
-              value={locked ?? ""}
-              onChange={(e) => onLock(e.target.value || null)}
-              className="min-h-10 rounded-lg border border-line-strong bg-surface px-2 text-[13px]"
-            >
-              <option value="">Melhor turma (automático)</option>
+          <Select value={locked ?? AUTO} onValueChange={(v) => onLock(v === AUTO ? null : v)}>
+            <SelectTrigger size="sm" className="mt-1 h-8 w-full text-xs" aria-label={`Turma de ${code}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={AUTO}>Melhor turma (automático)</SelectItem>
               {sections.map((s) => (
-                <option key={s.id} value={s.code}>
-                  Fixar turma {s.code}: {sectionTimes(s)}
-                  {seatsLabel(s) ? ` (${seatsLabel(s)})` : ""}
-                </option>
+                <SelectItem key={s.id} value={s.code}>
+                  Turma {s.code} · <span className="font-mono">{sectionTimes(s)}</span>
+                  {seatsLabel(s) ? ` · ${seatsLabel(s)}` : ""}
+                </SelectItem>
               ))}
-            </select>
-          </label>
+            </SelectContent>
+          </Select>
         )}
       </div>
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={`Tirar ${code} da grade`}
-        className="-mr-1.5 -mt-1.5 flex size-11 flex-none items-center justify-center rounded-xl text-muted hover:bg-soft"
-      >
-        <CloseIcon size={18} />
-      </button>
-    </div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" size="icon" onClick={onRemove} aria-label={`Tirar ${code} da grade`} className="-mt-1 -mr-1">
+            <X className="text-muted-foreground" strokeWidth={1.5} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Tirar da grade</TooltipContent>
+      </Tooltip>
+    </li>
   );
 }
 
@@ -321,29 +273,30 @@ function AvailableRow({
   const open = sections.filter((s) => s.seats === null || s.seats > 0).length;
 
   return (
-    <li className="flex items-center gap-2.5 border-b border-soft px-3 py-2.5 last:border-0">
+    <li className="flex items-center gap-2 px-3 py-2.5">
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-sm font-semibold">
-          {state.entry.subjectCode} {name}
+        <span className="text-sm">
+          <Code className="mr-1.5">{state.entry.subjectCode}</Code>
+          {name}
         </span>
-        <span className="text-[13px] text-ink-2">
-          {state.entry.period}º per. · {sections.length} {sections.length === 1 ? "turma" : "turmas"}
-          {sections.length === 1 ? ` · ${sectionSummary(sections[0])}` : ""}
-          {state.unlocks.length ? ` · destrava ${state.unlocks.length}` : ""}
+        <span className="text-xs text-muted-foreground">
+          {state.entry.period}º per. · {sections.length === 1 ? sectionSummary(sections[0]) : `${sections.length} turmas`}
+          {state.unlocks.length ? ` · libera ${state.unlocks.length}` : ""}
         </span>
         {open === 0 ? (
-          <WarnBadge className="!text-xs">sem vagas</WarnBadge>
+          <WarnBadge className="mt-0.5">sem vagas</WarnBadge>
         ) : clash ? (
-          <WarnBadge className="!text-xs">choca com {clash} na opção atual</WarnBadge>
+          <WarnBadge className="mt-0.5">choca com {clash} nesta opção</WarnBadge>
         ) : null}
       </div>
-      <button
-        type="button"
-        onClick={onAdd}
-        className="min-h-10 flex-none rounded-xl border border-brand bg-surface px-3 text-sm font-semibold text-brand hover:bg-brand-tint"
-      >
-        Adicionar
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline" size="icon" onClick={onAdd} aria-label={`Adicionar ${state.entry.subjectCode} à grade`}>
+            <Plus strokeWidth={1.5} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Adicionar à grade</TooltipContent>
+      </Tooltip>
     </li>
   );
 }

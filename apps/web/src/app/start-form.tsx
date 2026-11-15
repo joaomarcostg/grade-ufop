@@ -1,20 +1,20 @@
 "use client";
 
+import { ArrowRight, ChevronsUpDown, FileUp, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useId, useMemo, useState } from "react";
+import { useRef, useState } from "react";
 
-import { SearchIcon } from "@/components/icons";
-import { buttonClass, Card } from "@/components/ui";
+import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import type { ProgramSummary } from "@/lib/catalog-types";
 import { useHydrated, useStudentStore } from "@/lib/store";
-
-function normalize(text: string) {
-  return text
-    .normalize("NFD")
-    .replace(/\p{Mn}/gu, "")
-    .toLowerCase();
-}
+import { nameKey } from "@/lib/transcript/match";
+import type { Transcript } from "@/lib/transcript/parse";
+import { readTranscriptFile } from "@/lib/transcript/read";
+import { cn } from "@/lib/utils";
 
 function describe(p: ProgramSummary) {
   return [p.degree, p.campus].filter(Boolean).join(" · ");
@@ -25,153 +25,169 @@ export function StartForm({ institution, programs }: { institution: string; prog
   const hydrated = useHydrated();
   const lastProgram = useStudentStore((s) => s.lastProgram);
   const visit = useStudentStore((s) => s.visit);
+  const setPendingImport = useStudentStore((s) => s.setPendingImport);
 
-  const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
   const [selected, setSelected] = useState<ProgramSummary | null>(null);
-  const listId = useId();
-
-  const matches = useMemo(() => {
-    const q = normalize(query.trim());
-    if (!q) return programs;
-    return programs.filter((p) => normalize(`${p.name} ${p.degree ?? ""} ${p.campus ?? ""} ${p.code}`).includes(q));
-  }, [programs, query]);
+  const [reading, setReading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [choices, setChoices] = useState<{ transcript: Transcript; fileName: string; programs: ProgramSummary[] } | null>(
+    null,
+  );
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const last =
     hydrated && lastProgram?.institution === institution
       ? programs.find((p) => p.code.toLowerCase() === lastProgram.program)
       : undefined;
 
-  function choose(program: ProgramSummary) {
-    setSelected(program);
-    setQuery(`${program.name}${program.degree ? ` (${program.degree})` : ""}`);
-    setOpen(false);
-  }
+  const goTo = (program: ProgramSummary, page: "progresso" | "importar") => {
+    visit(institution, program.code);
+    router.push(`/${institution}/${program.code.toLowerCase()}/${page}`);
+  };
 
-  function start() {
-    if (!selected) return;
-    visit(institution, selected.code);
-    router.push(`/${institution}/${selected.code.toLowerCase()}/progresso`);
-  }
+  const startImport = (program: ProgramSummary, transcript: Transcript, fileName: string) => {
+    setPendingImport({ institution, program: program.code, transcript, fileName });
+    goTo(program, "importar");
+  };
+
+  const readFile = async (file: File | undefined) => {
+    if (!file) return;
+    setReading(true);
+    setError(null);
+    setChoices(null);
+    try {
+      const transcript = await readTranscriptFile(file);
+      // The transcript names the program but not its campus or degree.
+      const key = transcript.programName ? nameKey(transcript.programName) : null;
+      const candidates = selected
+        ? [selected]
+        : programs.filter((p) => key && nameKey(p.name) === key);
+      if (candidates.length === 1) startImport(candidates[0], transcript, file.name);
+      else if (candidates.length > 1) setChoices({ transcript, fileName: file.name, programs: candidates });
+      else
+        setError(
+          `Não reconhecemos o curso “${transcript.programName ?? "?"}”. Escolha seu curso acima e importe de novo.`,
+        );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Não foi possível ler o arquivo");
+    } finally {
+      setReading(false);
+      if (fileInput.current) fileInput.current.value = "";
+    }
+  };
 
   return (
-    <Card className="flex min-w-0 flex-[1_1_460px] flex-col gap-6 p-6 sm:p-8">
-      <h2 className="font-display text-2xl font-semibold tracking-tight">Comece por aqui</h2>
+    <section aria-labelledby="start" className="flex flex-col gap-6 rounded-2xl border bg-card p-6 sm:p-8">
+      <h2 id="start" className="text-xl font-medium">
+        Comece por aqui
+      </h2>
 
       {last && (
         <Link
           href={`/${institution}/${last.code.toLowerCase()}/grade`}
-          className="flex items-center justify-between gap-3 rounded-xl border border-line bg-ground px-4 py-3 text-ink no-underline hover:border-line-strong"
+          className="flex items-center justify-between gap-3 rounded-xl border bg-background px-4 py-3 transition-colors hover:border-foreground/25"
         >
           <span className="flex flex-col">
-            <span className="text-sm text-muted">Continuar de onde parou</span>
-            <strong className="text-base">{last.name}</strong>
+            <span className="text-xs text-muted-foreground">Continuar de onde parou</span>
+            <span className="text-sm font-medium">{last.name}</span>
           </span>
-          <span className="text-sm font-semibold text-brand">Abrir</span>
+          <ArrowRight className="size-4 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
         </Link>
       )}
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="program" className="text-sm font-semibold">
-          1. Seu curso
-        </label>
-        <div className="relative">
-          <div className="flex min-h-14 items-center gap-3 rounded-xl border-2 border-line-strong px-3.5 focus-within:border-brand">
-            <SearchIcon size={20} className="flex-none text-muted" />
-            <input
-              id="program"
+        <span id="program-label" className="text-sm font-medium">
+          Seu curso
+        </span>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
               role="combobox"
               aria-expanded={open}
-              aria-controls={listId}
-              aria-autocomplete="list"
-              aria-activedescendant={open && matches[active] ? `${listId}-${matches[active].code}` : undefined}
-              autoComplete="off"
-              placeholder="Busque pelo nome do curso"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setSelected(null);
-                setOpen(true);
-                setActive(0);
-              }}
-              onFocus={() => setOpen(true)}
-              onBlur={() => setTimeout(() => setOpen(false), 120)}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowDown") {
-                  e.preventDefault();
-                  setOpen(true);
-                  setActive((i) => Math.min(i + 1, matches.length - 1));
-                } else if (e.key === "ArrowUp") {
-                  e.preventDefault();
-                  setActive((i) => Math.max(i - 1, 0));
-                } else if (e.key === "Enter" && open && matches[active]) {
-                  e.preventDefault();
-                  choose(matches[active]);
-                } else if (e.key === "Escape") {
-                  setOpen(false);
-                }
-              }}
-              className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted"
-            />
-          </div>
-          {open && (
-            <ul
-              id={listId}
-              role="listbox"
-              className="absolute inset-x-0 top-full z-20 mt-1 max-h-80 overflow-y-auto rounded-xl border border-line bg-surface py-1 shadow-lg"
+              aria-labelledby="program-label"
+              className={cn("h-12 justify-between px-4 text-base font-normal", !selected && "text-muted-foreground")}
             >
-              {matches.length === 0 && <li className="px-4 py-3 text-sm text-muted">Nenhum curso encontrado.</li>}
-              {matches.map((p, i) => (
-                <li
-                  key={p.code}
-                  id={`${listId}-${p.code}`}
-                  role="option"
-                  aria-selected={i === active}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    choose(p);
-                  }}
-                  onMouseEnter={() => setActive(i)}
-                  className={`flex cursor-pointer flex-col px-4 py-2.5 ${i === active ? "bg-brand-tint" : ""}`}
-                >
-                  <span className="text-[15px] font-semibold">{p.name}</span>
-                  <span className="text-sm text-muted">{describe(p)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <span className="text-sm text-muted">
+              <span className="truncate">{selected ? selected.name : "Busque pelo nome do curso"}</span>
+              <ChevronsUpDown className="size-4 opacity-60" strokeWidth={1.5} />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Nome do curso" />
+              <CommandList className="max-h-80">
+                <CommandEmpty>Nenhum curso encontrado</CommandEmpty>
+                <CommandGroup>
+                  {programs.map((p) => (
+                    <CommandItem
+                      key={p.code}
+                      value={`${p.name} ${describe(p)} ${p.code}`}
+                      onSelect={() => {
+                        setSelected(p);
+                        setOpen(false);
+                      }}
+                      className="flex flex-col items-start gap-0"
+                    >
+                      <span>{p.name}</span>
+                      <span className="text-xs text-muted-foreground">{describe(p)}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+        <span className="text-sm text-muted-foreground">
           {selected ? describe(selected) : `${programs.length} cursos da UFOP`}
         </span>
       </div>
 
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-3 text-sm font-semibold">2. O que você já cursou?</legend>
-        <label className="flex cursor-pointer items-start gap-3.5 rounded-xl border-2 border-brand bg-brand-tint p-4">
-          <input type="radio" name="method" defaultChecked className="mt-0.5 size-5 accent-brand" />
-          <span className="flex flex-col gap-1">
-            <strong>Marcar no mapa do curso</strong>
-            <span className="text-sm leading-normal text-ink-2">
-              Período por período: marque as disciplinas em que já foi aprovado.
-            </span>
-          </span>
-        </label>
-        <label className="flex items-start gap-3.5 rounded-xl border border-line p-4 opacity-70">
-          <input type="radio" name="method" disabled className="mt-0.5 size-5" />
-          <span className="flex flex-col gap-1">
-            <strong>Importar histórico escolar (PDF) · em breve</strong>
-            <span className="text-sm leading-normal text-muted">
-              O arquivo será lido aqui no navegador, sem ser enviado para nenhum servidor.
-            </span>
-          </span>
-        </label>
-      </fieldset>
+      <Button size="lg" disabled={!selected} onClick={() => selected && goTo(selected, "progresso")}>
+        Marcar o que já cursei
+        <ArrowRight strokeWidth={1.5} />
+      </Button>
 
-      <button type="button" onClick={start} disabled={!selected} className={`${buttonClass.primary} min-h-13 text-[17px]`}>
-        Continuar
-      </button>
-    </Card>
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <Separator className="flex-1" />
+        ou
+        <Separator className="flex-1" />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Button variant="outline" size="lg" disabled={reading} onClick={() => fileInput.current?.click()}>
+          <FileUp strokeWidth={1.5} />
+          {reading ? "Lendo o histórico…" : "Importar histórico escolar (PDF)"}
+        </Button>
+        <input
+          ref={fileInput}
+          type="file"
+          accept="application/pdf"
+          className="sr-only"
+          onChange={(e) => void readFile(e.target.files?.[0])}
+        />
+        <p className="text-sm text-muted-foreground">
+          Reconhece o curso e as disciplinas aprovadas. O arquivo é lido no seu navegador e não é enviado.
+        </p>
+      </div>
+
+      {choices && (
+        <div className="flex flex-col gap-2 rounded-xl border bg-background p-4">
+          <p className="text-sm">Qual destes é o seu curso?</p>
+          {choices.programs.map((p) => (
+            <Button key={p.code} variant="outline" className="justify-between" onClick={() => startImport(p, choices.transcript, choices.fileName)}>
+              {p.name}
+              <span className="text-xs text-muted-foreground">{describe(p)}</span>
+            </Button>
+          ))}
+        </div>
+      )}
+      {error && (
+        <p role="alert" className="flex items-start gap-2 text-sm text-destructive">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+          {error}
+        </p>
+      )}
+    </section>
   );
 }

@@ -5,6 +5,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { DEFAULT_PREFERENCES, type Preferences } from "./scheduler";
+import type { Status, Transcript } from "./transcript/parse";
 
 /**
  * Everything a student enters, kept in this browser's localStorage (no account
@@ -20,6 +21,16 @@ export interface SavedPlan {
   createdAt: string;
 }
 
+/** A transcript the student imported, kept to replay any past semester. */
+export interface ImportedHistory {
+  importedAt: string;
+  fileName: string;
+  rows: { term: string; code: string; name: string; status: Status; workloadHours: number }[];
+  terms: string[];
+  /** Transcript code -> curriculum code, as the student confirmed it. */
+  mapping: Record<string, string>;
+}
+
 export interface ProgramState {
   completed: string[];
   track: string | null;
@@ -27,22 +38,37 @@ export interface ProgramState {
   locked: Record<string, string>;
   preferences: Preferences;
   saved: SavedPlan[];
+  history: ImportedHistory | null;
+  /** Replaying the start of this term from the imported history; null = today. */
+  simulateAt: string | null;
 }
 
-const EMPTY: ProgramState = {
+export const EMPTY_PROGRAM: ProgramState = {
   completed: [],
   track: null,
   planned: [],
   locked: {},
   preferences: DEFAULT_PREFERENCES,
   saved: [],
+  history: null,
+  simulateAt: null,
 };
+
+export interface PendingImport {
+  institution: string;
+  program: string;
+  fileName: string;
+  transcript: Transcript;
+}
 
 interface StudentStore {
   lastProgram: { institution: string; program: string } | null;
   programs: Record<string, ProgramState>;
+  /** A parsed transcript waiting for the student to review it. */
+  pendingImport: PendingImport | null;
   visit: (institution: string, program: string) => void;
   update: (key: string, change: (state: ProgramState) => Partial<ProgramState>) => void;
+  setPendingImport: (pending: PendingImport | null) => void;
 }
 
 export function programKey(institution: string, program: string) {
@@ -54,12 +80,14 @@ export const useStudentStore = create<StudentStore>()(
     (set) => ({
       lastProgram: null,
       programs: {},
+      pendingImport: null,
       visit: (institution, program) => set({ lastProgram: { institution, program: program.toLowerCase() } }),
       update: (key, change) =>
         set((store) => {
-          const current = { ...EMPTY, ...store.programs[key] };
+          const current = { ...EMPTY_PROGRAM, ...store.programs[key] };
           return { programs: { ...store.programs, [key]: { ...current, ...change(current) } } };
         }),
+      setPendingImport: (pendingImport) => set({ pendingImport }),
     }),
     {
       name: "grade:student",
@@ -72,9 +100,10 @@ export const useStudentStore = create<StudentStore>()(
   ),
 );
 
-/** The saved state of one program (defaults until the student changes something). */
+/** The saved state of one program, with defaults for anything not set yet. */
 export function useProgramState(key: string): ProgramState {
-  return useStudentStore((store) => store.programs[key]) ?? EMPTY;
+  const saved = useStudentStore((store) => store.programs[key]);
+  return saved ? { ...EMPTY_PROGRAM, ...saved } : EMPTY_PROGRAM;
 }
 
 const subscribeToHydration = (onChange: () => void) => useStudentStore.persist.onFinishHydration(onChange);

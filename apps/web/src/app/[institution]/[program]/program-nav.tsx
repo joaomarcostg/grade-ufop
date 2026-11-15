@@ -1,20 +1,21 @@
 "use client";
 
+import { CalendarDays, ChartNoAxesColumn } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { CalendarIcon, ChartIcon } from "@/components/icons";
+import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { path: "grade", label: "Montar grade", icon: CalendarIcon },
-  { path: "progresso", label: "Progresso", icon: ChartIcon },
+  { path: "grade", label: "Montar grade", icon: CalendarDays },
+  { path: "progresso", label: "Progresso", icon: ChartNoAxesColumn },
 ];
 
 export function ProgramNav({ base }: { base: string }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Principal" className="flex flex-wrap gap-1">
-      {LINKS.map(({ path, label, icon: LinkIcon }) => {
+    <nav aria-label="Principal" className="flex gap-1">
+      {LINKS.map(({ path, label, icon: Icon }) => {
         const href = `${base}/${path}`;
         const current = pathname === href;
         return (
@@ -22,12 +23,14 @@ export function ProgramNav({ base }: { base: string }) {
             key={path}
             href={href}
             aria-current={current ? "page" : undefined}
-            className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-[15px] no-underline ${
-              current ? "bg-soft font-semibold text-ink" : "font-medium text-ink-2 hover:bg-soft hover:text-ink"
-            }`}
+            className={cn(
+              "inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm transition-colors",
+              current ? "bg-secondary font-medium text-foreground" : "text-ink-2 hover:bg-secondary/70 hover:text-foreground",
+            )}
           >
-            <LinkIcon size={17} />
-            {label}
+            <Icon className="size-4" strokeWidth={1.5} aria-hidden="true" />
+            <span className="hidden sm:inline">{label}</span>
+            <span className="sm:hidden">{path === "grade" ? "Grade" : "Progresso"}</span>
           </Link>
         );
       })}

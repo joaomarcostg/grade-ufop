@@ -1,132 +1,111 @@
 "use client";
 
+import { FileUp } from "lucide-react";
 import Link from "next/link";
-import { type ReactNode, useMemo, useState } from "react";
+import { useState } from "react";
 
-import { CheckIcon, LockIcon, PlusIcon } from "@/components/icons";
-import { buttonClass, Card, Skeleton, WarnBadge } from "@/components/ui";
+import { Code } from "@/components/brand";
+import { SimulationBanner, SimulationSelect } from "@/components/simulation";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { ProgramBundle } from "@/lib/catalog-types";
-import { type EntryState, missingLabel } from "@/lib/eligibility";
-import { formatHours, useProgram } from "@/lib/use-program";
+import { formatHours, type Program, useProgram } from "@/lib/use-program";
 
+import { CurriculumMap, MarkUntil, usePeriods } from "./curriculum-map";
 import { OtherEntries } from "./other-entries";
-import { SubjectDetail } from "./subject-detail";
+import { SubjectSheet } from "./subject-detail";
 
 export function ProgressView({ bundle }: { bundle: ProgramBundle }) {
   const program = useProgram(bundle);
-  const { eligibility, state, hydrated } = program;
-  const [selected, setSelected] = useState<string | null>(null);
-
-  const periods = useMemo(() => {
-    const byPeriod = new Map<number, EntryState[]>();
-    for (const s of eligibility.states.values()) {
-      if (s.entry.category !== "mandatory") continue;
-      const period = s.entry.period ?? 0;
-      byPeriod.set(period, [...(byPeriod.get(period) ?? []), s]);
-    }
-    return [...byPeriod.entries()]
-      .sort(([a], [b]) => (a || 99) - (b || 99))
-      .map(([period, states]) => ({
-        period,
-        states: states.sort((a, b) => a.entry.subjectCode.localeCompare(b.entry.subjectCode)),
-      }));
-  }, [eligibility]);
-
-  const selectedState = selected ? eligibility.states.get(selected) : undefined;
+  const periods = usePeriods(program);
+  const [open, setOpen] = useState<string | null>(null);
+  const base = `/${bundle.institution.code}/${bundle.program.code.toLowerCase()}`;
   const p = bundle.program;
   const meta = [p.degree, p.campus ? `Campus ${p.campus}` : null, p.curriculumVersion ? `currículo ${p.curriculumVersion}` : null]
     .filter(Boolean)
     .join(" · ");
 
   return (
-    <main className="mx-auto flex w-full max-w-[1360px] flex-col gap-7 px-4 pb-12 pt-9 sm:px-8">
+    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 pt-8 pb-12 sm:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">{p.name}</h1>
-          <span className="text-[15px] text-muted">{meta}</span>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-medium tracking-tight">{p.name}</h1>
+          <p className="text-sm text-muted-foreground">{meta}</p>
         </div>
-        {p.tracks.length > 0 && <TrackPicker bundle={bundle} program={program} />}
+        {program.hydrated && (
+          <div className="flex flex-wrap items-center gap-2">
+            {p.tracks.length > 0 && <TrackSelect bundle={bundle} program={program} />}
+            <SimulationSelect program={program} />
+            <MarkUntil program={program} periods={periods} />
+            <Button variant="outline" asChild>
+              <Link href={`${base}/importar`}>
+                <FileUp strokeWidth={1.5} />
+                Importar histórico
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
 
-      {!hydrated ? (
-        <Skeleton className="h-40" />
+      {!program.hydrated ? (
+        <Skeleton className="h-96" />
       ) : (
         <>
-          <HoursCard program={program} />
-          {state.completed.length === 0 && (
-            <p className="rounded-xl bg-brand-tint px-4 py-3 text-[15px] text-ink">
-              Clique numa disciplina para marcar se já foi aprovado, ou use “Marcar período” para marcar um período
-              inteiro de uma vez.
-            </p>
-          )}
-          <Legend term={bundle.term.code} />
-          <section aria-label="Disciplinas obrigatórias por período" className="overflow-x-auto pb-1">
-            <div
-              className="grid gap-3"
-              style={{ gridTemplateColumns: `repeat(${periods.length}, minmax(150px, 1fr))`, minWidth: periods.length * 162 }}
-            >
-              {periods.map(({ period, states }) => (
-                <PeriodColumn
-                  key={period}
-                  period={period}
-                  states={states}
-                  selected={selected}
-                  onSelect={setSelected}
-                  program={program}
-                  term={bundle.term.code}
-                />
-              ))}
-            </div>
-          </section>
+          <SimulationBanner program={program} term={bundle.term.code} />
 
-          <div className="flex flex-wrap items-start gap-5">
-            <div className="flex min-w-0 flex-[1_1_420px]">
-              {selectedState ? (
-                <SubjectDetail bundle={bundle} program={program} state={selectedState} onSelect={setSelected} />
-              ) : (
-                <Card className="flex w-full flex-col gap-2 p-6">
-                  <h2 className="font-display text-xl font-semibold">Detalhes da disciplina</h2>
-                  <p className="text-[15px] text-muted">
-                    Selecione uma disciplina no mapa para ver pré-requisitos, o que ela libera e as turmas deste
-                    semestre.
-                  </p>
-                </Card>
-              )}
-            </div>
-            <UnlockCard bundle={bundle} program={program} onSelect={setSelected} />
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <HoursSummary program={program} />
+            <NextSteps program={program} base={base} onOpen={setOpen} />
           </div>
 
-          <OtherEntries bundle={bundle} program={program} onSelect={setSelected} selected={selected} />
+          <section aria-labelledby="map" className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+              <h2 id="map" className="text-xl font-medium">
+                Obrigatórias por período
+              </h2>
+              <Legend term={bundle.term.code} />
+            </div>
+            {program.completed.size === 0 && !program.simulating && (
+              <p className="text-sm text-ink-2">
+                Marque as disciplinas em que você já foi aprovado. O quadrado ao lado de cada período marca todas de
+                uma vez.
+              </p>
+            )}
+            <CurriculumMap program={program} periods={periods} term={bundle.term.code} onOpen={setOpen} openCode={open} />
+          </section>
+
+          <OtherEntries program={program} term={bundle.term.code} onOpen={setOpen} />
+          <SubjectSheet bundle={bundle} program={program} code={open} onOpen={setOpen} onClose={() => setOpen(null)} />
         </>
       )}
     </main>
   );
 }
 
-type Program = ReturnType<typeof useProgram>;
-
-function TrackPicker({ bundle, program }: { bundle: ProgramBundle; program: Program }) {
+function TrackSelect({ bundle, program }: { bundle: ProgramBundle; program: Program }) {
   const names = [...new Set(bundle.program.tracks.map((t) => t.name))];
   return (
-    <label className="flex flex-col gap-1.5 text-sm font-semibold">
-      Ênfase
-      <select
-        value={program.state.track ?? ""}
-        onChange={(e) => program.change(() => ({ track: e.target.value || null }))}
-        className="min-h-11 rounded-xl border border-line-strong bg-surface px-3 text-[15px] font-normal"
-      >
-        <option value="">Ainda não escolhi (mostrar todas)</option>
+    <Select
+      value={program.state.track ?? "all"}
+      onValueChange={(value) => program.change(() => ({ track: value === "all" ? null : value }))}
+    >
+      <SelectTrigger className="h-9 min-w-48" aria-label="Ênfase">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">Todas as ênfases</SelectItem>
         {names.map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
+          <SelectItem key={name} value={name}>
+            Ênfase em {name}
+          </SelectItem>
         ))}
-      </select>
-    </label>
+      </SelectContent>
+    </Select>
   );
 }
 
-function HoursCard({ program }: { program: Program }) {
+function HoursSummary({ program }: { program: Program }) {
   const { progress } = program.eligibility;
   const required = progress.required;
   const total = required.total ?? 0;
@@ -135,193 +114,54 @@ function HoursCard({ program }: { program: Program }) {
   const rows = [
     { label: "Obrigatórias", done: progress.byCategory.mandatory, required: required.mandatory },
     { label: "Eletivas", done: progress.byCategory.elective, required: required.elective },
-    { label: "Atividades complementares", done: progress.byCategory.activity, required: required.activities },
+    { label: "Atividades", done: progress.byCategory.activity, required: required.activities },
   ].filter((r) => r.required);
 
   return (
-    <Card className="flex flex-wrap gap-8 p-6">
-      <div className="flex flex-[1_1_260px] flex-col gap-2.5">
-        <h2 className="text-[15px] font-semibold text-muted">Carga horária para se formar</h2>
-        <div className="flex items-baseline gap-2.5">
-          <span className="font-display text-[44px] font-bold tracking-tight">{formatHours(done)}</span>
+    <section aria-labelledby="hours" className="flex flex-wrap gap-x-10 gap-y-6 rounded-xl border bg-card p-6">
+      <div className="flex min-w-56 flex-1 flex-col gap-3">
+        <h2 id="hours" className="text-sm text-muted-foreground">
+          Carga horária para se formar
+        </h2>
+        <p className="flex items-baseline gap-2">
+          <span className="text-4xl font-medium tracking-tight">{formatHours(done)}</span>
           {total > 0 && (
-            <span className="text-base text-muted">
+            <span className="text-sm text-muted-foreground">
               de {formatHours(total)} · {percent}%
             </span>
           )}
-        </div>
-        <Bar value={percent} className="h-2.5 bg-brand" />
+        </p>
+        <Bar value={percent} className="bg-primary" />
       </div>
-      <div className="grid flex-[999_1_560px] grid-cols-1 gap-5 sm:grid-cols-3">
+      <dl className="grid min-w-64 flex-[2] content-start gap-4 sm:grid-cols-3">
         {rows.map((r) => (
           <div key={r.label} className="flex flex-col gap-2">
-            <span className="text-sm font-semibold">{r.label}</span>
-            <span className="text-sm text-ink-2">
-              {formatHours(r.done)} de {formatHours(r.required ?? 0)}
-            </span>
-            <Bar value={r.required ? (r.done / r.required) * 100 : 0} className="h-1.5 bg-ink" />
+            <dt className="text-sm text-ink-2">{r.label}</dt>
+            <dd className="text-sm">
+              {formatHours(r.done)} <span className="text-muted-foreground">de {formatHours(r.required ?? 0)}</span>
+            </dd>
+            <Bar value={r.required ? (r.done / r.required) * 100 : 0} className="bg-foreground/70" />
           </div>
         ))}
         {required.extension ? (
-          <p className="text-[13px] leading-normal text-muted sm:col-span-3">
-            Extensão: {formatHours(required.extension)} exigidas, contadas dentro das disciplinas e atividades acima.
+          <p className="text-xs text-muted-foreground sm:col-span-3">
+            Inclui {formatHours(required.extension)} de extensão, contadas dentro das disciplinas e atividades
           </p>
         ) : null}
-      </div>
-    </Card>
+      </dl>
+    </section>
   );
 }
 
 function Bar({ value, className }: { value: number; className: string }) {
   return (
-    <div aria-hidden="true" className="h-2.5 overflow-hidden rounded-full bg-soft">
+    <div aria-hidden="true" className="h-1.5 overflow-hidden rounded-full bg-muted">
       <div className={`h-full rounded-full ${className}`} style={{ width: `${Math.min(100, value)}%` }} />
     </div>
   );
 }
 
-function Legend({ term }: { term: string }) {
-  const items = [
-    { label: "Aprovada", swatch: "border border-done-line bg-done-bg" },
-    { label: "Pode cursar agora", swatch: "border-2 border-ink-2 bg-surface" },
-    { label: "Falta pré-requisito", swatch: "border border-dashed border-[#a9a59a] bg-soft" },
-    { label: `Não ofertada em ${term}`, swatch: "border border-dashed border-[#a9a59a] bg-surface" },
-  ];
-  return (
-    <div aria-label="Legenda" className="flex flex-wrap gap-5 text-sm text-ink-2">
-      {items.map((i) => (
-        <span key={i.label} className="inline-flex items-center gap-2">
-          <span aria-hidden="true" className={`size-4 rounded-[5px] ${i.swatch}`} />
-          {i.label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function PeriodColumn({
-  period,
-  states,
-  selected,
-  onSelect,
-  program,
-  term,
-}: {
-  period: number;
-  states: EntryState[];
-  selected: string | null;
-  onSelect: (code: string) => void;
-  program: Program;
-  term: string;
-}) {
-  const allDone = states.every((s) => s.status === "done");
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="mb-1 flex items-center justify-between gap-2">
-        <h3 className="text-[13px] font-semibold text-muted">{period ? `${period}º período` : "Sem período"}</h3>
-        <button
-          type="button"
-          onClick={() => program.setCompleted(states.map((s) => s.entry.subjectCode), !allDone)}
-          className="rounded-md px-1.5 py-1 text-xs font-semibold text-brand hover:bg-brand-tint"
-        >
-          {allDone ? "Desmarcar" : "Marcar período"}
-        </button>
-      </div>
-      {states.map((s) => (
-        <SubjectChip
-          key={s.entry.subjectCode}
-          state={s}
-          name={program.name(s.entry.subjectCode)}
-          selected={selected === s.entry.subjectCode}
-          onSelect={onSelect}
-          term={term}
-          planned={program.state.planned.includes(s.entry.subjectCode)}
-        />
-      ))}
-    </div>
-  );
-}
-
-export function SubjectChip({
-  state,
-  name,
-  selected,
-  onSelect,
-  term,
-  planned,
-}: {
-  state: EntryState;
-  name: string;
-  selected: boolean;
-  onSelect: (code: string) => void;
-  term: string;
-  planned: boolean;
-}) {
-  const code = state.entry.subjectCode;
-  const ring = selected ? "outline-3 outline-offset-2 outline-brand" : "";
-  let style = "border-2 border-ink-2 bg-surface text-ink";
-  let label: ReactNode = (
-    <>
-      <PlusIcon size={11} strokeWidth={3.5} />
-      {code}
-    </>
-  );
-  let note: ReactNode = null;
-
-  if (state.status === "done") {
-    style = "border border-done-line bg-done-bg text-done";
-    label = (
-      <>
-        <CheckIcon size={12} strokeWidth={3} />
-        {code}
-      </>
-    );
-  } else if (state.status === "locked") {
-    style = "border-2 border-dashed border-[#a9a59a] bg-soft text-ink-2";
-    label = (
-      <>
-        <LockIcon size={11} strokeWidth={3} />
-        {code} · {missingLabel(state)}
-      </>
-    );
-  } else if (!state.offered) {
-    style = "border border-dashed border-[#a9a59a] bg-surface text-ink-2";
-    note = <span className="text-xs text-muted">não ofertada em {term}</span>;
-  } else if (state.openSections === 0) {
-    note = <WarnBadge className="mt-1 !text-xs">sem vagas</WarnBadge>;
-  }
-  if (planned && state.status !== "done") {
-    note = (
-      <>
-        {note}
-        <span className="text-xs font-semibold text-brand">na sua grade</span>
-      </>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(code)}
-      aria-pressed={selected}
-      className={`flex flex-col gap-0.5 rounded-[10px] p-2.5 text-left ${style} ${ring}`}
-    >
-      <span className="inline-flex items-center gap-1 text-xs font-semibold">{label}</span>
-      <span className="text-[13px] leading-snug">{name}</span>
-      {note}
-    </button>
-  );
-}
-
-function UnlockCard({
-  bundle,
-  program,
-  onSelect,
-}: {
-  bundle: ProgramBundle;
-  program: Program;
-  onSelect: (code: string) => void;
-}) {
+function NextSteps({ program, base, onOpen }: { program: Program; base: string; onOpen: (code: string) => void }) {
   const ranked = [...program.eligibility.states.values()]
     .filter((s) => s.status === "available" && s.offered && s.entry.category === "mandatory")
     .sort(
@@ -330,41 +170,63 @@ function UnlockCard({
         (a.entry.period ?? 99) - (b.entry.period ?? 99) ||
         a.entry.subjectCode.localeCompare(b.entry.subjectCode),
     )
-    .slice(0, 5);
-  if (ranked.length === 0) return null;
-  const base = `/${bundle.institution.code}/${bundle.program.code.toLowerCase()}`;
+    .slice(0, 4);
 
   return (
-    <Card className="flex min-w-0 flex-[1_1_420px] flex-col gap-3.5 p-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="font-display text-[22px] font-semibold">O que destrava mais</h2>
-        <span className="text-sm text-muted">Obrigatórias que você pode cursar agora e são ofertadas em {bundle.term.code}</span>
-      </div>
-      <ol className="flex flex-col">
-        {ranked.map((s) => (
-          <li key={s.entry.subjectCode} className="border-b border-soft last:border-0">
-            <button
-              type="button"
-              onClick={() => onSelect(s.entry.subjectCode)}
-              className="flex w-full items-center justify-between gap-3 py-2.5 text-left"
+    <section aria-labelledby="next" className="flex flex-col gap-3 rounded-xl border bg-card p-6">
+      <h2 id="next" className="text-sm text-muted-foreground">
+        O que destrava mais
+      </h2>
+      {ranked.length === 0 ? (
+        <p className="text-sm text-ink-2">Nenhuma obrigatória liberada e ofertada neste semestre.</p>
+      ) : (
+        <>
+          <ol className="flex flex-col">
+            {ranked.map((s) => (
+              <li key={s.entry.subjectCode}>
+                <button
+                  type="button"
+                  onClick={() => onOpen(s.entry.subjectCode)}
+                  className="flex w-full items-baseline gap-2 rounded-md py-1.5 text-left text-sm hover:bg-muted/60"
+                >
+                  <Code className="w-14 shrink-0">{s.entry.subjectCode}</Code>
+                  <span className="min-w-0 flex-1 truncate">{program.name(s.entry.subjectCode)}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {s.unlocks.length ? `libera ${s.unlocks.length}` : `${s.entry.period}º per.`}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+          <Button asChild className="mt-auto self-start">
+            <Link
+              href={`${base}/grade`}
+              onClick={() => ranked.forEach((s) => program.setPlanned(s.entry.subjectCode, true))}
             >
-              <span className="text-[15px]">
-                <strong>{s.entry.subjectCode}</strong> {program.name(s.entry.subjectCode)}
-              </span>
-              <span className="flex-none text-sm text-ink-2">
-                {s.unlocks.length ? `pré-requisito de ${s.unlocks.length}` : `${s.entry.period}º período`}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ol>
-      <Link
-        href={`${base}/grade`}
-        onClick={() => ranked.forEach((s) => program.setPlanned(s.entry.subjectCode, true))}
-        className={`${buttonClass.primary} self-start no-underline hover:text-white`}
-      >
-        Montar grade com estas
-      </Link>
-    </Card>
+              Montar grade com estas
+            </Link>
+          </Button>
+        </>
+      )}
+    </section>
+  );
+}
+
+function Legend({ term }: { term: string }) {
+  const items = [
+    { label: "Aprovada", swatch: "border-done-line bg-done-bg" },
+    { label: "Pode cursar", swatch: "border-foreground/25 bg-card" },
+    { label: "Falta pré-requisito", swatch: "border-dashed border-foreground/20 bg-muted" },
+    { label: `Não ofertada em ${term}`, swatch: "border-dashed border-foreground/25 bg-card" },
+  ];
+  return (
+    <ul aria-label="Legenda" className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      {items.map((i) => (
+        <li key={i.label} className="inline-flex items-center gap-1.5">
+          <span aria-hidden="true" className={`size-3 rounded-[3px] border ${i.swatch}`} />
+          {i.label}
+        </li>
+      ))}
+    </ul>
   );
 }

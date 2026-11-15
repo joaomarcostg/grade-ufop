@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import type { ProgramBundle } from "./catalog-types";
 import { computeEligibility } from "./eligibility";
 import { type ProgramState, programKey, useHydrated, useProgramState, useStudentStore } from "./store";
+import { passedBefore } from "./transcript/match";
 
 /** A program's catalog data joined with what this student saved for it. */
 export function useProgram(bundle: ProgramBundle) {
@@ -18,7 +19,16 @@ export function useProgram(bundle: ProgramBundle) {
     if (hydrated) visit(bundle.institution.code, bundle.program.code);
   }, [hydrated, visit, bundle.institution.code, bundle.program.code]);
 
-  const completed = useMemo(() => new Set(state.completed), [state.completed]);
+  // While replaying a past semester, "passed" comes from the imported history.
+  const simulating = state.simulateAt !== null && state.history !== null;
+  const passedCodes = useMemo(
+    () =>
+      simulating && state.history
+        ? passedBefore(state.history, state.history.mapping, state.simulateAt)
+        : state.completed,
+    [simulating, state.history, state.simulateAt, state.completed],
+  );
+  const completed = useMemo(() => new Set(passedCodes), [passedCodes]);
   const eligibility = useMemo(
     () => computeEligibility(bundle, completed, state.track),
     [bundle, completed, state.track],
@@ -29,6 +39,7 @@ export function useProgram(bundle: ProgramBundle) {
   const setCompleted = useCallback(
     (codes: string[], done: boolean) =>
       change((s) => {
+        if (s.simulateAt) return {}; // a replay is read-only
         const next = new Set(s.completed);
         for (const code of codes) {
           if (done) next.add(code);
@@ -53,11 +64,11 @@ export function useProgram(bundle: ProgramBundle) {
 
   const name = useCallback((code: string) => bundle.subjects[code]?.name ?? code, [bundle.subjects]);
 
-  return { key, hydrated, state, completed, eligibility, change, setCompleted, setPlanned, name };
+  return { key, hydrated, state, simulating, completed, eligibility, change, setCompleted, setPlanned, name };
 }
+
+export type Program = ReturnType<typeof useProgram>;
 
 export function formatHours(hours: number) {
   return `${hours.toLocaleString("pt-BR")} h`;
 }
-
-export type Program = ReturnType<typeof useProgram>;

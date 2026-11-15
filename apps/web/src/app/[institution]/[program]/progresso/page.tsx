@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { SiteFooter } from "@/components/site-header";
-import { Skeleton } from "@/components/ui";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getProgramBundle } from "@/server/catalog";
 
 import { ProgressView } from "./progress-view";

@@ -42,3 +42,9 @@ export const UNAVAILABLE_TEXT: Record<UnavailableReason, string> = {
   shift: "nenhuma turma nos turnos escolhidos",
   seats: "todas as turmas sem vagas",
 };
+
+/** A subject's calendar tint, stable for its position in the plan. */
+export function colorFor(code: string, order: string[]) {
+  const index = order.indexOf(code);
+  return SUBJECT_COLORS[(index < 0 ? 0 : index) % SUBJECT_COLORS.length];
+}
