@@ -17,3 +17,7 @@ pipeline/out/
 
 # OS / editors
 .DS_Store
+
+# Node
+node_modules/
+packages/db/src/generated/

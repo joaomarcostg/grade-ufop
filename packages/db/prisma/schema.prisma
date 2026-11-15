@@ -1,0 +1,241 @@
+// Database for the catalog (loaded by the gradesync pipeline) and student data.
+//
+// Catalog tables mirror gradesync's canonical Dataset and are keyed by the
+// institution's own codes, so a re-sync updates rows in place and ids stay
+// stable for everything that references them. The pipeline's loader writes
+// these tables with SQL; this schema and its migrations are the only place the
+// tables are defined.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EntryCategory {
+  mandatory
+  elective
+  optional
+  activity
+
+  @@map("entry_category")
+}
+
+enum Weekday {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+
+  @@map("weekday")
+}
+
+enum ClassKind {
+  theory
+  practice
+
+  @@map("class_kind")
+}
+
+// --- Catalog -----------------------------------------------------------------
+
+model Institution {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code        String       @unique
+  name        String
+  timezone    String
+  terms       Term[]
+  departments Department[]
+  subjects    Subject[]
+  programs    Program[]
+
+  @@map("institution")
+}
+
+/// An academic term (e.g. "2026/2"). The app shows the current term by default.
+model Term {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  institutionId String       @map("institution_id") @db.Uuid
+  code          String
+  isCurrent     Boolean      @default(false) @map("is_current")
+  syncedAt      DateTime?    @map("synced_at") @db.Timestamptz
+  datasetSha256 String?      @map("dataset_sha256")
+  institution   Institution  @relation(fields: [institutionId], references: [id])
+  curricula     Curriculum[]
+  sections      Section[]
+
+  @@unique([institutionId, code])
+  @@map("term")
+}
+
+model Department {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  institutionId String      @map("institution_id") @db.Uuid
+  code          String
+  name          String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  subjects      Subject[]
+  sections      Section[]
+
+  @@unique([institutionId, code])
+  @@map("department")
+}
+
+model Subject {
+  id            String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  institutionId String             @map("institution_id") @db.Uuid
+  code          String
+  name          String
+  departmentId  String?            @map("department_id") @db.Uuid
+  syllabus      String?
+  updatedAt     DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  institution   Institution        @relation(fields: [institutionId], references: [id])
+  department    Department?        @relation(fields: [departmentId], references: [id])
+  entries       CurriculumEntry[]
+  sections      Section[]
+  requiredBy    EntryRequirement[]
+
+  @@unique([institutionId, code])
+  @@map("subject")
+}
+
+model Program {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  institutionId String       @map("institution_id") @db.Uuid
+  code          String
+  name          String
+  degree        String?
+  campus        String?
+  institution   Institution  @relation(fields: [institutionId], references: [id])
+  curricula     Curriculum[]
+
+  @@unique([institutionId, code])
+  @@map("program")
+}
+
+/// The curriculum a program had in force in a term.
+model Curriculum {
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  programId     String            @map("program_id") @db.Uuid
+  termId        String            @map("term_id") @db.Uuid
+  version       String?
+  /// Hours needed to graduate by category: mandatory, elective, activities, extension, total...
+  requiredHours Json              @default("{}") @map("required_hours")
+  sourceUrl     String?           @map("source_url")
+  program       Program           @relation(fields: [programId], references: [id])
+  term          Term              @relation(fields: [termId], references: [id])
+  tracks        CurriculumTrack[]
+  entries       CurriculumEntry[]
+
+  @@unique([programId, termId])
+  @@map("curriculum")
+}
+
+/// A specialisation (habilitação/ênfase) with its own hour requirements.
+model CurriculumTrack {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  curriculumId  String     @map("curriculum_id") @db.Uuid
+  kind          String
+  name          String
+  requiredHours Json       @default("{}") @map("required_hours")
+  curriculum    Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+
+  @@unique([curriculumId, kind, name])
+  @@map("curriculum_track")
+}
+
+model CurriculumEntry {
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  curriculumId   String             @map("curriculum_id") @db.Uuid
+  subjectId      String             @map("subject_id") @db.Uuid
+  category       EntryCategory
+  /// Track name the entry belongs to; null means every student of the program.
+  track          String?
+  /// Recommended semester; null for electives.
+  period         Int?
+  workloadHours  Int?               @map("workload_hours")
+  extensionHours Int?               @map("extension_hours")
+  classHours     Int?               @map("class_hours")
+  weeklyTheory   Int?               @map("weekly_theory")
+  weeklyPractice Int?               @map("weekly_practice")
+  curriculum     Curriculum         @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  subject        Subject            @relation(fields: [subjectId], references: [id])
+  requirements   EntryRequirement[]
+
+  @@index([curriculumId])
+  @@index([subjectId])
+  @@map("curriculum_entry")
+}
+
+/// One prerequisite of an entry: a subject, or a minimum of completed hours.
+/// Exactly one of subjectId / hours is set (enforced by a CHECK constraint).
+model EntryRequirement {
+  id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entryId   String          @map("entry_id") @db.Uuid
+  subjectId String?         @map("subject_id") @db.Uuid
+  hours     Int?
+  entry     CurriculumEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  subject   Subject?        @relation(fields: [subjectId], references: [id])
+
+  @@index([entryId])
+  @@map("entry_requirement")
+}
+
+/// One offered class (turma) of a subject in a term. Sections are never
+/// deleted by a sync: one that disappears from the source gets withdrawnAt.
+model Section {
+  id           String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  termId       String              @map("term_id") @db.Uuid
+  subjectId    String              @map("subject_id") @db.Uuid
+  departmentId String              @map("department_id") @db.Uuid
+  code         String
+  delivery     String?
+  modality     String?
+  location     String?
+  language     String?
+  seats        Int?
+  enrolled     Int?
+  reservation  String?
+  withdrawnAt  DateTime?           @map("withdrawn_at") @db.Timestamptz
+  updatedAt    DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  term         Term                @relation(fields: [termId], references: [id])
+  subject      Subject             @relation(fields: [subjectId], references: [id])
+  department   Department          @relation(fields: [departmentId], references: [id])
+  meetings     SectionMeeting[]
+  instructors  SectionInstructor[]
+
+  @@unique([termId, subjectId, code])
+  @@index([termId, departmentId])
+  @@map("section")
+}
+
+/// A weekly meeting, in minutes after midnight (local time of the institution).
+model SectionMeeting {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sectionId   String     @map("section_id") @db.Uuid
+  day         Weekday
+  startMinute Int        @map("start_minute") @db.SmallInt
+  endMinute   Int        @map("end_minute") @db.SmallInt
+  kind        ClassKind?
+  section     Section    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId])
+  @@map("section_meeting")
+}
+
+model SectionInstructor {
+  sectionId String      @map("section_id") @db.Uuid
+  position  Int         @db.SmallInt
+  name      String
+  kinds     ClassKind[]
+  section   Section     @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@id([sectionId, position])
+  @@map("section_instructor")
+}

@@ -79,6 +79,34 @@ def sync(
 
 
 @app.command()
+def load(
+    dataset_file: Annotated[Path, typer.Argument(help="Dataset JSON written by build")],
+    database_url: Annotated[str, typer.Option(envvar="DATABASE_URL", help="Postgres URL")],
+    current: Annotated[bool, typer.Option(help="Mark this term as the current one")] = False,
+    force: Annotated[
+        bool, typer.Option(help="Load even if this dataset was loaded already")
+    ] = False,
+) -> None:
+    """Load a dataset into the database (one transaction)."""
+    import psycopg
+
+    from gradesync.load import load_dataset
+    from gradesync.model import Dataset
+
+    dataset = Dataset.model_validate_json(dataset_file.read_text())
+    with psycopg.connect(database_url) as conn:
+        stats = load_dataset(conn, dataset, make_current=current, force=force)
+    if stats.skipped:
+        typer.echo(f"{dataset.institution.code} {dataset.term}: already loaded, nothing to do")
+    else:
+        typer.echo(
+            f"{dataset.institution.code} {dataset.term}: {stats.subjects} subjects, "
+            f"{stats.programs} programs, {stats.entries} curriculum entries, "
+            f"{stats.sections} sections ({stats.withdrawn} withdrawn)"
+        )
+
+
+@app.command()
 def discover(institution: Institution, cache: Cache = DEFAULT_CACHE) -> None:
     """Compare the institution's public catalog with the program registry."""
     adapter = get_adapter(institution)

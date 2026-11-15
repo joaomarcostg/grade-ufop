@@ -1,0 +1,22 @@
+# Local development database. Port 54329 avoids clashing with other Postgres
+# instances on the default 5432. It joins the default bridge network so compose
+# does not need to create (and allocate a subnet for) a project network.
+services:
+  db:
+    image: postgres:17
+    network_mode: bridge
+    environment:
+      POSTGRES_DB: grade
+      POSTGRES_USER: grade
+      POSTGRES_PASSWORD: grade
+    ports:
+      - "54329:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grade -d grade"]
+      interval: 2s
+      retries: 20
+
+volumes:
+  db-data:

@@ -1,0 +1,10 @@
+{
+  "name": "grade",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
+}
