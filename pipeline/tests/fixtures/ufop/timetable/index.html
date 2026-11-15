@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+--><html xmlns="http://www.w3.org/1999/xhtml"><head><link type="text/css" rel="stylesheet" href="/HorarioAulas/javax.faces.resource/theme.css.xhtml?ln=primefaces-aristo" /><script type="text/javascript" src="/HorarioAulas/javax.faces.resource/jsf.js.xhtml?ln=javax.faces&amp;stage=Development"></script><script type="text/javascript">if(window.PrimeFaces){PrimeFaces.settings.projectStage='Development';}</script>
+        <title>Horário de Aulas Por Departamento - Universidade Federal de Ouro Preto</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script type="text/javascript" src="/HorarioAulas/scripts/horario.js"></script>
+        <link href="/HorarioAulas/css/horario.css" type="text/css" rel="stylesheet" />        
+        <link href="/HorarioAulas/css/estiloTopo.css" type="text/css" rel="stylesheet" /></head><body>
+<form id="formPrincipal" name="formPrincipal" method="post" action="/HorarioAulas/index.xhtml" enctype="application/x-www-form-urlencoded">
+<input type="hidden" name="formPrincipal" value="formPrincipal" />
+
+                <div id="topo">
+                    <p id="topoRodape"></p><label id="formPrincipal:caminhoMenu" class="caminho">Consulta de horário de aulas por Departamento - 2026/2</label>
+                    <p id="titulo">Horário de Aulas<br />Universidade Federal de Ouro Preto</p>        
+                    <p id="topoImagem"></p>
+                </div>
+                <br /><br /><br /><br /><br /><br />
+                <div id="conteudo" class="conteudo"><span id="formPrincipal:conteudo">
+                        <center><div id="formPrincipal:msgGeral"></div>
+                            <table>
+                                <tr>
+                                    <td><label for="formPrincipal:anoSemestre" class="label">Ano/Semestre:</label>
+                                    </td>
+                                    <td><select id="formPrincipal:anoSemestre" name="formPrincipal:anoSemestre" class="campo" size="1" onchange="mojarra.ab(this,event,'change',0,'formPrincipal:caminhoMenu formPrincipal:tabela')">	<option value="2026/2" selected="selected">2026/2</option>
+	<option value="2026/1">2026/1</option>
+	<option value="2025/2">2025/2</option>
+	<option value="2025/1">2025/1</option>
+	<option value="2024/2">2024/2</option>
+	<option value="2024/1">2024/1</option>
+	<option value="2023/2">2023/2</option>
+	<option value="2023/1">2023/1</option>
+	<option value="2022/2">2022/2</option>
+	<option value="2022/1">2022/1</option>
+	<option value="2021/2">2021/2</option>
+	<option value="2021/1">2021/1</option>
+	<option value="2020/3">2020/3</option>
+	<option value="2020/2">2020/2</option>
+	<option value="2020/1">2020/1</option>
+	<option value="2019/2">2019/2</option>
+	<option value="2019/1">2019/1</option>
+	<option value="2018/2">2018/2</option>
+	<option value="2018/1">2018/1</option>
+	<option value="2017/2">2017/2</option>
+	<option value="2017/1">2017/1</option>
+	<option value="2016/2">2016/2</option>
+	<option value="2016/1">2016/1</option>
+	<option value="2015/2">2015/2</option>
+	<option value="2015/1">2015/1</option>
+	<option value="2014/2">2014/2</option>
+	<option value="2014/1">2014/1</option>
+	<option value="2013/2">2013/2</option>
+	<option value="2013/1">2013/1</option>
+	<option value="2012/2">2012/2</option>
+	<option value="2012/1">2012/1</option>
+	<option value="2011/2">2011/2</option>
+	<option value="2011/1">2011/1</option>
+	<option value="2010/2">2010/2</option>
+	<option value="2010/1">2010/1</option>
+	<option value="2009/2">2009/2</option>
+	<option value="2009/1">2009/1</option>
+	<option value="2008/2">2008/2</option>
+</select>
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label for="formPrincipal:pesquisa" class="label">Filtro:</label>
+                                    </td>
+                                    <td><input id="formPrincipal:pesquisa" type="text" name="formPrincipal:pesquisa" value="" />
+                                    </td>
+                                    <td><label style="color: red;">(Departamento, Disciplina, Professor...)</label>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <br />
+                            <center><input id="formPrincipal:botaoEnviar" type="submit" name="formPrincipal:botaoEnviar" value="Filtrar" class="botao" /><input type="submit" name="formPrincipal:j_idt20" value="Limpar" class="botao" />                                                    
+                            </center>
+                            <br /><table id="formPrincipal:tabela">
+<thead>
+<tr>
+<th scope="col">Sigla</th>
+<th scope="col">Departamento</th>
+</tr>
+</thead>
+<tbody>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:0:j_idt25':'formPrincipal:tabela:0:j_idt25'},'');return false"><span id="formPrincipal:tabela:0:codigoDepartamento">DEABI</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:0:descricao">DEPARTAMENTO DE ESTUDOS AFRICANOS, AFRO-BRASILEIROS E INDIGENAS</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:1:j_idt25':'formPrincipal:tabela:1:j_idt25'},'');return false"><span id="formPrincipal:tabela:1:codigoDepartamento">DEACL</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:1:descricao">DEPARTAMENTO DE ANALISES CLINICAS</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:2:j_idt25':'formPrincipal:tabela:2:j_idt25'},'');return false"><span id="formPrincipal:tabela:2:codigoDepartamento">DEALI</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:2:descricao">DEPARTAMENTO DE ALIMENTOS</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:3:j_idt25':'formPrincipal:tabela:3:j_idt25'},'');return false"><span id="formPrincipal:tabela:3:codigoDepartamento">DEAMB</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:3:descricao">DEPARTAMENTO DE ENGENHARIA AMBIENTAL                        </span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:4:j_idt25':'formPrincipal:tabela:4:j_idt25'},'');return false"><span id="formPrincipal:tabela:4:codigoDepartamento">DEARQ</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:4:descricao">DEPARTAMENTO DE ARQUITETURA E URBANISMO</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:5:j_idt25':'formPrincipal:tabela:5:j_idt25'},'');return false"><span id="formPrincipal:tabela:5:codigoDepartamento">DEART</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:5:descricao">DEPARTAMENTO DE ARTES</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:6:j_idt25':'formPrincipal:tabela:6:j_idt25'},'');return false"><span id="formPrincipal:tabela:6:codigoDepartamento">DEBIO</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:6:descricao">DEPARTAMENTO DE BIODIVERSIDADE, EVOLUCAO E MEIO AMBIENTE</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:7:j_idt25':'formPrincipal:tabela:7:j_idt25'},'');return false"><span id="formPrincipal:tabela:7:codigoDepartamento">DECAD</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:7:descricao">DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:8:j_idt25':'formPrincipal:tabela:8:j_idt25'},'');return false"><span id="formPrincipal:tabela:8:codigoDepartamento">DECAT</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:8:descricao">DEPARTAMENTO DE ENGENHARIA DE CONTROLE E AUTOMACAO E TECNICAS FUNDAMENTAIS</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:9:j_idt25':'formPrincipal:tabela:9:j_idt25'},'');return false"><span id="formPrincipal:tabela:9:codigoDepartamento">DECBI</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:9:descricao">DEPARTAMENTO DE CIENCIAS BIOLOGICAS</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:10:j_idt25':'formPrincipal:tabela:10:j_idt25'},'');return false"><span id="formPrincipal:tabela:10:codigoDepartamento">DECEA</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:10:descricao">DEPARTAMENTO DE CIENCIAS EXATAS E APLICADAS -J.MONLEVADE</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:11:j_idt25':'formPrincipal:tabela:11:j_idt25'},'');return false"><span id="formPrincipal:tabela:11:codigoDepartamento">DECGP</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:11:descricao">DEPARTAMENTO DE CIRURGIA, GINECOLOGIA E OBSTETRICIA</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:12:j_idt25':'formPrincipal:tabela:12:j_idt25'},'');return false"><span id="formPrincipal:tabela:12:codigoDepartamento">DECIV</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:12:descricao">DEPARTAMENTO DE ENGENHARIA CIVIL</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:13:j_idt25':'formPrincipal:tabela:13:j_idt25'},'');return false"><span id="formPrincipal:tabela:13:codigoDepartamento">DECOM</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:13:descricao">DEPARTAMENTO DE COMPUTACAO</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:14:j_idt25':'formPrincipal:tabela:14:j_idt25'},'');return false"><span id="formPrincipal:tabela:14:codigoDepartamento">DECPA</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:14:descricao">DEPARTAMENTO DE CLINICAS PEDIATRICAS E DO ADULTO</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:15:j_idt25':'formPrincipal:tabela:15:j_idt25'},'');return false"><span id="formPrincipal:tabela:15:codigoDepartamento">DECSI</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:15:descricao">DEPARTAMENTO DE COMPUTACAO E SISTEMAS</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:16:j_idt25':'formPrincipal:tabela:16:j_idt25'},'');return false"><span id="formPrincipal:tabela:16:codigoDepartamento">DECSO</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:16:descricao">DEPARTAMENTO DE CIENCIAS SOCIAIS</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:17:j_idt25':'formPrincipal:tabela:17:j_idt25'},'');return false"><span id="formPrincipal:tabela:17:codigoDepartamento">DEDIR</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:17:descricao">DEPARTAMENTO DE DIREITO</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:18:j_idt25':'formPrincipal:tabela:18:j_idt25'},'');return false"><span id="formPrincipal:tabela:18:codigoDepartamento">DEECO</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:18:descricao">DEPARTAMENTO DE CIENCIAS ECONOMICAS</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:19:j_idt25':'formPrincipal:tabela:19:j_idt25'},'');return false"><span id="formPrincipal:tabela:19:codigoDepartamento">DEEDU</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:19:descricao">DEPARTAMENTO DE EDUCACAO</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:20:j_idt25':'formPrincipal:tabela:20:j_idt25'},'');return false"><span id="formPrincipal:tabela:20:codigoDepartamento">DEEFD</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:20:descricao">DEPARTAMENTO DE EDUCACAO FISICA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:21:j_idt25':'formPrincipal:tabela:21:j_idt25'},'');return false"><span id="formPrincipal:tabela:21:codigoDepartamento">DEELT</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:21:descricao">DEPARTAMENTO DE ENGENHARIA ELETRICA</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:22:j_idt25':'formPrincipal:tabela:22:j_idt25'},'');return false"><span id="formPrincipal:tabela:22:codigoDepartamento">DEEMA</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:22:descricao">DEPARTAMENTO DE EDUCACAO MATEMATICA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:23:j_idt25':'formPrincipal:tabela:23:j_idt25'},'');return false"><span id="formPrincipal:tabela:23:codigoDepartamento">DEENP</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:23:descricao">DEPARTAMENTO DE ENGENHARIA DE PRODUCAO - ICEA</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:24:j_idt25':'formPrincipal:tabela:24:j_idt25'},'');return false"><span id="formPrincipal:tabela:24:codigoDepartamento">DEEST</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:24:descricao">DEPARTAMENTO DE ESTATISTICA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:25:j_idt25':'formPrincipal:tabela:25:j_idt25'},'');return false"><span id="formPrincipal:tabela:25:codigoDepartamento">DEETE</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:25:descricao">DEPARTAMENTO DE EDUCACAO E TECNOLOGIAS</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:26:j_idt25':'formPrincipal:tabela:26:j_idt25'},'');return false"><span id="formPrincipal:tabela:26:codigoDepartamento">DEFAR</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:26:descricao">DEPARTAMENTO DE FARMACIA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:27:j_idt25':'formPrincipal:tabela:27:j_idt25'},'');return false"><span id="formPrincipal:tabela:27:codigoDepartamento">DEFIL</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:27:descricao">DEPARTAMENTO DE FILOSOFIA</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:28:j_idt25':'formPrincipal:tabela:28:j_idt25'},'');return false"><span id="formPrincipal:tabela:28:codigoDepartamento">DEFIS</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:28:descricao">DEPARTAMENTO DE FISICA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:29:j_idt25':'formPrincipal:tabela:29:j_idt25'},'');return false"><span id="formPrincipal:tabela:29:codigoDepartamento">DEGEO</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:29:descricao">DEPARTAMENTO DE GEOLOGIA</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:30:j_idt25':'formPrincipal:tabela:30:j_idt25'},'');return false"><span id="formPrincipal:tabela:30:codigoDepartamento">DEGEP</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:30:descricao">DEPARTAMENTO DE GESTAO PUBLICA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:31:j_idt25':'formPrincipal:tabela:31:j_idt25'},'');return false"><span id="formPrincipal:tabela:31:codigoDepartamento">DEHIS</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:31:descricao">DEPARTAMENTO DE HISTORIA</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:32:j_idt25':'formPrincipal:tabela:32:j_idt25'},'');return false"><span id="formPrincipal:tabela:32:codigoDepartamento">DEISH</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:32:descricao">DEPARTAMENTO INSTITUTO DE SAUDE E HUMANIDADES - IPATINGA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:33:j_idt25':'formPrincipal:tabela:33:j_idt25'},'');return false"><span id="formPrincipal:tabela:33:codigoDepartamento">DEJOR</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:33:descricao">DEPARTAMENTO DE JORNALISMO</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:34:j_idt25':'formPrincipal:tabela:34:j_idt25'},'');return false"><span id="formPrincipal:tabela:34:codigoDepartamento">DELET</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:34:descricao">DEPARTAMENTO DE LETRAS</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:35:j_idt25':'formPrincipal:tabela:35:j_idt25'},'');return false"><span id="formPrincipal:tabela:35:codigoDepartamento">DEMAT</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:35:descricao">DEPARTAMENTO DE MATEMATICA</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:36:j_idt25':'formPrincipal:tabela:36:j_idt25'},'');return false"><span id="formPrincipal:tabela:36:codigoDepartamento">DEMEC</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:36:descricao">DEPARTAMENTO DE ENGENHARIA MECANICA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:37:j_idt25':'formPrincipal:tabela:37:j_idt25'},'');return false"><span id="formPrincipal:tabela:37:codigoDepartamento">DEMET</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:37:descricao">DEPARTAMENTO DE ENGENHARIA METALURGICA E DE MATERIAIS</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:38:j_idt25':'formPrincipal:tabela:38:j_idt25'},'');return false"><span id="formPrincipal:tabela:38:codigoDepartamento">DEMIN</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:38:descricao">DEPARTAMENTO DE ENGENHARIA DE MINAS</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:39:j_idt25':'formPrincipal:tabela:39:j_idt25'},'');return false"><span id="formPrincipal:tabela:39:codigoDepartamento">DEMSC</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:39:descricao">DEPARTAMENTO DE MEDICINA DE FAMILIA, SAUDE MENTAL E COLETIVA</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:40:j_idt25':'formPrincipal:tabela:40:j_idt25'},'');return false"><span id="formPrincipal:tabela:40:codigoDepartamento">DEMUL</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:40:descricao">DEPARTAMENTO DE MUSEOLOGIA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:41:j_idt25':'formPrincipal:tabela:41:j_idt25'},'');return false"><span id="formPrincipal:tabela:41:codigoDepartamento">DEMUS</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:41:descricao">DEPARTAMENTO DE MUSICA                                      </span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:42:j_idt25':'formPrincipal:tabela:42:j_idt25'},'');return false"><span id="formPrincipal:tabela:42:codigoDepartamento">DENCS</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:42:descricao">DEPARTAMENTO DE NUTRICAO CLINICA E SOCIAL</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:43:j_idt25':'formPrincipal:tabela:43:j_idt25'},'');return false"><span id="formPrincipal:tabela:43:codigoDepartamento">DEPRO</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:43:descricao">DEPARTAMENTO DE ENGENHARIA DE PRODUCAO</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:44:j_idt25':'formPrincipal:tabela:44:j_idt25'},'');return false"><span id="formPrincipal:tabela:44:codigoDepartamento">DEQUI</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:44:descricao">DEPARTAMENTO DE QUIMICA</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:45:j_idt25':'formPrincipal:tabela:45:j_idt25'},'');return false"><span id="formPrincipal:tabela:45:codigoDepartamento">DESSO</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:45:descricao">DEPARTAMENTO DE SERVICO SOCIAL</span></td>
+</tr>
+<tr class="impar">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:46:j_idt25':'formPrincipal:tabela:46:j_idt25'},'');return false"><span id="formPrincipal:tabela:46:codigoDepartamento">DETUR</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:46:descricao">DEPARTAMENTO DE TURISMO</span></td>
+</tr>
+<tr class="par">
+<td>
+                                    <center><a href="#" onclick="mojarra.jsfcljs(document.getElementById('formPrincipal'),{'formPrincipal:tabela:47:j_idt25':'formPrincipal:tabela:47:j_idt25'},'');return false"><span id="formPrincipal:tabela:47:codigoDepartamento">DEURB</span></a>
+                                    </center></td>
+<td><span id="formPrincipal:tabela:47:descricao">DEPARTAMENTO DE ENGENHARIA URBANA</span></td>
+</tr>
+</tbody>
+</table>
+
+                        </center></span>
+                </div><input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:0" value="-1999239612807447246:-2403601551971292340" autocomplete="off" />
+</form></body>
+</html>

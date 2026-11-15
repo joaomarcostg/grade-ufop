@@ -1,0 +1,36 @@
+[project]
+name = "gradesync"
+version = "0.1.0"
+description = "Collects course, curriculum and timetable data from universities into one canonical dataset"
+requires-python = ">=3.11"
+dependencies = [
+  "httpx>=0.27",
+  "lxml>=5.2",
+  "pdfplumber>=0.11",
+  "pydantic>=2.7",
+  "typer>=0.12",
+]
+
+[project.optional-dependencies]
+db = ["psycopg[binary]>=3.2"]
+dev = ["pytest>=8.2", "ruff>=0.5"]
+
+[project.scripts]
+gradesync = "gradesync.cli:app"
+
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gradesync"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
