@@ -79,6 +79,7 @@ model Department {
   institutionId String      @map("institution_id") @db.Uuid
   code          String
   name          String
+  displayName   String?     @map("display_name")
   institution   Institution @relation(fields: [institutionId], references: [id])
   subjects      Subject[]
   sections      Section[]
@@ -92,6 +93,7 @@ model Subject {
   institutionId String             @map("institution_id") @db.Uuid
   code          String
   name          String
+  displayName   String?            @map("display_name")
   departmentId  String?            @map("department_id") @db.Uuid
   syllabus      String?
   updatedAt     DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
@@ -110,6 +112,7 @@ model Program {
   institutionId String       @map("institution_id") @db.Uuid
   code          String
   name          String
+  displayName   String?      @map("display_name")
   degree        String?
   campus        String?
   institution   Institution  @relation(fields: [institutionId], references: [id])

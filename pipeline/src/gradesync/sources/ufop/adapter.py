@@ -33,6 +33,7 @@ from gradesync.sources.ufop.curriculum import (
     parse_curriculum_pdf,
 )
 from gradesync.sources.ufop.programs import PENDING_SLUGS, PROGRAMS
+from gradesync.text import build_lexicon, display_name
 
 INSTITUTION = Institution(
     code="ufop", name="Universidade Federal de Ouro Preto", timezone="America/Sao_Paulo"
@@ -152,13 +153,14 @@ def build(store: RawStore, term: str) -> Dataset:
 
     _add_curriculum_only_subjects(subjects, programs, departments, warnings)
     warnings.extend(_check_references(subjects, programs))
+    departments, subjects, programs = _add_display_names(departments, subjects, programs)
 
     return Dataset(
         institution=INSTITUTION,
         term=term,
         generated_at=max(s.fetched_at for s in sources) if sources else datetime.now(UTC),
         departments=sorted(departments, key=lambda d: d.code),
-        subjects=sorted(subjects.values(), key=lambda s: s.code),
+        subjects=sorted(subjects, key=lambda s: s.code),
         programs=sorted(programs, key=lambda p: p.code),
         sections=sorted(sections, key=lambda s: (s.subject_code, s.code)),
         sources=[
@@ -166,6 +168,23 @@ def build(store: RawStore, term: str) -> Dataset:
             for s in sorted(sources, key=lambda s: s.key)
         ],
         warnings=warnings,
+    )
+
+
+def _add_display_names(
+    departments: list[Department], subjects: dict[str, Subject], programs: list[Program]
+) -> tuple[list[Department], list[Subject], list[Program]]:
+    """Readable names, spelled the way the syllabi and program titles spell words."""
+    lexicon = build_lexicon(
+        [s.syllabus for s in subjects.values() if s.syllabus] + [p.name for p in programs]
+    )
+    return (
+        [d.model_copy(update={"display_name": display_name(d.name, lexicon)}) for d in departments],
+        [
+            s.model_copy(update={"display_name": display_name(s.name, lexicon)})
+            for s in subjects.values()
+        ],
+        [p.model_copy(update={"display_name": display_name(p.name, lexicon)}) for p in programs],
     )
 
 

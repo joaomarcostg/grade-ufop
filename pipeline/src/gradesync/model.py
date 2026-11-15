@@ -58,6 +58,7 @@ class Institution(Model):
 class Department(Model):
     code: str
     name: str
+    display_name: str | None = None
 
 
 class Subject(Model):
@@ -65,6 +66,7 @@ class Subject(Model):
 
     code: str
     name: str
+    display_name: str | None = None
     department_code: str | None = None
     syllabus: str | None = None
 
@@ -127,6 +129,7 @@ class Program(Model):
 
     code: str
     name: str
+    display_name: str | None = None
     degree: str | None = None
     campus: str | None = None
     curriculum_version: str | None = None

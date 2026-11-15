@@ -108,10 +108,11 @@ def _upsert_departments(
 ) -> dict[str, str]:
     cur.executemany(
         """
-        INSERT INTO department (institution_id, code, name) VALUES (%s, %s, %s)
-        ON CONFLICT (institution_id, code) DO UPDATE SET name = EXCLUDED.name
+        INSERT INTO department (institution_id, code, name, display_name) VALUES (%s, %s, %s, %s)
+        ON CONFLICT (institution_id, code) DO UPDATE SET
+          name = EXCLUDED.name, display_name = EXCLUDED.display_name
         """,
-        [(institution_id, d.code, d.name) for d in dataset.departments],
+        [(institution_id, d.code, d.name, d.display_name) for d in dataset.departments],
     )
     return _ids(cur, "department", institution_id)
 
@@ -123,15 +124,15 @@ def _upsert_subjects(
     for s in dataset.subjects:
         if s.department_code and s.department_code not in departments:
             raise LoadError(f"subject {s.code}: unknown department {s.department_code}")
-        rows.append(
-            (institution_id, s.code, s.name, departments.get(s.department_code or ""), s.syllabus)
-        )
+        department_id = departments.get(s.department_code or "")
+        rows.append((institution_id, s.code, s.name, s.display_name, department_id, s.syllabus))
     cur.executemany(
         """
-        INSERT INTO subject (institution_id, code, name, department_id, syllabus)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO subject (institution_id, code, name, display_name, department_id, syllabus)
+        VALUES (%s, %s, %s, %s, %s, %s)
         ON CONFLICT (institution_id, code) DO UPDATE SET
           name = EXCLUDED.name,
+          display_name = EXCLUDED.display_name,
           department_id = COALESCE(EXCLUDED.department_id, subject.department_id),
           syllabus = COALESCE(EXCLUDED.syllabus, subject.syllabus),
           updated_at = now()
@@ -150,11 +151,16 @@ def _load_curricula(
 ) -> int:
     cur.executemany(
         """
-        INSERT INTO program (institution_id, code, name, degree, campus) VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO program (institution_id, code, name, display_name, degree, campus)
+        VALUES (%s, %s, %s, %s, %s, %s)
         ON CONFLICT (institution_id, code) DO UPDATE SET
-          name = EXCLUDED.name, degree = EXCLUDED.degree, campus = EXCLUDED.campus
+          name = EXCLUDED.name, display_name = EXCLUDED.display_name,
+          degree = EXCLUDED.degree, campus = EXCLUDED.campus
         """,
-        [(institution_id, p.code, p.name, p.degree, p.campus) for p in dataset.programs],
+        [
+            (institution_id, p.code, p.name, p.display_name, p.degree, p.campus)
+            for p in dataset.programs
+        ],
     )
     programs = _ids(cur, "program", institution_id)
 
