@@ -80,21 +80,22 @@ up within that time, or at once through `POST /api/revalidate` (below).
 
 ## Keeping the data fresh
 
-`.github/workflows/sync.yml` runs `gradesync refresh`, which loads whatever
-term the site shows and switches to a newer one as soon as UFOP publishes its
-timetable (once it has at least 1000 sections):
+`.github/workflows/sync.yml` runs `gradesync refresh`, which loads the term the
+site shows and switches to a newer one once UFOP publishes its timetable (with
+at least 1000 sections, taking fresh curricula at the switch). It only runs
+around matrícula, the only time the data changes in ways students act on:
 
 | When | What |
 | --- | --- |
-| Daily | Looks for a newly published term (one request to UFOP). |
-| Mondays | Full sync: timetable and curricula. |
-| Every two hours inside a matrícula/ajuste window | Timetable only (`--sections-only`, about 50 requests), so seats follow the atestados. |
+| The week before the first ajuste | Daily, looks for the new term's timetable (one request to UFOP) and switches to it. |
+| From the 1st atestado to the atestado definitivo | Every two hours, the timetable only (`--sections-only`, about 50 requests), so seats follow the atestados. |
+| Any other time | Nothing. |
 
 The windows come from PROGRAD's academic calendar and live in
 [`pipeline/enrollment-windows.txt`](pipeline/enrollment-windows.txt): add the
 next year's when the calendar comes out. Raw snapshots are kept in the Actions
-cache, so a seats refresh does not download the curricula again. It can also be
-run by hand from the Actions tab (*Run workflow*).
+cache, so a seats refresh does not download the curricula again. Any mode can
+also be run by hand from the Actions tab (*Run workflow*).
 
 Setup:
 
@@ -103,5 +104,6 @@ Setup:
   environment variable. After loading, the workflow calls `POST /api/revalidate`
   with it, so the site drops its cached catalog and shows the new seats on the
   next visit. Without it, the site still catches up within an hour.
-- GitHub pauses scheduled workflows after 60 days without commits; push
-  something (or re-enable the workflow) before each matrícula.
+- GitHub pauses scheduled workflows after 60 days without commits, and warns by
+  email first: push something, or re-enable the workflow in the Actions tab,
+  before each window.

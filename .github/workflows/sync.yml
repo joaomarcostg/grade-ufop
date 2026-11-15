@@ -1,18 +1,19 @@
 name: Sync UFOP data
 
-# Keeps the site's data fresh without anyone running the pipeline by hand:
-# - daily, a quick look for a newly published term, which the site switches to;
-# - every Monday, a full sync (timetable and curricula);
-# - every two hours inside a matrícula/ajuste window
-#   (pipeline/enrollment-windows.txt), the timetable only, so seats follow the
+# Keeps the site's data fresh around each matrícula, the only time it changes
+# in ways students act on. Windows come from the academic calendar
+# (pipeline/enrollment-windows.txt):
+# - the week before a window: daily, look for the new term's timetable and
+#   switch the site to it once published;
+# - inside a window: every two hours, the timetable only, so seats follow the
 #   atestados.
-# After loading, it asks the site to drop its cached catalog.
+# Outside them nothing runs. After loading, it asks the site to drop its
+# cached catalog.
 
 on:
   schedule:
-    - cron: "40 9 * * *" # daily, 06:40 in Brasília: newer term?
-    - cron: "0 9 * * 1" # Mondays, 06:00: full sync
-    - cron: "17 */2 * * *" # every two hours: seats, only inside a window
+    - cron: "40 9 * * *" # daily, 06:40 in Brasília: acts the week before a window
+    - cron: "17 */2 * * *" # every two hours: acts inside a window
   workflow_dispatch:
     inputs:
       mode:
@@ -46,16 +47,17 @@ jobs:
         run: |
           if [ "$EVENT" = workflow_dispatch ]; then
             mode="$INPUT_MODE"
-          elif [ "$SCHEDULE" = "40 9 * * *" ]; then
-            mode=new-term
-          elif [ "$SCHEDULE" = "0 9 * * 1" ]; then
-            mode=full
           else
             mode=skip
             today=$(TZ=America/Sao_Paulo date +%F)
             while read -r start end _; do
               case "$start" in "" | \#*) continue ;; esac
-              if [[ ! "$today" < "$start" && ! "$today" > "$end" ]]; then mode=sections; fi
+              week_before=$(date -d "$start - 7 days" +%F)
+              if [ "$SCHEDULE" = "40 9 * * *" ]; then
+                if [[ ! "$today" < "$week_before" && "$today" < "$start" ]]; then mode=new-term; fi
+              elif [[ ! "$today" < "$start" && ! "$today" > "$end" ]]; then
+                mode=sections
+              fi
             done < pipeline/enrollment-windows.txt
           fi
           echo "mode=$mode" >> "$GITHUB_OUTPUT"

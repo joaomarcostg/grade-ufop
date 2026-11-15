@@ -160,10 +160,13 @@ def refresh(
 
     if todo.newer:
         typer.echo(f"{institution}: {todo.newer} is published (showing {current or 'nothing'})")
-        # Polled until it looks complete, so the same budget as the current term.
-        adapter.fetch(store, todo.newer, refresh=not sections_only, refresh_sections=sections_only)
+        # Polled until it looks complete, so only its timetable at first.
+        adapter.fetch(store, todo.newer, refresh_sections=True)
         dataset = _build(institution, todo.newer, cache, out)
         if len(dataset.sections) >= min_sections:
+            # Curricula can change between terms: take fresh ones for the switch.
+            adapter.fetch(store, todo.newer, refresh=True)
+            dataset = _build(institution, todo.newer, cache, out)
             load_current(dataset)
             typer.echo(f"{institution}: now showing {todo.newer}")
             return

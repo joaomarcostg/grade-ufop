@@ -1,7 +1,9 @@
 # Matrícula and ajuste windows from UFOP's academic calendar (PROGRAD,
-# prograd.ufop.br/calendario-academico), inclusive, in Brasília dates.
-# Inside a window the sync workflow refreshes seats every two hours; outside,
-# once a week. Add the next year's windows when PROGRAD publishes its calendar.
+# prograd.ufop.br/calendario-academico), inclusive, in Brasília dates: from the
+# 1st atestado and ajuste to the atestado definitivo. The sync workflow looks
+# for the new term daily in the week before a window and refreshes seats every
+# two hours inside it; otherwise it does nothing. Add the next year's windows
+# when PROGRAD publishes its calendar (usually in November).
 #
 # start      end         term    source
 2027-02-12  2027-03-02  2027/1  Calendário 2027 presencial, Res. Congrad 309/2026
